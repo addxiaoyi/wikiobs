@@ -1,0 +1,143 @@
+{
+  "generatedAt": "2026-10-20T05:18:32.846Z",
+  "isolation": "All vault, plugin, and scheduled-task IPC writes are handled by in-memory fixtures.",
+  "viewport": {
+    "width": 320,
+    "height": 700
+  },
+  "screenshots": [
+    "artifacts\\nested-form-flows\\plugin-details-320x700.png",
+    "artifacts\\nested-form-flows\\plugin-uninstall-confirm-320x700.png",
+    "artifacts\\nested-form-flows\\plugin-install-preview-320x700.png",
+    "artifacts\\nested-form-flows\\vault-rename-320x700.png",
+    "artifacts\\nested-form-flows\\vault-duplicate-320x700.png",
+    "artifacts\\nested-form-flows\\vault-delete-confirm-320x700.png",
+    "artifacts\\nested-form-flows\\vault-create-cancel-draft-320x700.png",
+    "artifacts\\nested-form-flows\\vault-create-320x700.png",
+    "artifacts\\nested-form-flows\\scheduled-task-create-320x700.png",
+    "artifacts\\nested-form-flows\\scheduled-task-edit-320x700.png",
+    "artifacts\\nested-form-flows\\plugin-details-1280x900.png",
+    "artifacts\\nested-form-flows\\vault-rename-1280x900.png",
+    "artifacts\\nested-form-flows\\scheduled-task-edit-1280x900.png"
+  ],
+  "checks": [
+    {
+      "name": "plugin-details-keyboard-focus",
+      "detail": "Enter opened details and focus moved into the dialog"
+    },
+    {
+      "name": "layout:plugin-details-320x700",
+      "detail": "320x700; dialogs=2"
+    },
+    {
+      "name": "layout:plugin-uninstall-confirm-320x700",
+      "detail": "320x700; dialogs=3"
+    },
+    {
+      "name": "plugin-uninstall-cancel",
+      "detail": "plugin details remain open; plugin is unchanged"
+    },
+    {
+      "name": "plugin-uninstall-submit",
+      "detail": "fixture plugin removed from the visible list"
+    },
+    {
+      "name": "plugin-inspect-error",
+      "detail": "invalid plugin path shows an inline error"
+    },
+    {
+      "name": "layout:plugin-install-preview-320x700",
+      "detail": "320x700; dialogs=2"
+    },
+    {
+      "name": "plugin-install-submit",
+      "detail": "trusted fixture is listed after install"
+    },
+    {
+      "name": "layout:vault-rename-320x700",
+      "detail": "320x700; dialogs=2"
+    },
+    {
+      "name": "vault-rename-cancel",
+      "detail": "original vault remains unchanged"
+    },
+    {
+      "name": "vault-rename-submit",
+      "detail": "renamed fixture appears in the list"
+    },
+    {
+      "name": "layout:vault-duplicate-320x700",
+      "detail": "320x700; dialogs=2"
+    },
+    {
+      "name": "vault-duplicate-submit",
+      "detail": "duplicate fixture appears without filesystem writes"
+    },
+    {
+      "name": "layout:vault-delete-confirm-320x700",
+      "detail": "320x700; dialogs=2"
+    },
+    {
+      "name": "vault-delete-cancel",
+      "detail": "fixture vault remains after cancel"
+    },
+    {
+      "name": "vault-delete-submit",
+      "detail": "fixture vault removed from the visible list"
+    },
+    {
+      "name": "layout:vault-create-cancel-draft-320x700",
+      "detail": "320x700; dialogs=2"
+    },
+    {
+      "name": "vault-create-cancel",
+      "detail": "form draft is cleared when reopened"
+    },
+    {
+      "name": "layout:vault-create-320x700",
+      "detail": "320x700; dialogs=2"
+    },
+    {
+      "name": "vault-create-submit",
+      "detail": "created fixture appears in the list"
+    },
+    {
+      "name": "layout:scheduled-task-create-320x700",
+      "detail": "320x700; dialogs=2"
+    },
+    {
+      "name": "scheduled-task-create-cancel",
+      "detail": "new task form closes without adding a row"
+    },
+    {
+      "name": "scheduled-task-create-submit",
+      "detail": "saved task appears in the task list"
+    },
+    {
+      "name": "layout:scheduled-task-edit-320x700",
+      "detail": "320x700; dialogs=2"
+    },
+    {
+      "name": "scheduled-task-edit-cancel",
+      "detail": "unsaved edit was discarded"
+    },
+    {
+      "name": "scheduled-task-edit-submit",
+      "detail": "updated task name appears in the list"
+    },
+    {
+      "name": "layout:plugin-details-1280x900",
+      "detail": "1280x900; dialogs=2"
+    },
+    {
+      "name": "layout:vault-rename-1280x900",
+      "detail": "1280x900; dialogs=2"
+    },
+    {
+      "name": "layout:scheduled-task-edit-1280x900",
+      "detail": "1280x900; dialogs=2"
+    }
+  ],
+  "findings": [],
+  "errors": []
+}

@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18, 20]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+        env:
+          CI: true
+  visual-e2e:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Electron visual regression probes
+        run: npm run e2e:visual
+
+      - name: Upload screenshots and reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wikiobs-visual-regression
+          path: |
+            artifacts/animation-stability/
+            artifacts/animation-race/
+            artifacts/modal-lifecycle/
+            artifacts/nested-form-flows/
+            artifacts/form-state-flows/
+            artifacts/settings-utility-flows/
+            artifacts/sidebar-interactions/
+            artifacts/progress-reflow/
+            artifacts/ui-audit-100/multiview/
+          if-no-files-found: warn
+          retention-days: 7

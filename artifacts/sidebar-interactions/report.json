@@ -1,0 +1,170 @@
+{
+  "generatedAt": "2026-10-20T05:19:31.882Z",
+  "screenshots": [
+    "artifacts\\sidebar-interactions\\rename-note-320x700.png",
+    "artifacts\\sidebar-interactions\\rename-directory-320x700.png",
+    "artifacts\\sidebar-interactions\\file-moved-into-folder-320x700.png",
+    "artifacts\\sidebar-interactions\\file-keyboard-context-menu-320x700.png",
+    "artifacts\\sidebar-interactions\\file-tree-long-names-320x700.png",
+    "artifacts\\sidebar-interactions\\file-keyboard-context-menu-320x700.png",
+    "artifacts\\sidebar-interactions\\file-tree-long-names-480x800.png",
+    "artifacts\\sidebar-interactions\\delete-file-cancel-320x700.png",
+    "artifacts\\sidebar-interactions\\delete-file-confirm-320x700.png",
+    "artifacts\\sidebar-interactions\\delete-directory-cancel-480x800.png",
+    "artifacts\\sidebar-interactions\\delete-directory-confirm-480x800.png",
+    "artifacts\\sidebar-interactions\\delete-file-failure-480x800.png",
+    "artifacts\\sidebar-interactions\\delete-file-failure-result-480x800.png",
+    "artifacts\\sidebar-interactions\\delete-directory-failure-480x800.png",
+    "artifacts\\sidebar-interactions\\delete-directory-failure-result-480x800.png",
+    "artifacts\\sidebar-interactions\\chat-keyboard-switch-480x800.png",
+    "artifacts\\sidebar-interactions\\chat-delete-confirm-480x800.png",
+    "artifacts\\sidebar-interactions\\chat-empty-after-delete-480x800.png"
+  ],
+  "checks": [
+    {
+      "name": "layout:rename-note-320x700",
+      "detail": "320x700"
+    },
+    {
+      "name": "rename-note",
+      "detail": "note rename uses a base name and creates one .md extension"
+    },
+    {
+      "name": "directory-keyboard-expand",
+      "detail": "ArrowRight expands a folder and reveals its child"
+    },
+    {
+      "name": "directory-keyboard-collapse",
+      "detail": "ArrowLeft collapses the folder"
+    },
+    {
+      "name": "layout:rename-directory-320x700",
+      "detail": "320x700"
+    },
+    {
+      "name": "rename-directory",
+      "detail": "directory rename completes and refreshes the tree"
+    },
+    {
+      "name": "layout:file-moved-into-folder-320x700",
+      "detail": "320x700"
+    },
+    {
+      "name": "file-drag-move",
+      "detail": "drag-and-drop moves the note to the renamed directory"
+    },
+    {
+      "name": "layout:file-keyboard-context-menu-320x700",
+      "detail": "320x700"
+    },
+    {
+      "name": "file-context-menu-focus-restore",
+      "detail": "Shift+F10 opens the menu and Escape restores focus"
+    },
+    {
+      "name": "file-context-menu-rapid-toggle",
+      "detail": "three keyboard open/close cycles leave no menu residue"
+    },
+    {
+      "name": "layout:file-tree-long-names-320x700",
+      "detail": "320x700"
+    },
+    {
+      "name": "layout:file-keyboard-context-menu-320x700",
+      "detail": "320x700"
+    },
+    {
+      "name": "file-context-menu-focus-restore",
+      "detail": "Shift+F10 opens the menu and Escape restores focus"
+    },
+    {
+      "name": "file-context-menu-rapid-toggle",
+      "detail": "repeated keyboard open and close leaves no menu residue"
+    },
+    {
+      "name": "layout:file-tree-long-names-480x800",
+      "detail": "480x800"
+    },
+    {
+      "name": "layout:delete-file-cancel-320x700",
+      "detail": "320x700"
+    },
+    {
+      "name": "delete-file-cancel",
+      "detail": "Are you sure you want to delete this file?"
+    },
+    {
+      "name": "layout:delete-file-confirm-320x700",
+      "detail": "320x700"
+    },
+    {
+      "name": "delete-file-confirm",
+      "detail": "Are you sure you want to delete this file?"
+    },
+    {
+      "name": "layout:delete-directory-cancel-480x800",
+      "detail": "480x800"
+    },
+    {
+      "name": "delete-directory-cancel",
+      "detail": "Are you sure you want to delete this directory? This will delete all contents of the directory."
+    },
+    {
+      "name": "layout:delete-directory-confirm-480x800",
+      "detail": "480x800"
+    },
+    {
+      "name": "delete-directory-confirm",
+      "detail": "Are you sure you want to delete this directory? This will delete all contents of the directory."
+    },
+    {
+      "name": "layout:delete-file-failure-480x800",
+      "detail": "480x800"
+    },
+    {
+      "name": "layout:delete-file-failure-result-480x800",
+      "detail": "480x800"
+    },
+    {
+      "name": "delete-file-failure",
+      "detail": "Are you sure you want to delete this file?; failed operation was surfaced and preserved the file"
+    },
+    {
+      "name": "layout:delete-directory-failure-480x800",
+      "detail": "480x800"
+    },
+    {
+      "name": "layout:delete-directory-failure-result-480x800",
+      "detail": "480x800"
+    },
+    {
+      "name": "delete-directory-failure",
+      "detail": "Are you sure you want to delete this directory? This will delete all contents of the directory.; failed operation was surfaced and preserved the folder"
+    },
+    {
+      "name": "layout:chat-keyboard-switch-480x800",
+      "detail": "480x800"
+    },
+    {
+      "name": "chat-keyboard-switch",
+      "detail": "Enter activates the focused chat and marks it current"
+    },
+    {
+      "name": "layout:chat-delete-confirm-480x800",
+      "detail": "480x800"
+    },
+    {
+      "name": "chat-delete-cancel",
+      "detail": "cancel preserves the chat"
+    },
+    {
+      "name": "layout:chat-empty-after-delete-480x800",
+      "detail": "480x800"
+    },
+    {
+      "name": "chat-delete-submit",
+      "detail": "confirmed delete returns to the empty history state"
+    }
+  ],
+  "errors": []
+}

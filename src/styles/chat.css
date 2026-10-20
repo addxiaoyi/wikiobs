@@ -1,0 +1,95 @@
+/* Main chat container */
+.markdown-content p {
+  padding: 0.25rem;
+  margin: 0;
+  word-wrap: break-word;
+}
+
+.chat-container {
+  line-height: 1.6;
+}
+
+/* User's message box */
+.user-chat-message {
+  background-color: rgb(50, 50, 50);
+  color: rgb(220, 220, 220);
+  border-radius: 10px;
+  margin: 10px 0;
+  padding: 0 4px;
+  font-size: 0.94rem;
+  line-height: 1.2rem;
+}
+
+/* AI's message box */
+.assistant-chat-message {
+  color: rgb(210, 210, 210);
+  margin: 10px 0;
+  padding: 0 4px;
+  font-size: 0.94rem;
+  line-height: 1.2rem;
+}
+
+@keyframes dropdown-fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(10px);
+  }
+}
+
+.animate-dropdown-fadeIn {
+  opacity: 0;
+  animation: dropdown-fadeIn 0.5s ease-out forwards;
+}
+
+.chat-error-state {
+  display: flex;
+  width: 100%;
+  max-width: 48rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  border-radius: 0.5rem;
+  background: rgba(127, 29, 29, 0.2);
+  color: #fecaca;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+.chat-error-state span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.chat-error-state button {
+  flex: 0 0 auto;
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  border-radius: 0.375rem;
+  background: transparent;
+  color: #fecaca;
+  padding: 0.3rem 0.55rem;
+  cursor: pointer;
+}
+
+.chat-error-state button:hover,
+.chat-error-state button:focus-visible {
+  background: rgba(248, 113, 113, 0.16);
+}
+
+@media (max-width: 640px) {
+  .chat-new-button {
+    min-height: 40px;
+    padding-top: 0.55rem;
+    padding-bottom: 0.55rem;
+  }
+
+  .chat-error-state {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

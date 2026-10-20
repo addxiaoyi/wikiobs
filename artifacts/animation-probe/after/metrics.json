@@ -1,0 +1,850 @@
+[
+  {
+    "at": 0,
+    "capturedAt": 168,
+    "url": "http://127.0.0.1:7777/",
+    "title": "WIKIOBS · Local knowledge workspace",
+    "bodyText": "正在初始化向量数据库...\n准备中…\n0s",
+    "scrollTop": 0,
+    "bodyScrollTop": 0,
+    "scrollHeight": 800,
+    "bodyScrollHeight": 0,
+    "viewport": {
+      "width": 1200,
+      "height": 800,
+      "dpr": 1.5
+    },
+    "root": {
+      "selector": "#root",
+      "tag": "DIV",
+      "className": "",
+      "text": "",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1200,
+        "height": 0
+      },
+      "transform": "none",
+      "opacity": "1",
+      "visibility": "visible"
+    },
+    "stage": {
+      "selector": "[data-stage-container]",
+      "tag": "DIV",
+      "className": "",
+      "text": "",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1200,
+        "height": 0
+      },
+      "transform": "none",
+      "opacity": "1",
+      "visibility": "visible"
+    },
+    "dialogs": [
+      {
+        "rect": {
+          "x": 319.3333435058594,
+          "y": 322.58343505859375,
+          "width": 561.3333740234375,
+          "height": 154.83331298828125
+        },
+        "transform": "matrix(1, 0, 0, 1, 0, 0.0001)",
+        "opacity": "1",
+        "text": "正在初始化向量数据库...准备中…0s"
+      }
+    ],
+    "animated": [
+      {
+        "tag": "DIV",
+        "className": "_dsp-flex _ai-stretch _fb-auto _bxs-border-box _pos-relative _mih-0px _miw-0px _fs-0 _fd-column _btlr-t-radius-4 _btrr-t-radius-4 _bbrr-t-radius-4 _bblr-t-radius-4 _btw-1px _brw-1p",
+        "text": "正在初始化向量数据库...准备中…0s",
+        "rect": {
+          "x": 319.3333435058594,
+          "y": 322.58343505859375,
+          "width": 561.3333740234375,
+          "height": 154.83331298828125
+        },
+        "transform": "matrix(1, 0, 0, 1, 0, 0.0001)",
+        "opacity": "1",
+        "visibility": "visible"
+      },
+      {
+        "tag": "SPAN",
+        "className": "MuiCircularProgress-root MuiCircularProgress-indeterminate MuiCircularProgress-colorPrimary shrink-0 text-blue-500 css-18lrjg1-MuiCircularProgress-root",
+        "text": "",
+        "rect": {
+          "x": 346.1517028808594,
+          "y": 422.9018249511719,
+          "width": 27.69661521911621,
+          "height": 27.696575164794922
+        },
+        "transform": "matrix(-0.549023, 0.835807, -0.835807, -0.549023, 0, 0)",
+        "opacity": "1",
+        "visibility": "visible"
+      }
+    ],
+    "screenshot": "00000ms.png"
+  },
+  {
+    "at": 100,
+    "capturedAt": 231,
+    "url": "http://127.0.0.1:7777/",
+    "title": "WIKIOBS · Local knowledge workspace",
+    "bodyText": "正在初始化向量数据库...\n准备中…\n0s",
+    "scrollTop": 0,
+    "bodyScrollTop": 0,
+    "scrollHeight": 800,
+    "bodyScrollHeight": 0,
+    "viewport": {
+      "width": 1200,
+      "height": 800,
+      "dpr": 1.5
+    },
+    "root": {
+      "selector": "#root",
+      "tag": "DIV",
+      "className": "",
+      "text": "",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1200,
+        "height": 0
+      },
+      "transform": "none",
+      "opacity": "1",
+      "visibility": "visible"
+    },
+    "stage": {
+      "selector": "[data-stage-container]",
+      "tag": "DIV",
+      "className": "",
+      "text": "",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1200,
+        "height": 0
+      },
+      "transform": "none",
+      "opacity": "1",
+      "visibility": "visible"
+    },
+    "dialogs": [
+      {
+        "rect": {
+          "x": 319.3333435058594,
+          "y": 322.5833435058594,
+          "width": 561.3333740234375,
+          "height": 154.83334350585938
+        },
+        "transform": "none",
+        "opacity": "1",
+        "text": "正在初始化向量数据库...准备中…0s"
+      }
+    ],
+    "animated": [
+      {
+        "tag": "SPAN",
+        "className": "MuiCircularProgress-root MuiCircularProgress-indeterminate MuiCircularProgress-colorPrimary shrink-0 text-blue-500 css-18lrjg1-MuiCircularProgress-root",
+        "text": "",
+        "rect": {
+          "x": 345.91943359375,
+          "y": 422.66943359375,
+          "width": 28.1611328125,
+          "height": 28.1611328125
+        },
+        "transform": "matrix(-0.769941, 0.638115, -0.638115, -0.769941, 0, 0)",
+        "opacity": "1",
+        "visibility": "visible"
+      }
+    ],
+    "screenshot": "00100ms.png"
+  },
+  {
+    "at": 350,
+    "capturedAt": 414,
+    "url": "http://127.0.0.1:7777/",
+    "title": "WIKIOBS · Local knowledge workspace",
+    "bodyText": "正在初始化向量数据库...\n准备中…\n0s",
+    "scrollTop": 0,
+    "bodyScrollTop": 0,
+    "scrollHeight": 800,
+    "bodyScrollHeight": 0,
+    "viewport": {
+      "width": 1200,
+      "height": 800,
+      "dpr": 1.5
+    },
+    "root": {
+      "selector": "#root",
+      "tag": "DIV",
+      "className": "",
+      "text": "",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1200,
+        "height": 0
+      },
+      "transform": "none",
+      "opacity": "1",
+      "visibility": "visible"
+    },
+    "stage": {
+      "selector": "[data-stage-container]",
+      "tag": "DIV",
+      "className": "",
+      "text": "",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1200,
+        "height": 0
+      },
+      "transform": "none",
+      "opacity": "1",
+      "visibility": "visible"
+    },
+    "dialogs": [
+      {
+        "rect": {
+          "x": 319.3333435058594,
+          "y": 322.5833435058594,
+          "width": 561.3333740234375,
+          "height": 154.83334350585938
+        },
+        "transform": "none",
+        "opacity": "1",
+        "text": "正在初始化向量数据库...准备中…0s"
+      }
+    ],
+    "animated": [
+      {
+        "tag": "SPAN",
+        "className": "MuiCircularProgress-root MuiCircularProgress-indeterminate MuiCircularProgress-colorPrimary shrink-0 text-blue-500 css-18lrjg1-MuiCircularProgress-root",
+        "text": "",
+        "rect": {
+          "x": 348.7790222167969,
+          "y": 425.5290222167969,
+          "width": 22.44197654724121,
+          "height": 22.44197654724121
+        },
+        "transform": "matrix(-0.991425, -0.130675, 0.130675, -0.991425, 0, 0)",
+        "opacity": "1",
+        "visibility": "visible"
+      }
+    ],
+    "screenshot": "00350ms.png"
+  },
+  {
+    "at": 800,
+    "capturedAt": 873,
+    "url": "http://127.0.0.1:7777/",
+    "title": "WIKIOBS · Local knowledge workspace",
+    "bodyText": "Loading workspace…\n正在初始化向量数据库...\n准备中…\n0s",
+    "scrollTop": 0,
+    "bodyScrollTop": 0,
+    "scrollHeight": 800,
+    "bodyScrollHeight": 800,
+    "viewport": {
+      "width": 1200,
+      "height": 800,
+      "dpr": 1.5
+    },
+    "root": {
+      "selector": "#root",
+      "tag": "DIV",
+      "className": "",
+      "text": "Loading workspace…",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1200,
+        "height": 800
+      },
+      "transform": "none",
+      "opacity": "1",
+      "visibility": "visible"
+    },
+    "stage": {
+      "selector": "[data-stage-container]",
+      "tag": "DIV",
+      "className": "",
+      "text": "",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "transform": "none",
+      "opacity": "1",
+      "visibility": "visible"
+    },
+    "dialogs": [
+      {
+        "rect": {
+          "x": 319.3333435058594,
+          "y": 322.5833435058594,
+          "width": 561.3333740234375,
+          "height": 154.83334350585938
+        },
+        "transform": "none",
+        "opacity": "1",
+        "text": "正在初始化向量数据库...准备中…0s"
+      }
+    ],
+    "animated": [
+      {
+        "tag": "SPAN",
+        "className": "MuiCircularProgress-root MuiCircularProgress-indeterminate MuiCircularProgress-colorPrimary shrink-0 text-blue-500 css-18lrjg1-MuiCircularProgress-root",
+        "text": "",
+        "rect": {
+          "x": 346.15557861328125,
+          "y": 422.90557861328125,
+          "width": 27.688884735107422,
+          "height": 27.688884735107422
+        },
+        "transform": "matrix(0.547897, -0.836546, 0.836546, 0.547897, 0, 0)",
+        "opacity": "1",
+        "visibility": "visible"
+      }
+    ],
+    "screenshot": "00800ms.png"
+  },
+  {
+    "at": 1500,
+    "capturedAt": 1638,
+    "url": "http://127.0.0.1:7777/",
+    "title": "WIKIOBS · Local knowledge workspace",
+    "bodyText": "WIKIOBS\n反馈\nWIKIOBS-A11Y\nWelcome to WIKIOBS\nWelcome to WIKIOBS!\n\nWIKIOBS is a private AI personal knowledge management tool. Our philosophy is that AI should be a thought enhancer not a thought replacer: WIKIOBS helps you find & connect notes, discover new insights and enhance your reasoning.\n\nSome features you should be aware of:\n\nChat:\n\nAsk your entire set of notes anything you want to know! WIKIOBS will automatically give the LLM relevant context.\n\nAsk things like “What are my thoughts on phil",
+    "scrollTop": 0,
+    "bodyScrollTop": 0,
+    "scrollHeight": 800,
+    "bodyScrollHeight": 800,
+    "viewport": {
+      "width": 1200,
+      "height": 800,
+      "dpr": 1.5
+    },
+    "root": {
+      "selector": "#root",
+      "tag": "DIV",
+      "className": "",
+      "text": "后退前进WIKIOBS反馈wikiobs-a11yWelcome to WIKIOBSWelcome to WIKIOBS!WIKIOBS is a private AI personal knowledge management tool",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1200,
+        "height": 800
+      },
+      "transform": "none",
+      "opacity": "1",
+      "visibility": "visible"
+    },
+    "stage": {
+      "selector": "[data-stage-container]",
+      "tag": "DIV",
+      "className": "",
+      "text": "后退前进WIKIOBS反馈wikiobs-a11yWelcome to WIKIOBSWelcome to WIKIOBS!WIKIOBS is a private AI personal knowledge management tool",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1200,
+        "height": 800
+      },
+      "transform": "none",
+      "opacity": "1",
+      "visibility": "visible"
+    },
+    "dialogs": [],
+    "animated": [
+      {
+        "tag": "SPAN",
+        "className": "titlebar-title pointer-events-none absolute left-1/2 -translate-x-1/2 select-none text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70",
+        "text": "WIKIOBS",
+        "rect": {
+          "x": 568.2291870117188,
+          "y": 11,
+          "width": 63.54166793823242,
+          "height": 14
+        },
+        "transform": "matrix(1, 0, 0, 1, -31.7708, 0)",
+        "opacity": "1",
+        "visibility": "visible"
+      },
+      {
+        "tag": "DIV",
+        "className": "_dsp-flex _ai-stretch _fb-auto _bxs-border-box _pos-relative _mih-0px _miw-0px _fs-0 _fd-column icons-sidebar-group items-center gap-1",
+        "text": "",
+        "rect": {
+          "x": -7.322534084320068,
+          "y": 119.5,
+          "width": 40,
+          "height": 550
+        },
+        "transform": "matrix(1, 0, 0, 1, -12.9892, 0)",
+        "opacity": "0.3505",
+        "visibility": "visible"
+      },
+      {
+        "tag": "DIV",
+        "className": "_dsp-flex _ai-stretch _fb-auto _bxs-border-box _pos-relative _mih-0px _miw-0px _fs-0 _fd-column icons-sidebar-group-bottom items-center gap-1",
+        "text": "",
+        "rect": {
+          "x": -14.333333969116211,
+          "y": 695,
+          "width": 40,
+          "height": 93
+        },
+        "transform": "matrix(1, 0, 0, 1, -20, 0)",
+        "opacity": "0",
+        "visibility": "visible"
+      },
+      {
+        "tag": "DIV",
+        "className": "",
+        "text": "",
+        "rect": {
+          "x": 378.13543701171875,
+          "y": 1053.791748046875,
+          "width": 719.1979370117188,
+          "height": 0
+        },
+        "transform": "none",
+        "opacity": "0",
+        "visibility": "visible"
+      }
+    ],
+    "screenshot": "01500ms.png"
+  },
+  {
+    "at": 2500,
+    "capturedAt": 2618,
+    "url": "http://127.0.0.1:7777/",
+    "title": "WIKIOBS · Local knowledge workspace",
+    "bodyText": "WIKIOBS\n反馈\nWIKIOBS-A11Y\nWelcome to WIKIOBS\nWelcome to WIKIOBS!\n\nWIKIOBS is a private AI personal knowledge management tool. Our philosophy is that AI should be a thought enhancer not a thought replacer: WIKIOBS helps you find & connect notes, discover new insights and enhance your reasoning.\n\nSome features you should be aware of:\n\nChat:\n\nAsk your entire set of notes anything you want to know! WIKIOBS will automatically give the LLM relevant context.\n\nAsk things like “What are my thoughts on phil",
+    "scrollTop": 0,
+    "bodyScrollTop": 0,
+    "scrollHeight": 800,
+    "bodyScrollHeight": 800,
+    "viewport": {
+      "width": 1200,
+      "height": 800,
+      "dpr": 1.5
+    },
+    "root": {
+      "selector": "#root",
+      "tag": "DIV",
+      "className": "",
+      "text": "后退前进WIKIOBS反馈wikiobs-a11yWelcome to WIKIOBSWelcome to WIKIOBS!WIKIOBS is a private AI personal knowledge management tool",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1200,
+        "height": 800
+      },
+      "transform": "none",
+      "opacity": "1",
+      "visibility": "visible"
+    },
+    "stage": {
+      "selector": "[data-stage-container]",
+      "tag": "DIV",
+      "className": "",
+      "text": "后退前进WIKIOBS反馈wikiobs-a11yWelcome to WIKIOBSWelcome to WIKIOBS!WIKIOBS is a private AI personal knowledge management tool",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1200,
+        "height": 800
+      },
+      "transform": "none",
+      "opacity": "1",
+      "visibility": "visible"
+    },
+    "dialogs": [],
+    "animated": [
+      {
+        "tag": "SPAN",
+        "className": "titlebar-title pointer-events-none absolute left-1/2 -translate-x-1/2 select-none text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70",
+        "text": "WIKIOBS",
+        "rect": {
+          "x": 568.2291870117188,
+          "y": 11,
+          "width": 63.54166793823242,
+          "height": 14
+        },
+        "transform": "matrix(1, 0, 0, 1, -31.7708, 0)",
+        "opacity": "1",
+        "visibility": "visible"
+      },
+      {
+        "tag": "DIV",
+        "className": "_dsp-flex _ai-stretch _fb-auto _bxs-border-box _pos-relative _mih-0px _miw-0px _fs-0 _fd-column icons-sidebar-group items-center gap-1",
+        "text": "",
+        "rect": {
+          "x": 5.6666669845581055,
+          "y": 119.5,
+          "width": 40,
+          "height": 550
+        },
+        "transform": "matrix(1, 0, 0, 1, 0, 0)",
+        "opacity": "1",
+        "visibility": "visible"
+      },
+      {
+        "tag": "DIV",
+        "className": "_dsp-flex _ai-stretch _fb-auto _bxs-border-box _pos-relative _mih-0px _miw-0px _fs-0 _fd-column icons-sidebar-group-bottom items-center gap-1",
+        "text": "",
+        "rect": {
+          "x": 5.6666669845581055,
+          "y": 695,
+          "width": 40,
+          "height": 93
+        },
+        "transform": "matrix(1, 0, 0, 1, 0, 0)",
+        "opacity": "1",
+        "visibility": "visible"
+      },
+      {
+        "tag": "DIV",
+        "className": "",
+        "text": "",
+        "rect": {
+          "x": 378.13543701171875,
+          "y": 1053.791748046875,
+          "width": 719.1979370117188,
+          "height": 0
+        },
+        "transform": "none",
+        "opacity": "0",
+        "visibility": "visible"
+      }
+    ],
+    "screenshot": "02500ms.png"
+  },
+  {
+    "at": 5000,
+    "capturedAt": 5104,
+    "url": "http://127.0.0.1:7777/",
+    "title": "WIKIOBS · Local knowledge workspace",
+    "bodyText": "WIKIOBS\n反馈\nWIKIOBS-A11Y\nWelcome to WIKIOBS\nWelcome to WIKIOBS!\n\nWIKIOBS is a private AI personal knowledge management tool. Our philosophy is that AI should be a thought enhancer not a thought replacer: WIKIOBS helps you find & connect notes, discover new insights and enhance your reasoning.\n\nSome features you should be aware of:\n\nChat:\n\nAsk your entire set of notes anything you want to know! WIKIOBS will automatically give the LLM relevant context.\n\nAsk things like “What are my thoughts on phil",
+    "scrollTop": 0,
+    "bodyScrollTop": 0,
+    "scrollHeight": 800,
+    "bodyScrollHeight": 800,
+    "viewport": {
+      "width": 1200,
+      "height": 800,
+      "dpr": 1.5
+    },
+    "root": {
+      "selector": "#root",
+      "tag": "DIV",
+      "className": "",
+      "text": "后退前进WIKIOBS反馈wikiobs-a11yWelcome to WIKIOBSWelcome to WIKIOBS!WIKIOBS is a private AI personal knowledge management tool",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1200,
+        "height": 800
+      },
+      "transform": "none",
+      "opacity": "1",
+      "visibility": "visible"
+    },
+    "stage": {
+      "selector": "[data-stage-container]",
+      "tag": "DIV",
+      "className": "",
+      "text": "后退前进WIKIOBS反馈wikiobs-a11yWelcome to WIKIOBSWelcome to WIKIOBS!WIKIOBS is a private AI personal knowledge management tool",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1200,
+        "height": 800
+      },
+      "transform": "none",
+      "opacity": "1",
+      "visibility": "visible"
+    },
+    "dialogs": [],
+    "animated": [
+      {
+        "tag": "SPAN",
+        "className": "titlebar-title pointer-events-none absolute left-1/2 -translate-x-1/2 select-none text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70",
+        "text": "WIKIOBS",
+        "rect": {
+          "x": 568.2291870117188,
+          "y": 11,
+          "width": 63.54166793823242,
+          "height": 14
+        },
+        "transform": "matrix(1, 0, 0, 1, -31.7708, 0)",
+        "opacity": "1",
+        "visibility": "visible"
+      },
+      {
+        "tag": "DIV",
+        "className": "_dsp-flex _ai-stretch _fb-auto _bxs-border-box _pos-relative _mih-0px _miw-0px _fs-0 _fd-column icons-sidebar-group items-center gap-1",
+        "text": "",
+        "rect": {
+          "x": 5.6666669845581055,
+          "y": 119.5,
+          "width": 40,
+          "height": 550
+        },
+        "transform": "matrix(1, 0, 0, 1, 0, 0)",
+        "opacity": "1",
+        "visibility": "visible"
+      },
+      {
+        "tag": "DIV",
+        "className": "_dsp-flex _ai-stretch _fb-auto _bxs-border-box _pos-relative _mih-0px _miw-0px _fs-0 _fd-column icons-sidebar-group-bottom items-center gap-1",
+        "text": "",
+        "rect": {
+          "x": 5.6666669845581055,
+          "y": 695,
+          "width": 40,
+          "height": 93
+        },
+        "transform": "matrix(1, 0, 0, 1, 0, 0)",
+        "opacity": "1",
+        "visibility": "visible"
+      },
+      {
+        "tag": "DIV",
+        "className": "",
+        "text": "",
+        "rect": {
+          "x": 378.13543701171875,
+          "y": 1053.791748046875,
+          "width": 719.1979370117188,
+          "height": 0
+        },
+        "transform": "none",
+        "opacity": "0",
+        "visibility": "visible"
+      }
+    ],
+    "screenshot": "05000ms.png"
+  },
+  {
+    "at": 9000,
+    "capturedAt": 9106,
+    "url": "http://127.0.0.1:7777/",
+    "title": "WIKIOBS · Local knowledge workspace",
+    "bodyText": "WIKIOBS\n反馈\nWIKIOBS-A11Y\nWelcome to WIKIOBS\nWelcome to WIKIOBS!\n\nWIKIOBS is a private AI personal knowledge management tool. Our philosophy is that AI should be a thought enhancer not a thought replacer: WIKIOBS helps you find & connect notes, discover new insights and enhance your reasoning.\n\nSome features you should be aware of:\n\nChat:\n\nAsk your entire set of notes anything you want to know! WIKIOBS will automatically give the LLM relevant context.\n\nAsk things like “What are my thoughts on phil",
+    "scrollTop": 0,
+    "bodyScrollTop": 0,
+    "scrollHeight": 800,
+    "bodyScrollHeight": 800,
+    "viewport": {
+      "width": 1200,
+      "height": 800,
+      "dpr": 1.5
+    },
+    "root": {
+      "selector": "#root",
+      "tag": "DIV",
+      "className": "",
+      "text": "后退前进WIKIOBS反馈wikiobs-a11yWelcome to WIKIOBSWelcome to WIKIOBS!WIKIOBS is a private AI personal knowledge management tool",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1200,
+        "height": 800
+      },
+      "transform": "none",
+      "opacity": "1",
+      "visibility": "visible"
+    },
+    "stage": {
+      "selector": "[data-stage-container]",
+      "tag": "DIV",
+      "className": "",
+      "text": "后退前进WIKIOBS反馈wikiobs-a11yWelcome to WIKIOBSWelcome to WIKIOBS!WIKIOBS is a private AI personal knowledge management tool",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1200,
+        "height": 800
+      },
+      "transform": "none",
+      "opacity": "1",
+      "visibility": "visible"
+    },
+    "dialogs": [],
+    "animated": [
+      {
+        "tag": "SPAN",
+        "className": "titlebar-title pointer-events-none absolute left-1/2 -translate-x-1/2 select-none text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70",
+        "text": "WIKIOBS",
+        "rect": {
+          "x": 568.2291870117188,
+          "y": 11,
+          "width": 63.54166793823242,
+          "height": 14
+        },
+        "transform": "matrix(1, 0, 0, 1, -31.7708, 0)",
+        "opacity": "1",
+        "visibility": "visible"
+      },
+      {
+        "tag": "DIV",
+        "className": "_dsp-flex _ai-stretch _fb-auto _bxs-border-box _pos-relative _mih-0px _miw-0px _fs-0 _fd-column icons-sidebar-group items-center gap-1",
+        "text": "",
+        "rect": {
+          "x": 5.6666669845581055,
+          "y": 119.5,
+          "width": 40,
+          "height": 550
+        },
+        "transform": "matrix(1, 0, 0, 1, 0, 0)",
+        "opacity": "1",
+        "visibility": "visible"
+      },
+      {
+        "tag": "DIV",
+        "className": "_dsp-flex _ai-stretch _fb-auto _bxs-border-box _pos-relative _mih-0px _miw-0px _fs-0 _fd-column icons-sidebar-group-bottom items-center gap-1",
+        "text": "",
+        "rect": {
+          "x": 5.6666669845581055,
+          "y": 695,
+          "width": 40,
+          "height": 93
+        },
+        "transform": "matrix(1, 0, 0, 1, 0, 0)",
+        "opacity": "1",
+        "visibility": "visible"
+      },
+      {
+        "tag": "DIV",
+        "className": "",
+        "text": "",
+        "rect": {
+          "x": 378.13543701171875,
+          "y": 1053.791748046875,
+          "width": 719.1979370117188,
+          "height": 0
+        },
+        "transform": "none",
+        "opacity": "0",
+        "visibility": "visible"
+      }
+    ],
+    "screenshot": "09000ms.png"
+  },
+  {
+    "at": 15000,
+    "capturedAt": 15098,
+    "url": "http://127.0.0.1:7777/",
+    "title": "WIKIOBS · Local knowledge workspace",
+    "bodyText": "WIKIOBS\n反馈\nWIKIOBS-A11Y\nWelcome to WIKIOBS\nWelcome to WIKIOBS!\n\nWIKIOBS is a private AI personal knowledge management tool. Our philosophy is that AI should be a thought enhancer not a thought replacer: WIKIOBS helps you find & connect notes, discover new insights and enhance your reasoning.\n\nSome features you should be aware of:\n\nChat:\n\nAsk your entire set of notes anything you want to know! WIKIOBS will automatically give the LLM relevant context.\n\nAsk things like “What are my thoughts on phil",
+    "scrollTop": 0,
+    "bodyScrollTop": 0,
+    "scrollHeight": 800,
+    "bodyScrollHeight": 800,
+    "viewport": {
+      "width": 1200,
+      "height": 800,
+      "dpr": 1.5
+    },
+    "root": {
+      "selector": "#root",
+      "tag": "DIV",
+      "className": "",
+      "text": "后退前进WIKIOBS反馈wikiobs-a11yWelcome to WIKIOBSWelcome to WIKIOBS!WIKIOBS is a private AI personal knowledge management tool",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1200,
+        "height": 800
+      },
+      "transform": "none",
+      "opacity": "1",
+      "visibility": "visible"
+    },
+    "stage": {
+      "selector": "[data-stage-container]",
+      "tag": "DIV",
+      "className": "",
+      "text": "后退前进WIKIOBS反馈wikiobs-a11yWelcome to WIKIOBSWelcome to WIKIOBS!WIKIOBS is a private AI personal knowledge management tool",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1200,
+        "height": 800
+      },
+      "transform": "none",
+      "opacity": "1",
+      "visibility": "visible"
+    },
+    "dialogs": [],
+    "animated": [
+      {
+        "tag": "SPAN",
+        "className": "titlebar-title pointer-events-none absolute left-1/2 -translate-x-1/2 select-none text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70",
+        "text": "WIKIOBS",
+        "rect": {
+          "x": 568.2291870117188,
+          "y": 11,
+          "width": 63.54166793823242,
+          "height": 14
+        },
+        "transform": "matrix(1, 0, 0, 1, -31.7708, 0)",
+        "opacity": "1",
+        "visibility": "visible"
+      },
+      {
+        "tag": "DIV",
+        "className": "_dsp-flex _ai-stretch _fb-auto _bxs-border-box _pos-relative _mih-0px _miw-0px _fs-0 _fd-column icons-sidebar-group items-center gap-1",
+        "text": "",
+        "rect": {
+          "x": 5.6666669845581055,
+          "y": 119.5,
+          "width": 40,
+          "height": 550
+        },
+        "transform": "matrix(1, 0, 0, 1, 0, 0)",
+        "opacity": "1",
+        "visibility": "visible"
+      },
+      {
+        "tag": "DIV",
+        "className": "_dsp-flex _ai-stretch _fb-auto _bxs-border-box _pos-relative _mih-0px _miw-0px _fs-0 _fd-column icons-sidebar-group-bottom items-center gap-1",
+        "text": "",
+        "rect": {
+          "x": 5.6666669845581055,
+          "y": 695,
+          "width": 40,
+          "height": 93
+        },
+        "transform": "matrix(1, 0, 0, 1, 0, 0)",
+        "opacity": "1",
+        "visibility": "visible"
+      },
+      {
+        "tag": "DIV",
+        "className": "",
+        "text": "",
+        "rect": {
+          "x": 378.13543701171875,
+          "y": 1053.791748046875,
+          "width": 719.1979370117188,
+          "height": 0
+        },
+        "transform": "none",
+        "opacity": "0",
+        "visibility": "visible"
+      }
+    ],
+    "screenshot": "15000ms.png"
+  }
+]

@@ -1,0 +1,8 @@
+import { _electron as electron } from 'playwright'
+import { setTimeout as sleep } from 'node:timers/promises'
+const vault='C:/Users/l/AppData/Local/Temp/wikiobs-multiview-vault'
+const app=await electron.launch({args:['.','--no-sandbox',`--user-data-dir=C:/Users/l/AppData/Local/Temp/wikiobs-chat-delete-${Date.now()}`]})
+const w=await app.firstWindow(); await w.waitForLoadState('domcontentloaded')
+await w.evaluate(async ({vault})=>{await window.electronStore.setVaultDirectoryForWindow(vault);await window.electronStore.setDefaultEmbeddingModel('Xenova/bge-small-en-v1.5');await window.electronStore.saveChat({id:'delete-ui-smoke',displayName:'Delete UI Smoke',timeOfLastMessage:Date.now(),messages:[{role:'user',content:'hello'}],toolDefinitions:[]})}, {vault})
+await w.reload(); await w.locator('button[title="Settings (Ctrl+,)"]').waitFor({state:'visible',timeout:120000}); await w.setViewportSize({width:480,height:800}); await w.locator('button[title="Chat history"]').click(); await sleep(500)
+const row=w.locator('#chat-recents-list [role="button"]').filter({hasText:'Delete UI Smoke'}); console.log('row',await row.count()); await row.click({button:'right'}); await sleep(250); console.log('menus',await w.locator('[role="menu"]:visible').count(),await w.getByText('Delete Chat',{exact:true}).count()); await w.getByText('Delete Chat',{exact:true}).last().click(); await sleep(200); console.log('dialogs',await w.locator('[role="dialog"]:visible').count(),'confirm',await w.getByRole('button',{name:'Delete',exact:true}).count()); await w.screenshot({path:'artifacts/ui-audit-100/followup/480-chat-delete-confirm.png'}); await app.close()

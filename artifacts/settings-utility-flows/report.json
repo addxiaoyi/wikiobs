@@ -1,0 +1,88 @@
+{
+  "generatedAt": "2026-10-20T05:19:08.616Z",
+  "screenshots": [
+    "artifacts\\settings-utility-flows\\cloud-openai-filled-320x700.png",
+    "artifacts\\settings-utility-flows\\local-llm-error-320x700.png",
+    "artifacts\\settings-utility-flows\\embedding-filled-320x700.png",
+    "artifacts\\settings-utility-flows\\export-preview-320x700.png",
+    "artifacts\\settings-utility-flows\\graph-populated-320x700.png",
+    "artifacts\\settings-utility-flows\\obsidian-export-long-path-320x700.png",
+    "artifacts\\settings-utility-flows\\obsidian-import-long-path-320x700.png"
+  ],
+  "checks": [
+    {
+      "name": "layout:cloud-openai-filled-320x700",
+      "detail": "320x700; dialogs=2"
+    },
+    {
+      "name": "cloud-llm-cancel-reset",
+      "detail": "cloud API key is cleared after cancel and reopen"
+    },
+    {
+      "name": "cloud-llm-save",
+      "detail": "OpenAI API save writes a fixture config"
+    },
+    {
+      "name": "local-llm-required-error",
+      "detail": "empty local model reports required name"
+    },
+    {
+      "name": "layout:local-llm-error-320x700",
+      "detail": "320x700; dialogs=2"
+    },
+    {
+      "name": "layout:embedding-filled-320x700",
+      "detail": "320x700; dialogs=2"
+    },
+    {
+      "name": "embedding-save",
+      "detail": "remote embedding save writes a fixture model"
+    },
+    {
+      "name": "export-date-validation",
+      "detail": "reversed date range is rejected inline"
+    },
+    {
+      "name": "layout:export-preview-320x700",
+      "detail": "320x700; dialogs=1"
+    },
+    {
+      "name": "export-preview",
+      "detail": "export preview lists fixture notes"
+    },
+    {
+      "name": "layout:graph-populated-320x700",
+      "detail": "320x700; dialogs=1"
+    },
+    {
+      "name": "graph-populated",
+      "detail": "graph canvas is visible with fixture data"
+    },
+    {
+      "name": "obsidian-export-required",
+      "detail": "export requires an output directory"
+    },
+    {
+      "name": "layout:obsidian-export-long-path-320x700",
+      "detail": "320x700; dialogs=1"
+    },
+    {
+      "name": "obsidian-export-success",
+      "detail": "export success is shown with long output path"
+    },
+    {
+      "name": "obsidian-import-required",
+      "detail": "import requires a source directory"
+    },
+    {
+      "name": "layout:obsidian-import-long-path-320x700",
+      "detail": "320x700; dialogs=1"
+    },
+    {
+      "name": "obsidian-import-success",
+      "detail": "import success is shown with long source path"
+    }
+  ],
+  "failures": [],
+  "errors": []
+}

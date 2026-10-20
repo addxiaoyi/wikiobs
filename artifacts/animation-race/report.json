@@ -1,0 +1,11 @@
+{
+  "screenshots": [
+    "artifacts/animation-race/chat-rapid-toggle.png",
+    "artifacts/animation-race/graph-settled.png",
+    "artifacts/animation-race/editor-tooltip-rapid-hover.png",
+    "artifacts/animation-race/editor-side-menu-rapid-hover.png",
+    "artifacts/animation-race/editor-turn-into-menu-open.png",
+    "artifacts/animation-race/editor-drag-menu-closed.png"
+  ],
+  "failures": []
+}

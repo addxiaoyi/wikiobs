@@ -1,0 +1,930 @@
+{
+  "fixtureUrl": "http://127.0.0.1:58287/wiki.html",
+  "viewports": [
+    {
+      "width": 320,
+      "height": 700
+    },
+    {
+      "width": 480,
+      "height": 800
+    },
+    {
+      "width": 640,
+      "height": 900
+    },
+    {
+      "width": 900,
+      "height": 900
+    },
+    {
+      "width": 1280,
+      "height": 900
+    }
+  ],
+  "screenshots": [
+    "artifacts/progress-reflow/ai-320x700-0.png",
+    "artifacts/progress-reflow/ai-320x700-50.png",
+    "artifacts/progress-reflow/ai-320x700-100.png",
+    "artifacts/progress-reflow/ai-320x700-complete.png",
+    "artifacts/progress-reflow/wiki-320x700-0.png",
+    "artifacts/progress-reflow/wiki-320x700-50.png",
+    "artifacts/progress-reflow/wiki-320x700-100.png",
+    "artifacts/progress-reflow/wiki-320x700-complete.png",
+    "artifacts/progress-reflow/ai-480x800-0.png",
+    "artifacts/progress-reflow/ai-480x800-50.png",
+    "artifacts/progress-reflow/ai-480x800-100.png",
+    "artifacts/progress-reflow/ai-480x800-complete.png",
+    "artifacts/progress-reflow/wiki-480x800-0.png",
+    "artifacts/progress-reflow/wiki-480x800-50.png",
+    "artifacts/progress-reflow/wiki-480x800-100.png",
+    "artifacts/progress-reflow/wiki-480x800-complete.png",
+    "artifacts/progress-reflow/ai-640x900-0.png",
+    "artifacts/progress-reflow/ai-640x900-50.png",
+    "artifacts/progress-reflow/ai-640x900-100.png",
+    "artifacts/progress-reflow/ai-640x900-complete.png",
+    "artifacts/progress-reflow/wiki-640x900-0.png",
+    "artifacts/progress-reflow/wiki-640x900-50.png",
+    "artifacts/progress-reflow/wiki-640x900-100.png",
+    "artifacts/progress-reflow/wiki-640x900-complete.png",
+    "artifacts/progress-reflow/ai-900x900-0.png",
+    "artifacts/progress-reflow/ai-900x900-50.png",
+    "artifacts/progress-reflow/ai-900x900-100.png",
+    "artifacts/progress-reflow/ai-900x900-complete.png",
+    "artifacts/progress-reflow/wiki-900x900-0.png",
+    "artifacts/progress-reflow/wiki-900x900-50.png",
+    "artifacts/progress-reflow/wiki-900x900-100.png",
+    "artifacts/progress-reflow/wiki-900x900-complete.png",
+    "artifacts/progress-reflow/ai-1280x900-0.png",
+    "artifacts/progress-reflow/ai-1280x900-50.png",
+    "artifacts/progress-reflow/ai-1280x900-100.png",
+    "artifacts/progress-reflow/ai-1280x900-complete.png",
+    "artifacts/progress-reflow/wiki-1280x900-0.png",
+    "artifacts/progress-reflow/wiki-1280x900-50.png",
+    "artifacts/progress-reflow/wiki-1280x900-100.png",
+    "artifacts/progress-reflow/wiki-1280x900-complete.png"
+  ],
+  "measurements": [
+    {
+      "surface": "ai-320x700",
+      "points": [
+        {
+          "point": "0",
+          "metrics": {
+            "viewport": {
+              "width": 320,
+              "height": 700
+            },
+            "scrollTop": 0,
+            "scrollHeight": 700,
+            "dialogs": [
+              {
+                "x": 32,
+                "y": 16,
+                "right": 288,
+                "bottom": 552.6875,
+                "width": 256,
+                "height": 536.6875
+              }
+            ]
+          }
+        },
+        {
+          "point": "50",
+          "metrics": {
+            "viewport": {
+              "width": 320,
+              "height": 700
+            },
+            "scrollTop": 0,
+            "scrollHeight": 700,
+            "dialogs": [
+              {
+                "x": 32,
+                "y": 16,
+                "right": 288,
+                "bottom": 552.6875,
+                "width": 256,
+                "height": 536.6875
+              }
+            ]
+          }
+        },
+        {
+          "point": "100",
+          "metrics": {
+            "viewport": {
+              "width": 320,
+              "height": 700
+            },
+            "scrollTop": 0,
+            "scrollHeight": 700,
+            "dialogs": [
+              {
+                "x": 32,
+                "y": 16,
+                "right": 288,
+                "bottom": 552.6875,
+                "width": 256,
+                "height": 536.6875
+              }
+            ]
+          }
+        }
+      ],
+      "completed": {
+        "viewport": {
+          "width": 320,
+          "height": 700
+        },
+        "scrollTop": 0,
+        "scrollHeight": 700,
+        "dialogs": [
+          {
+            "x": 32,
+            "y": 16,
+            "right": 288,
+            "bottom": 610.78125,
+            "width": 256,
+            "height": 594.78125
+          }
+        ]
+      }
+    },
+    {
+      "surface": "wiki-320x700",
+      "points": [
+        {
+          "point": "0",
+          "metrics": {
+            "viewport": {
+              "width": 320,
+              "height": 700
+            },
+            "scrollTop": 0,
+            "scrollHeight": 700,
+            "dialogs": [
+              {
+                "x": 32,
+                "y": 16,
+                "right": 288,
+                "bottom": 466.90625,
+                "width": 256,
+                "height": 450.90625
+              }
+            ]
+          }
+        },
+        {
+          "point": "50",
+          "metrics": {
+            "viewport": {
+              "width": 320,
+              "height": 700
+            },
+            "scrollTop": 0,
+            "scrollHeight": 700,
+            "dialogs": [
+              {
+                "x": 32,
+                "y": 16,
+                "right": 288,
+                "bottom": 466.90625,
+                "width": 256,
+                "height": 450.90625
+              }
+            ]
+          }
+        },
+        {
+          "point": "100",
+          "metrics": {
+            "viewport": {
+              "width": 320,
+              "height": 700
+            },
+            "scrollTop": 0,
+            "scrollHeight": 700,
+            "dialogs": [
+              {
+                "x": 32,
+                "y": 16,
+                "right": 288,
+                "bottom": 466.90625,
+                "width": 256,
+                "height": 450.90625
+              }
+            ]
+          }
+        }
+      ],
+      "completed": {
+        "viewport": {
+          "width": 320,
+          "height": 700
+        },
+        "scrollTop": 0,
+        "scrollHeight": 700,
+        "dialogs": [
+          {
+            "x": 32,
+            "y": 16,
+            "right": 288,
+            "bottom": 544.9271240234375,
+            "width": 256,
+            "height": 528.9271240234375
+          }
+        ]
+      }
+    },
+    {
+      "surface": "ai-480x800",
+      "points": [
+        {
+          "point": "0",
+          "metrics": {
+            "viewport": {
+              "width": 480,
+              "height": 800
+            },
+            "scrollTop": 0,
+            "scrollHeight": 800,
+            "dialogs": [
+              {
+                "x": 32,
+                "y": 16,
+                "right": 448,
+                "bottom": 552.6875,
+                "width": 416,
+                "height": 536.6875
+              }
+            ]
+          }
+        },
+        {
+          "point": "50",
+          "metrics": {
+            "viewport": {
+              "width": 480,
+              "height": 800
+            },
+            "scrollTop": 0,
+            "scrollHeight": 800,
+            "dialogs": [
+              {
+                "x": 32,
+                "y": 16,
+                "right": 448,
+                "bottom": 552.6875,
+                "width": 416,
+                "height": 536.6875
+              }
+            ]
+          }
+        },
+        {
+          "point": "100",
+          "metrics": {
+            "viewport": {
+              "width": 480,
+              "height": 800
+            },
+            "scrollTop": 0,
+            "scrollHeight": 800,
+            "dialogs": [
+              {
+                "x": 32,
+                "y": 16,
+                "right": 448,
+                "bottom": 552.6875,
+                "width": 416,
+                "height": 536.6875
+              }
+            ]
+          }
+        }
+      ],
+      "completed": {
+        "viewport": {
+          "width": 480,
+          "height": 800
+        },
+        "scrollTop": 0,
+        "scrollHeight": 800,
+        "dialogs": [
+          {
+            "x": 32,
+            "y": 16,
+            "right": 448,
+            "bottom": 566.7708740234375,
+            "width": 416,
+            "height": 550.7708740234375
+          }
+        ]
+      }
+    },
+    {
+      "surface": "wiki-480x800",
+      "points": [
+        {
+          "point": "0",
+          "metrics": {
+            "viewport": {
+              "width": 480,
+              "height": 800
+            },
+            "scrollTop": 0,
+            "scrollHeight": 800,
+            "dialogs": [
+              {
+                "x": 32,
+                "y": 16,
+                "right": 448,
+                "bottom": 446.8958435058594,
+                "width": 416,
+                "height": 430.8958435058594
+              }
+            ]
+          }
+        },
+        {
+          "point": "50",
+          "metrics": {
+            "viewport": {
+              "width": 480,
+              "height": 800
+            },
+            "scrollTop": 0,
+            "scrollHeight": 800,
+            "dialogs": [
+              {
+                "x": 32,
+                "y": 16,
+                "right": 448,
+                "bottom": 446.8958435058594,
+                "width": 416,
+                "height": 430.8958435058594
+              }
+            ]
+          }
+        },
+        {
+          "point": "100",
+          "metrics": {
+            "viewport": {
+              "width": 480,
+              "height": 800
+            },
+            "scrollTop": 0,
+            "scrollHeight": 800,
+            "dialogs": [
+              {
+                "x": 32,
+                "y": 16,
+                "right": 448,
+                "bottom": 446.8958435058594,
+                "width": 416,
+                "height": 430.8958435058594
+              }
+            ]
+          }
+        }
+      ],
+      "completed": {
+        "viewport": {
+          "width": 480,
+          "height": 800
+        },
+        "scrollTop": 0,
+        "scrollHeight": 800,
+        "dialogs": [
+          {
+            "x": 32,
+            "y": 16,
+            "right": 448,
+            "bottom": 484.8958435058594,
+            "width": 416,
+            "height": 468.8958435058594
+          }
+        ]
+      }
+    },
+    {
+      "surface": "ai-640x900",
+      "points": [
+        {
+          "point": "0",
+          "metrics": {
+            "viewport": {
+              "width": 640,
+              "height": 900
+            },
+            "scrollTop": 0,
+            "scrollHeight": 900,
+            "dialogs": [
+              {
+                "x": 32,
+                "y": 98,
+                "right": 608,
+                "bottom": 634.6875,
+                "width": 576,
+                "height": 536.6875
+              }
+            ]
+          }
+        },
+        {
+          "point": "50",
+          "metrics": {
+            "viewport": {
+              "width": 640,
+              "height": 900
+            },
+            "scrollTop": 0,
+            "scrollHeight": 900,
+            "dialogs": [
+              {
+                "x": 32,
+                "y": 98,
+                "right": 608,
+                "bottom": 634.6875,
+                "width": 576,
+                "height": 536.6875
+              }
+            ]
+          }
+        },
+        {
+          "point": "100",
+          "metrics": {
+            "viewport": {
+              "width": 640,
+              "height": 900
+            },
+            "scrollTop": 0,
+            "scrollHeight": 900,
+            "dialogs": [
+              {
+                "x": 32,
+                "y": 98,
+                "right": 608,
+                "bottom": 634.6875,
+                "width": 576,
+                "height": 536.6875
+              }
+            ]
+          }
+        }
+      ],
+      "completed": {
+        "viewport": {
+          "width": 640,
+          "height": 900
+        },
+        "scrollTop": 0,
+        "scrollHeight": 900,
+        "dialogs": [
+          {
+            "x": 32,
+            "y": 98,
+            "right": 608,
+            "bottom": 648.7708740234375,
+            "width": 576,
+            "height": 550.7708740234375
+          }
+        ]
+      }
+    },
+    {
+      "surface": "wiki-640x900",
+      "points": [
+        {
+          "point": "0",
+          "metrics": {
+            "viewport": {
+              "width": 640,
+              "height": 900
+            },
+            "scrollTop": 0,
+            "scrollHeight": 900,
+            "dialogs": [
+              {
+                "x": 32,
+                "y": 98,
+                "right": 608,
+                "bottom": 528.8958435058594,
+                "width": 576,
+                "height": 430.8958435058594
+              }
+            ]
+          }
+        },
+        {
+          "point": "50",
+          "metrics": {
+            "viewport": {
+              "width": 640,
+              "height": 900
+            },
+            "scrollTop": 0,
+            "scrollHeight": 900,
+            "dialogs": [
+              {
+                "x": 32,
+                "y": 98,
+                "right": 608,
+                "bottom": 528.8958435058594,
+                "width": 576,
+                "height": 430.8958435058594
+              }
+            ]
+          }
+        },
+        {
+          "point": "100",
+          "metrics": {
+            "viewport": {
+              "width": 640,
+              "height": 900
+            },
+            "scrollTop": 0,
+            "scrollHeight": 900,
+            "dialogs": [
+              {
+                "x": 32,
+                "y": 98,
+                "right": 608,
+                "bottom": 528.8958435058594,
+                "width": 576,
+                "height": 430.8958435058594
+              }
+            ]
+          }
+        }
+      ],
+      "completed": {
+        "viewport": {
+          "width": 640,
+          "height": 900
+        },
+        "scrollTop": 0,
+        "scrollHeight": 900,
+        "dialogs": [
+          {
+            "x": 32,
+            "y": 98,
+            "right": 608,
+            "bottom": 566.8958435058594,
+            "width": 576,
+            "height": 468.8958435058594
+          }
+        ]
+      }
+    },
+    {
+      "surface": "ai-900x900",
+      "points": [
+        {
+          "point": "0",
+          "metrics": {
+            "viewport": {
+              "width": 900,
+              "height": 900
+            },
+            "scrollTop": 0,
+            "scrollHeight": 900,
+            "dialogs": [
+              {
+                "x": 150,
+                "y": 98,
+                "right": 750,
+                "bottom": 634.6875,
+                "width": 600,
+                "height": 536.6875
+              }
+            ]
+          }
+        },
+        {
+          "point": "50",
+          "metrics": {
+            "viewport": {
+              "width": 900,
+              "height": 900
+            },
+            "scrollTop": 0,
+            "scrollHeight": 900,
+            "dialogs": [
+              {
+                "x": 150,
+                "y": 98,
+                "right": 750,
+                "bottom": 634.6875,
+                "width": 600,
+                "height": 536.6875
+              }
+            ]
+          }
+        },
+        {
+          "point": "100",
+          "metrics": {
+            "viewport": {
+              "width": 900,
+              "height": 900
+            },
+            "scrollTop": 0,
+            "scrollHeight": 900,
+            "dialogs": [
+              {
+                "x": 150,
+                "y": 98,
+                "right": 750,
+                "bottom": 634.6875,
+                "width": 600,
+                "height": 536.6875
+              }
+            ]
+          }
+        }
+      ],
+      "completed": {
+        "viewport": {
+          "width": 900,
+          "height": 900
+        },
+        "scrollTop": 0,
+        "scrollHeight": 900,
+        "dialogs": [
+          {
+            "x": 150,
+            "y": 98,
+            "right": 750,
+            "bottom": 648.7708740234375,
+            "width": 600,
+            "height": 550.7708740234375
+          }
+        ]
+      }
+    },
+    {
+      "surface": "wiki-900x900",
+      "points": [
+        {
+          "point": "0",
+          "metrics": {
+            "viewport": {
+              "width": 900,
+              "height": 900
+            },
+            "scrollTop": 0,
+            "scrollHeight": 900,
+            "dialogs": [
+              {
+                "x": 150,
+                "y": 98,
+                "right": 750,
+                "bottom": 528.8958435058594,
+                "width": 600,
+                "height": 430.8958435058594
+              }
+            ]
+          }
+        },
+        {
+          "point": "50",
+          "metrics": {
+            "viewport": {
+              "width": 900,
+              "height": 900
+            },
+            "scrollTop": 0,
+            "scrollHeight": 900,
+            "dialogs": [
+              {
+                "x": 150,
+                "y": 98,
+                "right": 750,
+                "bottom": 528.8958435058594,
+                "width": 600,
+                "height": 430.8958435058594
+              }
+            ]
+          }
+        },
+        {
+          "point": "100",
+          "metrics": {
+            "viewport": {
+              "width": 900,
+              "height": 900
+            },
+            "scrollTop": 0,
+            "scrollHeight": 900,
+            "dialogs": [
+              {
+                "x": 150,
+                "y": 98,
+                "right": 750,
+                "bottom": 528.8958435058594,
+                "width": 600,
+                "height": 430.8958435058594
+              }
+            ]
+          }
+        }
+      ],
+      "completed": {
+        "viewport": {
+          "width": 900,
+          "height": 900
+        },
+        "scrollTop": 0,
+        "scrollHeight": 900,
+        "dialogs": [
+          {
+            "x": 150,
+            "y": 98,
+            "right": 750,
+            "bottom": 566.8958435058594,
+            "width": 600,
+            "height": 468.8958435058594
+          }
+        ]
+      }
+    },
+    {
+      "surface": "ai-1280x900",
+      "points": [
+        {
+          "point": "0",
+          "metrics": {
+            "viewport": {
+              "width": 1280,
+              "height": 900
+            },
+            "scrollTop": 0,
+            "scrollHeight": 900,
+            "dialogs": [
+              {
+                "x": 340,
+                "y": 98,
+                "right": 940,
+                "bottom": 634.6875,
+                "width": 600,
+                "height": 536.6875
+              }
+            ]
+          }
+        },
+        {
+          "point": "50",
+          "metrics": {
+            "viewport": {
+              "width": 1280,
+              "height": 900
+            },
+            "scrollTop": 0,
+            "scrollHeight": 900,
+            "dialogs": [
+              {
+                "x": 340,
+                "y": 98,
+                "right": 940,
+                "bottom": 634.6875,
+                "width": 600,
+                "height": 536.6875
+              }
+            ]
+          }
+        },
+        {
+          "point": "100",
+          "metrics": {
+            "viewport": {
+              "width": 1280,
+              "height": 900
+            },
+            "scrollTop": 0,
+            "scrollHeight": 900,
+            "dialogs": [
+              {
+                "x": 340,
+                "y": 98,
+                "right": 940,
+                "bottom": 634.6875,
+                "width": 600,
+                "height": 536.6875
+              }
+            ]
+          }
+        }
+      ],
+      "completed": {
+        "viewport": {
+          "width": 1280,
+          "height": 900
+        },
+        "scrollTop": 0,
+        "scrollHeight": 900,
+        "dialogs": [
+          {
+            "x": 340,
+            "y": 98,
+            "right": 940,
+            "bottom": 648.7708740234375,
+            "width": 600,
+            "height": 550.7708740234375
+          }
+        ]
+      }
+    },
+    {
+      "surface": "wiki-1280x900",
+      "points": [
+        {
+          "point": "0",
+          "metrics": {
+            "viewport": {
+              "width": 1280,
+              "height": 900
+            },
+            "scrollTop": 0,
+            "scrollHeight": 900,
+            "dialogs": [
+              {
+                "x": 340,
+                "y": 98,
+                "right": 940,
+                "bottom": 528.8958435058594,
+                "width": 600,
+                "height": 430.8958435058594
+              }
+            ]
+          }
+        },
+        {
+          "point": "50",
+          "metrics": {
+            "viewport": {
+              "width": 1280,
+              "height": 900
+            },
+            "scrollTop": 0,
+            "scrollHeight": 900,
+            "dialogs": [
+              {
+                "x": 340,
+                "y": 98,
+                "right": 940,
+                "bottom": 528.8958435058594,
+                "width": 600,
+                "height": 430.8958435058594
+              }
+            ]
+          }
+        },
+        {
+          "point": "100",
+          "metrics": {
+            "viewport": {
+              "width": 1280,
+              "height": 900
+            },
+            "scrollTop": 0,
+            "scrollHeight": 900,
+            "dialogs": [
+              {
+                "x": 340,
+                "y": 98,
+                "right": 940,
+                "bottom": 528.8958435058594,
+                "width": 600,
+                "height": 430.8958435058594
+              }
+            ]
+          }
+        }
+      ],
+      "completed": {
+        "viewport": {
+          "width": 1280,
+          "height": 900
+        },
+        "scrollTop": 0,
+        "scrollHeight": 900,
+        "dialogs": [
+          {
+            "x": 340,
+            "y": 98,
+            "right": 940,
+            "bottom": 566.8958435058594,
+            "width": 600,
+            "height": 468.8958435058594
+          }
+        ]
+      }
+    }
+  ],
+  "failures": []
+}
