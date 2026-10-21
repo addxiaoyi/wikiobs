@@ -185,7 +185,11 @@ const WikiImporterModal: React.FC<WikiImporterModalProps> = ({ isOpen, onClose }
     setProgress({ current: 0, total: 0, currentUrl: t('wikiImporter.starting') })
 
     try {
-      const options: WikiImportOptions = { sourceType, source: source.trim() }
+      let normalizedSource = source.trim()
+      if (sourceType !== 'xml-dump' && !/^https?:\/\//i.test(normalizedSource)) {
+        normalizedSource = `https://${normalizedSource}`
+      }
+      const options: WikiImportOptions = { sourceType, source: normalizedSource }
       lastOptionsRef.current = options
       const importResult = await window.wikiImporter.import(options)
       finishImport(importResult)

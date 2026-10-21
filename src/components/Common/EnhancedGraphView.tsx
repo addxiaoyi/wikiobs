@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
+import { useTheme } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
@@ -73,6 +74,8 @@ const EnhancedGraphView: React.FC<EnhancedGraphViewProps> = ({
   height = 600,
 }) => {
   const { t } = useTranslation()
+  const muiTheme = useTheme()
+  const isDark = muiTheme.palette.mode === 'dark' || (typeof document !== 'undefined' && document.documentElement.classList.contains('dark'))
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const controlBarRef = useRef<HTMLDivElement>(null)
@@ -364,7 +367,13 @@ const EnhancedGraphView: React.FC<EnhancedGraphViewProps> = ({
     ctx.scale(zoom, zoom)
 
     // 绘制边
-    ctx.strokeStyle = '#94a3b8'
+    const defaultEdgeColor = isDark ? '#475569' : '#cbd5e1'
+    const labelColor = isDark ? '#f8fafc' : '#0f172a'
+    const subLabelColor = isDark ? '#94a3b8' : '#64748b'
+    const haloColor = isDark ? 'rgba(15, 23, 42, 0.85)' : 'rgba(255, 255, 255, 0.88)'
+    const selectedStrokeColor = isDark ? '#ffffff' : '#0f172a'
+
+    ctx.strokeStyle = defaultEdgeColor
     ctx.lineWidth = Math.max(1 / zoom, 0.5)
     layoutNodes.forEach((node) => {
       const connectedEdges = filteredEdges.filter((e) => e.source === node.id || e.target === node.id)
@@ -378,16 +387,16 @@ const EnhancedGraphView: React.FC<EnhancedGraphViewProps> = ({
           // 连线样式按类型区分
           if (edge.type === 'related') {
             ctx.setLineDash([4, 4])
-            ctx.strokeStyle = '#888'
+            ctx.strokeStyle = isDark ? '#64748b' : '#94a3b8'
           } else if (edge.type === 'link') {
-            ctx.strokeStyle = '#60a5fa'
+            ctx.strokeStyle = '#3b82f6'
           } else if (edge.type === 'mention') {
-            ctx.strokeStyle = '#fb923c'
+            ctx.strokeStyle = '#f97316'
           }
 
           ctx.stroke()
           ctx.setLineDash([])
-          ctx.strokeStyle = '#94a3b8'
+          ctx.strokeStyle = defaultEdgeColor
         }
       })
     })
@@ -432,26 +441,41 @@ const EnhancedGraphView: React.FC<EnhancedGraphViewProps> = ({
       ctx.fill()
 
       if (isSelected) {
-        ctx.strokeStyle = '#fff'
+        ctx.strokeStyle = selectedStrokeColor
         ctx.lineWidth = 3 / zoom
         ctx.stroke()
       }
 
-      // 节点标签
+      // 节点标签 (带抗遮挡光晕描边和防重叠字符截断)
       if (showLabels) {
-        ctx.fillStyle = '#e2e8f0'
-        ctx.font = `${Math.max(9 / zoom, 4)}px Arial`
+        const maxChars = zoom < 0.6 ? 8 : zoom < 1.0 ? 14 : 22
+        const displayLabel = node.label.length > maxChars ? `${node.label.slice(0, maxChars)}…` : node.label
+
+        ctx.save()
+        ctx.font = `${Math.max(9 / zoom, 4)}px sans-serif`
         ctx.textAlign = 'center'
-        ctx.fillText(node.label.substring(0, 15), x, y + 18 / zoom)
+        ctx.lineWidth = 3 / zoom
+        ctx.strokeStyle = haloColor
+        ctx.strokeText(displayLabel, x, y + 18 / zoom)
+        ctx.fillStyle = labelColor
+        ctx.fillText(displayLabel, x, y + 18 / zoom)
+        ctx.restore()
       }
 
       // 悬停/选中标签
       if ((isHovered || isSelected) && showLabels) {
         const tags = node.tags || []
         if (tags.length > 0) {
-          ctx.fillStyle = '#94a3b8'
-          ctx.font = `${Math.max(8 / zoom, 4)}px Arial`
-          ctx.fillText(tags.slice(0, 3).join(', '), x, y + 30 / zoom)
+          const subText = tags.slice(0, 3).join(', ')
+          ctx.save()
+          ctx.font = `${Math.max(8 / zoom, 4)}px sans-serif`
+          ctx.textAlign = 'center'
+          ctx.lineWidth = 2.5 / zoom
+          ctx.strokeStyle = haloColor
+          ctx.strokeText(subText, x, y + 30 / zoom)
+          ctx.fillStyle = subLabelColor
+          ctx.fillText(subText, x, y + 30 / zoom)
+          ctx.restore()
         }
       }
       ctx.globalAlpha = 1
@@ -470,6 +494,7 @@ const EnhancedGraphView: React.FC<EnhancedGraphViewProps> = ({
     height,
     showLabels,
     relatedNodeIds,
+    isDark,
   ])
 
   // 鼠标事件处理
@@ -804,8 +829,9 @@ const EnhancedGraphView: React.FC<EnhancedGraphViewProps> = ({
             width={width}
             height={height}
             style={{
-              border: '1px solid #ddd',
+              border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
               borderRadius: 4,
+              backgroundColor: isDark ? '#090d16' : '#f8fafc',
               cursor,
             }}
             onMouseMove={handleMouseMove}

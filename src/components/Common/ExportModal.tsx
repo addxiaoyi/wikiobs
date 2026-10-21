@@ -22,7 +22,7 @@ import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemText from '@mui/material/ListItemText'
 import gsap from 'gsap'
-import { X } from 'lucide-react'
+import { X, Copy, Check } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n'
 import { staggerFadeInUp, fadeInScale } from '@/lib/gsap-animations'
 
@@ -73,6 +73,19 @@ const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose }) => {
   const [preview, setPreview] = useState<NoteMetadata[] | null>(null)
   const [loadingPreview, setLoadingPreview] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set())
+  const [copied, setCopied] = useState(false)
+
+  const handleCopyPath = async () => {
+    if (result?.outputPath) {
+      try {
+        await navigator.clipboard.writeText(result.outputPath)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      } catch {
+        // ignore clipboard error
+      }
+    }
+  }
 
   const contentRef = useRef<HTMLDivElement>(null)
   const resultRef = useRef<HTMLDivElement>(null)
@@ -452,9 +465,20 @@ const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose }) => {
                 {result.success ? t('export.exportSuccess') : t('export.exportFailed')}
               </Typography>
               {result.outputPath && (
-                <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                  {result.outputPath}
-                </Typography>
+                <Box display="flex" alignItems="center" gap={1} mt={0.5}>
+                  <Typography variant="body2" sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                    {result.outputPath}
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    onClick={handleCopyPath}
+                    aria-label={t('vault.copyPath')}
+                    title={t('vault.copyPath')}
+                    sx={{ p: 0.5 }}
+                  >
+                    {copied ? <Check size={14} color="#10b981" /> : <Copy size={14} />}
+                  </IconButton>
+                </Box>
               )}
               {result.filesExported !== undefined && (
                 <Typography variant="body2">
