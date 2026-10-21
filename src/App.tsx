@@ -103,13 +103,15 @@ const App: React.FC = () => {
       try {
         if (await window.electronStore.getAnalyticsMode()) {
           const posthogKey = (typeof process !== 'undefined' && process.env ? process.env.VITE_POSTHOG_KEY : '') || ''
-          posthog.init(posthogKey, {
-            api_host: 'https://us.i.posthog.com',
-            autocapture: false,
-          })
-          posthog.register({
-            reorAppVersion: await window.electronUtils.getReorAppVersion(),
-          })
+          if (posthogKey) {
+            posthog.init(posthogKey, {
+              api_host: 'https://us.i.posthog.com',
+              autocapture: false,
+            })
+            posthog.register({
+              reorAppVersion: await window.electronUtils.getReorAppVersion(),
+            })
+          }
         }
       } catch (error) {
         toast.error(error instanceof Error ? error.message : String(error))
