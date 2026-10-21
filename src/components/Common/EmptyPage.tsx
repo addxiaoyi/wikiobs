@@ -57,7 +57,7 @@ const EmptyPage: React.FC = () => {
         <div className="empty-icon-shell mb-5" data-animation="empty-icon">
           <File color="#2dd4bf" size={72} strokeWidth={1.5} />
         </div>
-        <SizableText className="mb-0 text-lg font-medium" data-animation="empty-text" color="#e2e8f0" size="$6">
+        <SizableText className="mb-0 text-lg font-medium" data-animation="empty-text" color="$foreground" size="$6">
           {t('empty.noFile')}
         </SizableText>
         <SizableText
@@ -70,14 +70,14 @@ const EmptyPage: React.FC = () => {
         </SizableText>
         <YStack className="flex-row gap-2" data-animation="empty-buttons" paddingTop={24}>
           <button
-            className="cursor-pointer rounded-md border-0 bg-teal-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-teal-600"
+            className="cursor-pointer rounded-md border-0 bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             onClick={() => createUntitledNote()}
             type="button"
           >
             {t('empty.createFile')}
           </button>
           <button
-            className="cursor-pointer rounded-md border border-solid border-border bg-transparent px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="cursor-pointer rounded-md border border-solid border-border bg-transparent px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             onClick={() => setIsNewDirectoryModalOpen(true)}
             type="button"
           >

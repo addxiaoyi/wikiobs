@@ -51,8 +51,8 @@ const DefaultLLMSelector: React.FC<DefaultLLMSelectorProps> = ({ llmConfigs, def
 
   return (
     <Select onValueChange={handleDefaultModelChange} value={selectedLLM}>
-      <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="选择默认大模型" />
+      <SelectTrigger className="w-[180px]" aria-label={t('llm.default')}>
+        <SelectValue placeholder={t('llm.defaultPlaceholder')} />
       </SelectTrigger>
       <SelectContent>
         {llmConfigs.map((config) => {

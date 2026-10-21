@@ -47,7 +47,7 @@ const ChunkSizeSettings: React.FC<ChunkSizeSettingsProps> = ({ children }) => {
       {chunkSize && (
         <div>
           <Select onValueChange={handleChangeOnChunkSizeSelect} value={chunkSize.toString()}>
-            <SelectTrigger>
+            <SelectTrigger aria-label={t('embedding.chunkSize')}>
               <SelectValue placeholder={t('embedding.chunkSize')} />
             </SelectTrigger>
             <SelectContent>

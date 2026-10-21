@@ -65,11 +65,11 @@ const SimilarEntriesComponent: React.FC<SimilarEntriesComponentProps> = ({
       <Stack flex={1}>
         <YStack>
           {/* Header */}
-          <XStack alignItems="center" paddingHorizontal="$4" paddingVertical="$2" backgroundColor="$neutral800">
+          <XStack alignItems="center" paddingHorizontal="$4" paddingVertical="$2" borderBottomWidth={1} borderColor="$borderColor" backgroundColor="$background">
             <XStack flex={1} />
             <XStack alignItems="center" justifyContent="center">
-              <PiGraph size={16} color="$gray300" />
-              <Text marginLeft="$1" fontSize="$2" color="$gray300">
+              <PiGraph size={16} />
+              <Text marginLeft="$1" fontSize="$2" fontWeight="500" color="$foreground">
                 {titleText}
               </Text>
             </XStack>
@@ -86,6 +86,7 @@ const SimilarEntriesComponent: React.FC<SimilarEntriesComponentProps> = ({
                   borderWidth={0}
                   padding={0}
                   aria-label={t('semantic.refresh')}
+                  hoverStyle={{ backgroundColor: '$backgroundHover' }}
                 >
                   {isLoadingSimilarEntries ? <Spinner size="small" /> : <RefreshCw size={16} />}
                 </Button>

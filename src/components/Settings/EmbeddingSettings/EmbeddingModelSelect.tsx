@@ -19,7 +19,7 @@ const EmbeddingModelSelect: React.FC<EmbeddingModelSelectProps> = ({
   return (
     <div className="w-[150px]">
       <Select value={selectedModel} onValueChange={onModelChange}>
-        <SelectTrigger>
+        <SelectTrigger aria-label={t('settings.embedding')}>
           <SelectValue placeholder={t('embedding.title')} />
         </SelectTrigger>
         <SelectContent position="popper" align="center" className="max-h-[300px] max-w-[250px] overflow-y-auto">

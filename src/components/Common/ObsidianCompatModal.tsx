@@ -249,6 +249,7 @@ const ObsidianCompatModal: React.FC<ObsidianCompatModalProps> = ({ isOpen, onClo
                 value={outputDir}
                 onChange={(e) => setOutputDir(e.target.value)}
                 placeholder={t('obsidianCompat.selectOutputPlaceholder')}
+                inputProps={{ 'aria-label': t('obsidianCompat.outputDir') }}
               />
               <Button
                 variant="outlined"
@@ -271,6 +272,7 @@ const ObsidianCompatModal: React.FC<ObsidianCompatModalProps> = ({ isOpen, onClo
                 value={sourceDir}
                 onChange={(e) => setSourceDir(e.target.value)}
                 placeholder={t('obsidianCompat.selectSourcePlaceholder')}
+                inputProps={{ 'aria-label': t('obsidianCompat.sourceDir') }}
               />
               <Button
                 variant="outlined"

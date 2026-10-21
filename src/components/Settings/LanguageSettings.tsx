@@ -13,7 +13,7 @@ const LanguageSettings: React.FC = () => {
         description={t('language.interfaceDesc')}
         control={
           <Select value={locale} onValueChange={(value) => setLocale(value as 'en' | 'zh-CN')}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px]" aria-label={t('language.interface')}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

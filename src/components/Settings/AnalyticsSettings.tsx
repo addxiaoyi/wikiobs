@@ -42,7 +42,7 @@ const AnalyticsSettings: React.FC<AnalyticsSettingsProps> = () => {
         <XStack>
           <XStack justifyContent="space-between" alignItems="center" py="$3" width="100%">
             <SizableText size="$2">{t('analytics.desc')}</SizableText>
-            <Switch checked={isAnalyticsEnabled} onChange={handleSave} inputProps={{ 'aria-label': 'controlled' }} />
+            <Switch checked={isAnalyticsEnabled} onChange={handleSave} inputProps={{ 'aria-label': t('settings.analytics') }} />
           </XStack>
         </XStack>
       </YStack>
