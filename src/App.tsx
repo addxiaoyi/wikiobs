@@ -102,7 +102,8 @@ const App: React.FC = () => {
     const initialisePosthog = async () => {
       try {
         if (await window.electronStore.getAnalyticsMode()) {
-          posthog.init(import.meta.env.VITE_POSTHOG_KEY || '', {
+          const posthogKey = (typeof process !== 'undefined' && process.env ? process.env.VITE_POSTHOG_KEY : '') || ''
+          posthog.init(posthogKey, {
             api_host: 'https://us.i.posthog.com',
             autocapture: false,
           })

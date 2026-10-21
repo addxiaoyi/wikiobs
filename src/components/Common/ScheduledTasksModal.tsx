@@ -385,7 +385,7 @@ const ScheduledTasksModal: React.FC<ScheduledTasksModalProps> = ({ isOpen, onClo
                               size="small"
                               checked={task.enabled}
                               onChange={() => handleToggle(task)}
-                              inputProps={{ 'aria-label': `${t('scheduled.enableTask') || t('scheduled.enabled')}: ${task.name}` }}
+                              inputProps={{ 'aria-label': `${t('scheduled.enabled')}: ${task.name}` }}
                             />
                           }
                           label=""

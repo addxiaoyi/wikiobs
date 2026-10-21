@@ -174,14 +174,14 @@ const FileItemRows: React.FC<ListChildComponentProps> = ({ index, style, data })
                   )}
                 </span>
               )}
-              <Text
-                color={isSelected ? '#14b8a6' : '$gray11'}
-                numberOfLines={1}
-                className="min-w-0 flex-1 truncate"
-                title={file.name}
-              >
-                {isDirectory ? file.name : removeFileExtension(file.name)}
-              </Text>
+              <span title={file.name} className="min-w-0 flex-1 truncate">
+                <Text
+                  color={isSelected ? '#14b8a6' : '$gray11'}
+                  numberOfLines={1}
+                >
+                  {isDirectory ? file.name : removeFileExtension(file.name)}
+                </Text>
+              </span>
             </XStack>
             <NewDirectoryComponent
               isOpen={isNewDirectoryModalOpen}

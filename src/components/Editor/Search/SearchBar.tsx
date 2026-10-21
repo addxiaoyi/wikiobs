@@ -177,7 +177,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ editor }) => {
               goToSelection()
             }}
           >
-            <ChevronUp size={16} className="text-foreground hover:text-primary transition-colors cursor-pointer" />
+            <ChevronUp size={16} color="white" />
           </StyledIconButton>
           <StyledIconButton
             aria-label={t('search.nextResult')}
@@ -186,15 +186,15 @@ const SearchBar: React.FC<SearchBarProps> = ({ editor }) => {
               goToSelection()
             }}
           >
-            <ChevronDown size={16} className="text-foreground hover:text-primary transition-colors cursor-pointer" />
+            <ChevronDown size={16} color="white" />
           </StyledIconButton>
           {(showReplace || searchLocation.resultsExist) && (
             <StyledIconButton aria-label={t('search.toggleReplace')} onPress={toggleReplace}>
-              <Replace size={15} className="text-foreground hover:text-primary transition-colors cursor-pointer" />
+              <Replace size={15} color="white" />
             </StyledIconButton>
           )}
           <StyledIconButton aria-label={t('search.close')} onPress={toggleSearch}>
-            <X size={16} className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer" />
+            <X size={16} color="white" />
           </StyledIconButton>
         </XStack>
       </XStack>
