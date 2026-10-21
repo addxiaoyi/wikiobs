@@ -1,7 +1,7 @@
 import { alpha, createTheme } from '@mui/material/styles'
 
-const ACCENT = '#2dd4bf'
-const SURFACE = '#1d2129'
+const ACCENT = '#ffffff'
+const SURFACE = '#111319'
 
 const restoreDialogFocus = (dialog: HTMLElement): void => {
   const targetDialog =
@@ -20,14 +20,14 @@ export const appMuiTheme = createTheme({
     mode: 'dark',
     primary: { main: ACCENT },
     background: {
-      default: '#111318',
+      default: '#080a0f',
       paper: SURFACE,
     },
     text: {
-      primary: '#f1f5f9',
+      primary: '#f8fafc',
       secondary: '#94a3b8',
     },
-    divider: alpha('#94a3b8', 0.18),
+    divider: 'rgba(255, 255, 255, 0.08)',
   },
   shape: { borderRadius: 10 },
   typography: {
@@ -45,7 +45,7 @@ export const appMuiTheme = createTheme({
           alignItems: 'flex-start',
           paddingTop: 8,
           paddingBottom: 8,
-          '@media (min-width:600px)': { paddingTop: '10vh' },
+          '@media (min-width:600px)': { paddingTop: '8vh' },
         },
         paper: {
           display: 'flex',
@@ -53,18 +53,22 @@ export const appMuiTheme = createTheme({
           maxHeight: 'calc(100vh - 32px)',
           margin: 8,
           overflow: 'hidden',
-          border: `1px solid ${alpha('#94a3b8', 0.16)}`,
+          backgroundColor: 'rgba(15, 17, 23, 0.94)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          border: '1px solid rgba(255, 255, 255, 0.09)',
           backgroundImage: 'none',
-          boxShadow: '0 24px 72px rgba(0, 0, 0, 0.48)',
-          '@media (min-width:600px)': { maxHeight: 'min(80vh, 760px)' },
+          boxShadow: '0 32px 80px -12px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+          '@media (min-width:600px)': { maxHeight: 'min(82vh, 780px)' },
         },
       },
     },
     MuiBackdrop: {
       styleOverrides: {
         root: {
-          backgroundColor: 'rgba(8, 10, 14, 0.72)',
-          backdropFilter: 'blur(3px)',
+          backgroundColor: 'rgba(4, 5, 8, 0.75)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
         },
       },
     },
@@ -72,10 +76,11 @@ export const appMuiTheme = createTheme({
       styleOverrides: {
         root: {
           flex: '0 0 auto',
-          padding: '18px 22px 14px',
-          borderBottom: `1px solid ${alpha('#94a3b8', 0.14)}`,
+          padding: '16px 22px 14px',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
           fontSize: '1.05rem',
           fontWeight: 650,
+          letterSpacing: '-0.01em',
         },
       },
     },
@@ -95,40 +100,72 @@ export const appMuiTheme = createTheme({
       styleOverrides: {
         root: {
           flex: '0 0 auto',
-          minHeight: 64,
+          minHeight: 58,
           padding: '12px 20px',
           gap: 8,
-          borderTop: `1px solid ${alpha('#94a3b8', 0.14)}`,
+          borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+          backgroundColor: 'rgba(12, 14, 19, 0.65)',
         },
       },
     },
     MuiButton: {
       defaultProps: { disableElevation: true },
       styleOverrides: {
-        root: { minHeight: 36, borderRadius: 8, paddingInline: 14 },
+        root: {
+          minHeight: 34,
+          borderRadius: 7,
+          paddingInline: 14,
+          transition: 'all 75ms ease',
+        },
         containedPrimary: {
-          color: '#071b18',
-          '&:hover': { backgroundColor: '#5eead4' },
+          backgroundColor: '#ffffff',
+          color: '#080a0f',
+          fontWeight: 600,
+          '&:hover': {
+            backgroundColor: '#f1f5f9',
+            boxShadow: '0 0 16px rgba(255, 255, 255, 0.15)',
+          },
+        },
+        outlined: {
+          borderColor: 'rgba(255, 255, 255, 0.12)',
+          color: '#f8fafc',
+          '&:hover': {
+            borderColor: 'rgba(255, 255, 255, 0.28)',
+            backgroundColor: 'rgba(255, 255, 255, 0.06)',
+          },
         },
       },
     },
     MuiInputBase: {
-      styleOverrides: { root: { backgroundColor: alpha('#0f1115', 0.48) } },
+      styleOverrides: {
+        root: {
+          backgroundColor: 'rgba(10, 12, 16, 0.6)',
+          borderColor: 'rgba(255, 255, 255, 0.08)',
+          borderRadius: 6,
+        },
+      },
     },
     MuiPaper: {
-      styleOverrides: { outlined: { borderColor: alpha('#94a3b8', 0.2) } },
+      styleOverrides: {
+        outlined: { borderColor: 'rgba(255, 255, 255, 0.08)' },
+      },
     },
     MuiTableCell: {
       styleOverrides: {
-        head: { color: '#cbd5e1', fontWeight: 650, backgroundColor: '#242830' },
-        root: { borderColor: alpha('#94a3b8', 0.14) },
+        head: { color: '#f1f5f9', fontWeight: 650, backgroundColor: 'rgba(18, 21, 28, 0.85)' },
+        root: { borderColor: 'rgba(255, 255, 255, 0.08)' },
       },
     },
     MuiAlert: {
-      styleOverrides: { root: { borderRadius: 8 } },
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+        },
+      },
     },
     MuiLinearProgress: {
-      styleOverrides: { root: { height: 6, borderRadius: 999 } },
+      styleOverrides: { root: { height: 4, borderRadius: 999 } },
     },
   },
 })

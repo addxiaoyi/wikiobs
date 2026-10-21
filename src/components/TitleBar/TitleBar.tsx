@@ -29,7 +29,7 @@ const TitleBar: React.FC<TitleBarProps> = ({ activePanel, togglePanel }) => {
   }, [])
 
   const iconBtn =
-    'titlebar-panel-button electron-no-drag flex size-7 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent text-muted-foreground transition-colors hover:bg-accent hover:text-foreground'
+    'titlebar-panel-button electron-no-drag flex size-7 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent text-muted-foreground transition-all duration-75 hover:bg-white/[0.08] hover:text-white'
 
   return (
     <XStack

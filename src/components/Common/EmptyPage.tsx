@@ -55,29 +55,29 @@ const EmptyPage: React.FC = () => {
     <div ref={containerRef} className="empty-page flex size-full min-w-0 flex-col items-center justify-center px-6">
       <div className="flex max-w-[360px] flex-col items-center text-center">
         <div className="empty-icon-shell mb-5" data-animation="empty-icon">
-          <File color="#2dd4bf" size={72} strokeWidth={1.5} />
+          <File color="#ffffff" size={56} strokeWidth={1.5} />
         </div>
-        <SizableText className="mb-0 text-lg font-medium" data-animation="empty-text" color="$foreground" size="$6">
+        <SizableText className="mb-0 text-lg font-semibold tracking-tight" data-animation="empty-text" color="$foreground" size="$6">
           {t('empty.noFile')}
         </SizableText>
         <SizableText
-          className="max-w-[300px] text-center"
+          className="max-w-[300px] text-center text-sm leading-relaxed"
           data-animation="empty-subtext"
           color="$gray10"
           paddingTop={8}
         >
           {t('empty.openFile')}
         </SizableText>
-        <YStack className="flex-row gap-2" data-animation="empty-buttons" paddingTop={24}>
+        <YStack className="flex-row gap-2.5" data-animation="empty-buttons" paddingTop={24}>
           <button
-            className="cursor-pointer rounded-md border-0 bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="cursor-pointer rounded-lg border-0 bg-white px-4 py-2 text-sm font-semibold text-neutral-950 shadow-sm transition-all duration-75 hover:bg-neutral-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
             onClick={() => createUntitledNote()}
             type="button"
           >
             {t('empty.createFile')}
           </button>
           <button
-            className="cursor-pointer rounded-md border border-solid border-border bg-transparent px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="cursor-pointer rounded-lg border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-medium text-neutral-200 backdrop-blur-sm transition-all duration-75 hover:bg-white/10 hover:text-white active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
             onClick={() => setIsNewDirectoryModalOpen(true)}
             type="button"
           >

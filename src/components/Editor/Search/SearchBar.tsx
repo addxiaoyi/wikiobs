@@ -137,16 +137,16 @@ const SearchBar: React.FC<SearchBarProps> = ({ editor }) => {
   return (
     <div
       ref={searchBarRef}
-      className="editor-search-popover fixed right-4 top-10 animate-shift-in-down rounded-[12px] max-w-[calc(100vw-32px)] border border-border bg-popover text-popover-foreground shadow-2xl backdrop-blur-md"
+      className="editor-search-popover fixed right-4 top-11 max-w-[calc(100vw-32px)] rounded-xl border border-white/10 bg-[#0f1117]/90 text-neutral-100 shadow-2xl backdrop-blur-xl"
       style={{
         zIndex: 1000,
-        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2)',
+        boxShadow: '0 20px 48px -10px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.06)',
       }}
     >
       <XStack
         alignItems="center"
         width="100%"
-        className={`rounded-t-[11px] ${!showReplace ? 'rounded-b-[11px]' : ''} bg-background/95 p-2`}
+        className={`rounded-t-[10px] ${!showReplace ? 'rounded-b-[10px]' : ''} bg-transparent p-2`}
       >
         <div className="relative flex-1">
           <input
@@ -156,10 +156,10 @@ const SearchBar: React.FC<SearchBarProps> = ({ editor }) => {
             aria-label={t('search.find')}
             // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
-            className="w-full bg-transparent p-1.5 pr-20 text-foreground placeholder:text-muted-foreground focus:outline-none text-sm"
+            className="w-full bg-transparent p-1.5 pr-20 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
           />
           <div
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground select-none"
+            className="absolute right-3 top-1/2 -translate-y-1/2 select-none text-xs font-medium text-muted-foreground"
             role="status"
             aria-live="polite"
           >
@@ -167,7 +167,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ editor }) => {
           </div>
         </div>
 
-        <div className="mx-2 h-5 w-px bg-border" />
+        <div className="mx-2 h-5 w-px bg-white/10" />
 
         <XStack alignItems="center" gap={6}>
           <StyledIconButton
@@ -199,20 +199,20 @@ const SearchBar: React.FC<SearchBarProps> = ({ editor }) => {
         </XStack>
       </XStack>
       {showReplace && (
-        <YStack className="animate-shift-in-down border-t border-border">
-          <YStack alignItems="center" gap={3} className="rounded-b-[11px] bg-background/95 p-2">
+        <YStack className="border-t border-white/10">
+          <YStack alignItems="center" gap={3} className="rounded-b-[10px] bg-transparent p-2">
             <input
               value={replaceTerm}
               onChange={(event) => handleReplaceChange(event.target.value)}
               placeholder={t('search.replace')}
               aria-label={t('search.replace')}
-              className="w-full bg-transparent p-1.5 pr-16 text-foreground placeholder:text-muted-foreground focus:outline-none text-sm"
+              className="w-full bg-transparent p-1.5 pr-16 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
             />
             <div className="flex w-full justify-end gap-1.5 pt-1">
               <Button
-                className="h-8 min-w-0 flex-1 cursor-pointer border border-border bg-secondary/50 px-2 py-0 text-center text-xs font-normal text-foreground hover:bg-accent"
+                className="h-7 min-w-0 flex-1 cursor-pointer rounded-md border border-white/10 bg-white/[0.06] px-2 py-0 text-center text-xs font-normal text-neutral-300 transition-all duration-75 hover:bg-white/[0.12] hover:text-white"
                 onClick={() => {
                   if (!editor) return
                   editor.commands.replaceAll()
@@ -223,7 +223,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ editor }) => {
               </Button>
 
               <Button
-                className="h-8 min-w-0 flex-1 cursor-pointer border-none bg-primary px-2 py-0 text-center text-xs font-medium text-primary-foreground hover:bg-primary/90"
+                className="h-7 min-w-0 flex-1 cursor-pointer rounded-md border-0 bg-white px-2 py-0 text-center text-xs font-semibold text-neutral-950 transition-all duration-75 hover:bg-neutral-200 active:scale-[0.98]"
                 onClick={() => {
                   if (!editor) return
                   editor.commands.replace()

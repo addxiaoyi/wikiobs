@@ -141,7 +141,7 @@ const NavigationButtons: React.FC = () => {
         title={t('titlebar.goBack') || t('navigation.back')}
         type="button"
         aria-label={t('navigation.back')}
-        className="rounded p-1 transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary disabled:opacity-40"
+        className="rounded-md p-1 transition-all duration-75 hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/40 disabled:opacity-30 disabled:hover:bg-transparent"
       >
         <IoMdArrowRoundBack title={t('navigation.back')} />
       </button>
@@ -161,7 +161,7 @@ const NavigationButtons: React.FC = () => {
         title={t('titlebar.goForward') || t('navigation.forward')}
         type="button"
         aria-label={t('navigation.forward')}
-        className="rounded p-1 transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary disabled:opacity-40"
+        className="rounded-md p-1 transition-all duration-75 hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/40 disabled:opacity-30 disabled:hover:bg-transparent"
       >
         <IoMdArrowRoundForward title={t('navigation.forward')} />
       </button>

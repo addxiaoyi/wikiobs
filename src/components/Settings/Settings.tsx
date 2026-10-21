@@ -106,15 +106,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             <ScrollView height="min(80vh, 760px)" maxHeight="calc(100vh - 32px)">
               <XStack data-settings-shell="true" minHeight="min(80vh, 760px)" width="100%">
                 <YStack
-                  backgroundColor="$gray12"
+                  backgroundColor="$background"
                   width="180px"
                   minWidth="180px"
                   gap="$1"
-                  flex={1}
                   data-settings-nav="true"
                   role="tablist"
                   aria-label={t('settings.title')}
-                  className="flex flex-col rounded-l-lg border-y-0 border-l-0 border-r-[0.1px] border-solid border-gray-700 p-2 text-white"
+                  className="flex flex-col rounded-l-lg border-y-0 border-l-0 border-r border-solid border-white/10 p-2 text-white"
                 >
                   {settingsTabs.map(({ id, label, icon: Icon }) => {
                     const isActive = activeTab === id

@@ -13,8 +13,8 @@ const DialogOverlay = styled(DialogPrimitive.Overlay, {
   position: 'fixed',
   inset: 0,
   zIndex: 50,
-  backgroundColor: 'rgba(8, 10, 14, 0.72)',
-  backdropFilter: 'blur(3px)',
+  backgroundColor: 'rgba(5, 6, 9, 0.78)',
+  backdropFilter: 'blur(10px)',
   variants: {
     open: {
       true: {
@@ -29,11 +29,12 @@ const DialogOverlay = styled(DialogPrimitive.Overlay, {
 
 const DialogContent = styled(DialogPrimitive.Content, {
   name: 'DialogContent',
-  backgroundColor: '$background',
+  backgroundColor: 'rgba(14, 16, 22, 0.94)',
+  backdropFilter: 'blur(24px)',
   borderRadius: '$4',
   borderWidth: 1,
   borderStyle: 'solid',
-  borderColor: '$borderColor',
+  borderColor: 'rgba(255, 255, 255, 0.09)',
   // @ts-ignore
   position: 'fixed',
   left: '50%',
@@ -46,13 +47,13 @@ const DialogContent = styled(DialogPrimitive.Content, {
   overflowY: 'auto',
   overscrollBehavior: 'contain',
   shadowColor: '#000',
-  shadowOpacity: 0.48,
-  shadowRadius: 36,
+  shadowOpacity: 0.65,
+  shadowRadius: 48,
   transform: 'translateX(-50%)',
   media: {
     sm: {
-      top: '10vh',
-      maxHeight: 'calc(90vh - 16px)',
+      top: '8vh',
+      maxHeight: 'calc(84vh - 16px)',
     },
   },
   variants: {

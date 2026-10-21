@@ -30,9 +30,9 @@ export const ChatItem: React.FC<ChatItemProps> = ({ chatMetadata, onRequestDelet
 
   const isSelected = chatMetadata.id === currentChat?.id
   const itemClasses = `
-    flex items-center cursor-pointer py-2 px-3 rounded-md font-sans text-xs leading-relaxed
-    transition-colors duration-150 ease-in-out
-    ${chatMetadata.id === currentChat?.id ? 'text-primary font-medium bg-accent/60' : 'text-foreground/80 hover:text-foreground'}
+    flex items-center cursor-pointer py-1.5 px-2.5 rounded-lg font-sans text-xs
+    transition-all duration-75
+    ${isSelected ? 'text-white font-medium bg-white/[0.12] shadow-sm' : 'text-neutral-400 hover:text-white hover:bg-white/[0.05]'}
   `
 
   return (
@@ -103,18 +103,18 @@ export const ChatSidebar: React.FC = () => {
     <YStack backgroundColor="$gray3" className="flex h-full flex-col overflow-y-auto px-2 pb-4 pt-2.5">
       <div className="flex h-full flex-col gap-2">
         <div className="flex min-h-0 flex-1 flex-col gap-4">
-          <div className="mb-3 flex flex-col gap-4">
+          <div className="mb-2 flex flex-col gap-3">
             <button
               aria-label={t('chat.startNew')}
-              className="chat-new-button flex cursor-pointer items-center justify-center gap-2 rounded-md 
-                      border-0 bg-primary py-2.5 text-primary-foreground
-                      shadow-md transition-colors duration-200 hover:bg-primary/90
-                      hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="chat-new-button flex cursor-pointer items-center justify-center gap-2 rounded-lg 
+                      border border-white/10 bg-white/[0.08] py-2 text-white shadow-sm
+                      transition-all duration-75 hover:bg-white/[0.14] hover:border-white/20 active:scale-[0.99]
+                      focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/40"
               type="button"
               onClick={() => openNewChat(undefined)}
             >
-              <RiChatNewFill className="text-xl" />
-              <span className="text-xs font-bold">{t('chat.startNew')}</span>
+              <RiChatNewFill className="text-base" />
+              <span className="text-xs font-semibold tracking-wide">{t('chat.startNew')}</span>
             </button>
           </div>
 

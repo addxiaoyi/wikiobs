@@ -54,7 +54,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
   return (
     <div className="flex w-full">
-      <div className="z-50 flex w-full flex-col overflow-hidden rounded-lg border border-border bg-background shadow-sm">
+      <div className="z-50 flex w-full flex-col overflow-hidden rounded-xl border border-white/10 bg-[#0e1017]/80 shadow-xl backdrop-blur-md transition-all duration-75 focus-within:border-white/25 focus-within:ring-1 focus-within:ring-white/20">
         <TextArea
           value={userTextFieldInput}
           onCompositionStart={() => {
@@ -79,24 +79,19 @@ const ChatInput: React.FC<ChatInputProps> = ({
           w="100%"
           resize="none"
           bg="transparent"
-          p="$4"
+          p="$3.5"
           color="$foreground"
-          borderWidth={2}
-          borderColor="$border"
-          focusStyle={{
-            borderColor: '$ring',
-            borderWidth: 2,
-          }}
+          borderWidth={0}
           fontSize={12}
         />
-        <div className="mx-auto h-px w-[96%] bg-background/20" />
-        <div className="flex h-10 flex-col items-center justify-between gap-2  py-2 md:flex-row md:gap-4">
-          <div className="flex flex-col items-center justify-between rounded-md border-0 py-2 md:flex-row">
+        <div className="mx-auto h-px w-[96%] bg-white/[0.06]" />
+        <div className="flex h-11 flex-col items-center justify-between gap-2 px-3 py-2 md:flex-row md:gap-4">
+          <div className="flex flex-col items-center justify-between rounded-md border-0 md:flex-row">
             <LLMSelectOrButton selectedLLM={selectedLLM} setSelectedLLM={setSelectedLLM} />
           </div>
 
-          <div className="flex">
-            <div className="mr-[-8px] mt-[8px] flex flex-col items-center">
+          <div className="flex items-center gap-2">
+            <div className="mr-1 flex flex-col items-center">
               <ToggleButton
                 hybrid={!!agentConfig?.dbSearchFilters}
                 onPress={() => handleDbSearchToggle(!agentConfig?.dbSearchFilters)}
@@ -110,12 +105,12 @@ const ChatInput: React.FC<ChatInputProps> = ({
             </div>
 
             <Button
-              className="flex items-center justify-between bg-transparent text-[10px] text-primary hover:bg-transparent hover:text-accent-foreground"
+              className="flex size-7 items-center justify-center rounded-lg border-0 bg-white p-0 text-black shadow-sm transition-all duration-75 hover:bg-neutral-200 active:scale-[0.95] disabled:opacity-25"
               onClick={handleSubmitNewMessage}
               disabled={loadingState !== 'idle'}
               aria-label={t('chat.send')}
             >
-              <PiPaperPlaneRight className="size-4" color={state === 'light' ? 'black' : 'white'} />
+              <PiPaperPlaneRight className="size-3.5" color="#0b0d11" />
             </Button>
           </div>
         </div>

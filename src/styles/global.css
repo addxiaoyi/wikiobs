@@ -3,18 +3,18 @@
 @tailwind utilities;
 
 :root {
-  --bg-000: 220 13% 11%;
-  --gen-100: 210 17% 92%;
-  --surface-0: #111318;
-  --surface-1: #171a20;
-  --surface-2: #1d2129;
-  --surface-3: #252a33;
-  --line: rgba(148, 163, 184, 0.16);
-  --line-strong: rgba(148, 163, 184, 0.25);
-  --ink: #e2e8f0;
+  --bg-000: 240 10% 4%;
+  --gen-100: 0 0% 98%;
+  --surface-0: #08090c;
+  --surface-1: #0e1015;
+  --surface-2: #14171f;
+  --surface-3: #1b1f2a;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+  --ink: #f8fafc;
   --ink-muted: #94a3b8;
-  --accent: #2dd4bf;
-  --accent-soft: rgba(45, 212, 191, 0.12);
+  --accent: #ffffff;
+  --accent-soft: rgba(255, 255, 255, 0.08);
 }
 
 html,
@@ -29,26 +29,35 @@ body {
 * {
   box-sizing: border-box;
   border: none;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 ::selection {
-  background: rgba(45, 212, 191, 0.28);
-  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid rgba(255, 255, 255, 0.6);
   outline-offset: 2px;
 }
 
 a {
   cursor: pointer;
-  color: rgb(16, 214, 218);
+  color: #ffffff;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.35);
+  text-underline-offset: 3px;
+  transition: opacity 75ms ease, text-decoration-color 75ms ease;
+}
+
+a:hover {
+  text-decoration-color: #ffffff;
+  opacity: 0.9;
 }
 
 ::marker {
-  color: rgb(163 163 163);
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .electron-drag {
@@ -63,39 +72,55 @@ button {
   -webkit-app-region: no-drag;
 }
 
+.glass-panel {
+  background: rgba(13, 15, 20, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: rgba(20, 23, 32, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.4);
+}
+
 .empty-page {
-  background: radial-gradient(circle at 50% 38%, rgba(45, 212, 191, 0.045), transparent 30%), var(--surface-1);
+  background: radial-gradient(circle at 50% 36%, rgba(255, 255, 255, 0.035), transparent 45%), var(--surface-0);
 }
 
 .empty-icon-shell {
   display: grid;
-  width: 104px;
-  height: 104px;
+  width: 96px;
+  height: 96px;
   place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 24px;
-  background: linear-gradient(145deg, rgba(45, 212, 191, 0.1), rgba(255, 255, 255, 0.02));
-  color: var(--accent);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.01));
+  color: #ffffff;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 18px 40px rgba(0, 0, 0, 0.12);
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 16px 36px rgba(0, 0, 0, 0.35);
 }
 
 .empty-page button {
   min-height: 36px;
-  border-radius: 9px;
-  font-size: 0.8rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
   letter-spacing: 0.01em;
+  transition: all 75ms ease;
 }
 
 .empty-page button:first-child {
-  background: var(--accent) !important;
-  color: #06201d !important;
-  box-shadow: 0 6px 18px rgba(45, 212, 191, 0.16);
+  background: #ffffff !important;
+  color: #0b0d11 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 0 16px rgba(255, 255, 255, 0.12);
 }
 
 .empty-page button:first-child:hover {
-  background: #5eead4 !important;
+  background: #f1f5f9 !important;
   transform: translateY(-1px);
 }
 
@@ -105,66 +130,56 @@ button {
   height: 32px;
   align-items: center;
   justify-content: center;
-  margin-bottom: 14px;
-  border: 1px solid var(--line-strong);
-  border-radius: 10px;
-  color: var(--accent);
-  background: linear-gradient(145deg, var(--surface-2), var(--surface-0));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 8px 18px rgba(0, 0, 0, 0.16);
+  margin-bottom: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9px;
+  color: #ffffff;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .icons-sidebar-button {
   position: relative;
   background: transparent !important;
-  color: var(--ink-muted) !important;
-  border-radius: 10px !important;
-  transition:
-    background-color 160ms ease,
-    color 160ms ease,
-    transform 160ms ease,
-    box-shadow 160ms ease !important;
+  color: #8a8f98 !important;
+  border-radius: 8px !important;
+  transition: all 75ms ease !important;
 }
 
 .icons-sidebar-button:focus-visible,
 .titlebar-panel-button:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid rgba(255, 255, 255, 0.6);
   outline-offset: 2px;
 }
 
 .icons-sidebar-button:hover {
-  background: var(--surface-3) !important;
-  color: var(--ink) !important;
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #ffffff !important;
 }
 
 .icons-sidebar-button.is-active {
-  background: var(--accent-soft) !important;
-  color: var(--accent) !important;
-  box-shadow:
-    inset 2px 0 0 var(--accent),
-    0 5px 14px rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  box-shadow: inset 2px 0 0 #ffffff;
 }
 
 .settings-entry {
-  border: 1px solid rgba(45, 212, 191, 0.22) !important;
-  background: rgba(45, 212, 191, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
 }
 
 .settings-entry:hover,
 .settings-entry:focus-visible {
-  background: rgba(45, 212, 191, 0.16) !important;
-  border-color: rgba(45, 212, 191, 0.55) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
 }
 
 .icons-sidebar {
-  background: linear-gradient(
-    180deg,
-    var(--surface-0),
-    color-mix(in srgb, var(--surface-0) 88%, var(--surface-1))
-  ) !important;
-  border-right: 1px solid var(--line);
+  background: rgba(11, 13, 17, 0.88) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .file-sidebar-surface {
@@ -173,7 +188,7 @@ button {
 
 .file-sidebar-header {
   background: var(--surface-0);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .file-sidebar-content {
@@ -181,19 +196,23 @@ button {
 }
 
 .titlebar {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-1) 94%, white), var(--surface-1)) !important;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.025);
+  background: rgba(13, 15, 20, 0.8) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.02);
 }
 
 .titlebar-panel-button.is-active {
-  color: var(--accent) !important;
-  background: var(--accent-soft) !important;
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.12) !important;
 }
 
 .titlebar-title {
-  letter-spacing: 0.14em;
-  font-size: 0.75rem;
-  color: rgba(226, 232, 240, 0.86);
+  letter-spacing: 0.18em;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 600;
 }
 
 .editor-search-popover {
@@ -206,28 +225,29 @@ button {
   width: 100%;
   align-items: center;
   gap: 8px;
-  border-radius: 8px;
-  padding: 8px;
-  color: var(--ink-muted);
+  border-radius: 7px;
+  padding: 7px 10px;
+  color: #94a3b8;
   background: transparent;
   text-align: left;
   cursor: pointer;
+  transition: all 75ms ease;
 }
 
 .settings-tab:hover,
 .settings-tab:focus-visible {
-  color: var(--ink);
-  background: var(--surface-3);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .settings-tab.is-active {
-  color: var(--ink);
-  background: var(--accent-soft);
-  box-shadow: inset 2px 0 0 var(--accent);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 2px 0 0 #ffffff;
 }
 
 .settings-tab.is-active svg {
-  color: var(--accent);
+  color: #ffffff;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -246,23 +266,35 @@ input,
 textarea,
 [role='button'] {
   transition:
-    border-color 160ms ease,
-    background-color 160ms ease,
-    color 160ms ease,
-    box-shadow 160ms ease;
+    border-color 75ms ease,
+    background-color 75ms ease,
+    color 75ms ease,
+    box-shadow 75ms ease;
 }
 
 input,
 textarea,
 [data-radix-select-trigger] {
-  border-color: var(--line-strong) !important;
-  background: rgba(15, 17, 21, 0.58) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(15, 17, 23, 0.7) !important;
+  border-radius: 6px !important;
 }
 
 input:hover,
 textarea:hover,
 [data-radix-select-trigger]:hover {
-  border-color: rgba(45, 212, 191, 0.45) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+input:focus,
+textarea:focus,
+[data-radix-select-trigger]:focus {
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  outline: none !important;
+}
+
+.border-border {
+  border-color: var(--line) !important;
 }
 
 .border-border {
@@ -440,31 +472,31 @@ textarea:hover,
     --radius: 0.5rem;
   }
   .dark {
-    /* 统一的冷灰蓝深色梯度：侧栏最深 → 编辑区 → 交互层渐浅 */
-    --background: 220 13% 11%;
-    --foreground: 210 17% 92%;
-    --card: 220 13% 13%;
-    --card-foreground: 210 17% 92%;
-    --popover: 220 13% 13%;
-    --popover-foreground: 210 17% 92%;
-    --primary: 173 80% 40%;
-    --primary-foreground: 220 13% 11%;
-    --secondary: 220 14% 9%;
-    --secondary-foreground: 210 17% 92%;
-    --muted: 220 13% 16%;
-    --muted-foreground: 218 11% 58%;
-    --accent: 220 13% 18%;
-    --accent-foreground: 210 17% 92%;
-    --destructive: 0 62.8% 45%;
-    --destructive-foreground: 210 17% 92%;
-    --border: 220 13% 20%;
-    --input: 220 13% 20%;
-    --ring: 173 80% 40%;
-    --chart-1: 173 70% 45%;
-    --chart-2: 197 60% 50%;
-    --chart-3: 43 74% 60%;
-    --chart-4: 280 60% 62%;
-    --chart-5: 340 70% 58%;
+    /* Linear / Raycast 纯粹单色极简与纯石墨黑梯度 */
+    --background: 240 10% 4%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 6.5%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 7%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 10% 4%;
+    --secondary: 240 10% 8.5%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 8% 13%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 240 8% 15%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 8% 16%;
+    --input: 240 8% 16%;
+    --ring: 0 0% 100%;
+    --chart-1: 0 0% 98%;
+    --chart-2: 240 5% 75%;
+    --chart-3: 240 5% 55%;
+    --chart-4: 240 5% 40%;
+    --chart-5: 240 5% 25%;
   }
 }
 
