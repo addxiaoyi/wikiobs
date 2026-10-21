@@ -130,9 +130,10 @@ const FileItemRows: React.FC<ListChildComponentProps> = ({ index, style, data })
         <ContextMenuTrigger>
           <div
             draggable
-            role="button"
+            role="treeitem"
             tabIndex={0}
-            aria-label={`${file.name}${isDirectory ? ' directory' : ' file'}`}
+            aria-selected={isSelected}
+            aria-label={`${file.name} ${isDirectory ? t('file.directory') : t('file.file')}`}
             aria-current={isSelected ? 'page' : undefined}
             aria-expanded={isDirectory ? isExpanded : undefined}
             onKeyDown={(event) => {
@@ -173,7 +174,12 @@ const FileItemRows: React.FC<ListChildComponentProps> = ({ index, style, data })
                   )}
                 </span>
               )}
-              <Text color={isSelected ? '#14b8a6' : '$gray11'} numberOfLines={1} className="min-w-0 flex-1">
+              <Text
+                color={isSelected ? '#14b8a6' : '$gray11'}
+                numberOfLines={1}
+                className="min-w-0 flex-1 truncate"
+                title={file.name}
+              >
                 {isDirectory ? file.name : removeFileExtension(file.name)}
               </Text>
             </XStack>

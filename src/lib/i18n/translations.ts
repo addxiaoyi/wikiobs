@@ -21,6 +21,19 @@ export const translations = {
   'app.name': { en: 'WIKIOBS', 'zh-CN': 'WIKIOBS' },
   'app.tagline': { en: 'Your AI-powered second brain', 'zh-CN': '你的 AI 第二大脑' },
 
+  // ============ TitleBar & Navigation (extra) ============
+  'titlebar.syncing': { en: 'Syncing…', 'zh-CN': '正在同步…' },
+  'titlebar.synced': { en: 'Synced', 'zh-CN': '已同步' },
+  'titlebar.goBack': { en: 'Go back (Alt+Left)', 'zh-CN': '后退 (Alt+Left)' },
+  'titlebar.goForward': { en: 'Go forward (Alt+Right)', 'zh-CN': '前进 (Alt+Right)' },
+  'theme.switchToLight': { en: 'Switch to light theme', 'zh-CN': '切换为浅色模式' },
+  'theme.switchToDark': { en: 'Switch to dark theme', 'zh-CN': '切换为深色模式' },
+
+  // ============ Files & Sidebar ============
+  'file.directory': { en: 'directory', 'zh-CN': '目录' },
+  'file.file': { en: 'file', 'zh-CN': '文件' },
+  'files.emptyFolder': { en: '(Empty folder)', 'zh-CN': '（空文件夹）' },
+
   // ============ Settings / Settings Labels ============
   'settings.title': { en: 'Settings', 'zh-CN': '设置' },
   'settings.editor': { en: 'Editor', 'zh-CN': '编辑器' },

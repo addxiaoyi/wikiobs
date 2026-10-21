@@ -259,7 +259,10 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
                       height="$1"
                       width="100%"
                       borderRadius="$10"
-                      aria-label="搜索权重滑块"
+                      aria-label={t('search.balance')}
+                      aria-valuenow={Math.round(searchParams.vectorWeight * 100)}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
                     >
                       {/* Track is the comoonent to the right of the button, 
                         TractActive is the component to the left of the button. */}

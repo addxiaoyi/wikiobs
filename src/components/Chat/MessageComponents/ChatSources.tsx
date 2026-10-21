@@ -29,7 +29,7 @@ const ChatSources: React.FC<ChatSourcesProps> = ({ contextItems }) => {
 
   const getItemName = (item: FileInfoWithContent | DBEntry) => {
     if (isDBEntry(item)) {
-      return item.notepath.split('/').pop() || ''
+      return item.notepath.replace(/\\/g, '/').split('/').pop() || ''
     }
     return item.name
   }

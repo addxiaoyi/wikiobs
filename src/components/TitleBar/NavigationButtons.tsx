@@ -124,7 +124,7 @@ const NavigationButtons: React.FC = () => {
 
   return (
     // eslint-disable-next-line tailwindcss/no-custom-classname
-    <div className="history-container flex">
+    <div className="history-container flex items-center gap-1">
       <button
         id="back"
         ref={buttonRefBack}
@@ -133,13 +133,15 @@ const NavigationButtons: React.FC = () => {
         onMouseLeave={handleLongPressEnd}
         onClick={goBack}
         disabled={!canGoBack}
+        aria-disabled={!canGoBack}
         style={{
           color: navigationColor(canGoBack),
           cursor: !canGoBack ? 'default' : 'pointer',
         }}
-        title={t('navigation.back')}
+        title={t('titlebar.goBack') || t('navigation.back')}
         type="button"
-        aria-label="后退"
+        aria-label={t('navigation.back')}
+        className="rounded p-1 transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary disabled:opacity-40"
       >
         <IoMdArrowRoundBack title={t('navigation.back')} />
       </button>
@@ -151,13 +153,15 @@ const NavigationButtons: React.FC = () => {
         onMouseLeave={handleLongPressEnd}
         onClick={goForward}
         disabled={!canGoForward}
+        aria-disabled={!canGoForward}
         style={{
           color: navigationColor(canGoForward),
           cursor: !canGoForward ? 'default' : 'pointer',
         }}
-        title={t('navigation.forward')}
+        title={t('titlebar.goForward') || t('navigation.forward')}
         type="button"
-        aria-label="前进"
+        aria-label={t('navigation.forward')}
+        className="rounded p-1 transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary disabled:opacity-40"
       >
         <IoMdArrowRoundForward title={t('navigation.forward')} />
       </button>

@@ -1,17 +1,21 @@
 import { _electron as electron } from 'playwright'
 import { setTimeout as sleep } from 'node:timers/promises'
+import fs from 'node:fs/promises'
 
 const vault = process.argv[2] || 'C:/Users/l/AppData/Local/Temp/wikiobs-vault'
 const userData = `C:/Users/l/AppData/Local/Temp/wikiobs-pages-user-data-${Date.now()}`
+await fs.mkdir(vault, { recursive: true })
+await fs.writeFile(`${vault}/Welcome.md`, '# Welcome to WIKIOBS\n\nSmoke page fixture.', 'utf8')
+
 const checks = [
-  ['Knowledge graph', '\u77e5\u8bc6\u56fe\u8c31', '\u77e5\u8bc6\u56fe\u8c31'],
-  ['Scheduled tasks', '\u5b9a\u65f6\u4efb\u52a1', '\u5b9a\u65f6\u4efb\u52a1'],
-  ['Export', '\u5bfc\u51fa', '\u5bfc\u51fa'],
-  ['Plugins', '\u63d2\u4ef6', '\u63d2\u4ef6'],
-  ['Wiki importer', '\u4ece Wiki \u6536\u5f55', '\u4ece Wiki \u6536\u5f55'],
-  ['AI organization', 'AI \u6574\u7406', 'AI \u6587\u4ef6\u6574\u7406'],
-  ['Vault management', '\u521b\u5efa\u65b0\u77e5\u8bc6\u5e93', '\u77e5\u8bc6\u5e93'],
-  ['Settings', 'Settings (Ctrl+,)', '\u7f16\u8f91\u5668'],
+  ['Knowledge graph', 'button[title*="知识图谱"]', '知识图谱'],
+  ['Scheduled tasks', 'button[title*="定时任务"]', '定时任务'],
+  ['Export', 'button[title*="导出"]', '导出'],
+  ['Plugins', 'button[title*="插件"]', '插件'],
+  ['Wiki importer', 'button[title*="Wiki"]', '从 Wiki 收录'],
+  ['AI organization', 'button[title*="AI 整理"]', '整理'],
+  ['Vault management', 'button[title*="知识库"], button[aria-label*="知识库"]', '知识库'],
+  ['Settings', 'button[title*="Settings"]', '编辑器'],
 ]
 
 let app
@@ -29,16 +33,23 @@ try {
   await win.evaluate(async (selectedVault) => {
     await window.electronStore.setVaultDirectoryForWindow(selectedVault)
     await window.electronStore.setDefaultEmbeddingModel('Xenova/bge-small-en-v1.5')
+    await window.electronStore.setHasUserOpenedAppBefore()
   }, vault)
   await win.reload()
-  try { await win.locator('button[title="Settings (Ctrl+,)"]').waitFor({ state: 'visible', timeout: 120000 }) } catch { console.log('INIT_BODY', (await win.locator('body').innerText()).slice(0,2000)); console.log('INIT_ERRORS', errors); throw new Error('main page init timeout') }
+  try {
+    await win.locator('button[title*="Settings"]').first().waitFor({ state: 'visible', timeout: 120000 })
+  } catch {
+    console.log('INIT_BODY', (await win.locator('body').innerText()).slice(0, 2000))
+    console.log('INIT_ERRORS', errors)
+    throw new Error('main page init timeout')
+  }
 
   const mainText = await win.locator('body').innerText()
-  if (!mainText.includes('WIKIOBS')) throw new Error('\u4e3b\u9875\u9762\u672a\u6e32\u67d3')
+  if (!mainText.includes('WIKIOBS')) throw new Error('主页面未渲染')
 
-  for (const [name, title, expected] of checks) {
-    const trigger = win.locator(`button[title="${title}"]`)
-    if ((await trigger.count()) !== 1) throw new Error(`${name}\u5165\u53e3\u4e0d\u5b58\u5728`)
+  for (const [name, selector, expected] of checks) {
+    const trigger = win.locator(selector).first()
+    if ((await trigger.count()) !== 1) throw new Error(`${name}入口不存在`)
     await trigger.click()
     for (let attempt = 0; attempt < 150; attempt++) {
       if ((await win.locator('body').innerText()).includes(expected)) break

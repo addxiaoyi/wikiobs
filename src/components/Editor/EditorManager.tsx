@@ -88,7 +88,7 @@ const EditorManager: React.FC = () => {
       {editor && <SearchBar editor={editor._tiptapEditor} />}
 
       <YStack
-        className={`editor-content-shell relative h-full pb-12 pt-4 ${editorFlex ? 'flex justify-center px-24' : 'px-12'}`}
+        className={`editor-content-shell relative h-full pb-14 pt-4 ${editorFlex ? 'flex justify-center px-4 sm:px-8 md:px-16 lg:px-24' : 'px-4 sm:px-8 md:px-12'}`}
       >
         <YStack className={`relative size-full ${editorFlex ? 'max-w-4xl' : ''}`}>
           {editor && (
@@ -107,7 +107,7 @@ const EditorManager: React.FC = () => {
         />
       )}
       {editor && (
-        <div className="absolute inset-x-0 bottom-0 flex min-h-8 items-center justify-between gap-3 border-t border-border bg-background/95 px-4 py-1 text-xs text-muted-foreground">
+        <div className="absolute inset-x-0 bottom-0 z-20 flex min-h-8 items-center justify-between gap-3 border-t border-border bg-background/95 px-4 py-1 text-xs text-muted-foreground backdrop-blur-sm select-none">
           <div className="flex min-w-0 items-center gap-2">
             <span
               className={`min-w-0 max-w-[65%] truncate ${saveStatusClass}`}
@@ -122,7 +122,7 @@ const EditorManager: React.FC = () => {
             {saveState === 'error' && (
               <button
                 type="button"
-                className="shrink-0 text-primary underline underline-offset-2"
+                className="shrink-0 text-primary underline underline-offset-2 hover:opacity-80"
                 onClick={handleRetrySave}
               >
                 {t('editor.retrySave')}
@@ -130,7 +130,7 @@ const EditorManager: React.FC = () => {
             )}
           </div>
           {showDocumentStats && (
-            <div className="flex shrink-0 gap-4">
+            <div className="flex shrink-0 items-center gap-4 text-[11px] font-medium text-muted-foreground">
               <span>
                 {documentStats.characters} {t('editor.charCount')}
               </span>

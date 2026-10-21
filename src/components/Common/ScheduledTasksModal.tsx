@@ -380,7 +380,14 @@ const ScheduledTasksModal: React.FC<ScheduledTasksModalProps> = ({ isOpen, onClo
                       </TableCell>
                       <TableCell align="right">
                         <FormControlLabel
-                          control={<Switch size="small" checked={task.enabled} onChange={() => handleToggle(task)} />}
+                          control={
+                            <Switch
+                              size="small"
+                              checked={task.enabled}
+                              onChange={() => handleToggle(task)}
+                              inputProps={{ 'aria-label': `${t('scheduled.enableTask') || t('scheduled.enabled')}: ${task.name}` }}
+                            />
+                          }
                           label=""
                           sx={{ mr: 0.5 }}
                         />

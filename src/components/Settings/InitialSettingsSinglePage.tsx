@@ -85,26 +85,26 @@ const InitialSetupSinglePage: React.FC<OldInitialSettingsProps> = ({ readyForInd
           <SizableText className="setup-tagline" marginTop={3} textAlign="center" fontWeight={300}>
             {t('app.tagline')}
           </SizableText>
-          <XStack className="setup-section mt-10 flex w-full items-center justify-between border-0 border-b-2 border-solid border-neutral-700 pb-4">
-            <YStack className="w-80 flex-col">
+          <XStack className="setup-section mt-10 flex w-full flex-col sm:flex-row sm:items-center justify-between gap-3 border-0 border-b border-solid border-border pb-4">
+            <YStack className="w-full sm:w-80 flex-col">
               <SizableText fontSize={16} fontWeight="bold">
                 {t('settings.vaultDirectory')}
               </SizableText>
-              <SizableText margin={0} paddingTop={1} fontSize={12}>
+              <SizableText margin={0} paddingTop={1} fontSize={12} color="$gray10">
                 {t('setup.selectVaultDesc')}
               </SizableText>
             </YStack>
             <YStack className="flex-col">
               <DirectorySelector setErrorMsg={setDirectoryErrorMsg} />
               {showError && directoryErrorMsg && (
-                <SizableText className="text-xs text-red-500">{directoryErrorMsg}</SizableText>
+                <SizableText className="text-xs text-destructive mt-1">{directoryErrorMsg}</SizableText>
               )}
             </YStack>
           </XStack>
-          <YStack className="setup-section mt-2 border-0 border-b-2 border-solid border-neutral-700 pb-2">
+          <YStack className="setup-section mt-2 border-0 border-b border-solid border-border pb-2">
             <InitialEmbeddingModelSettings setErrorMsg={setEmbeddingErrorMsg} />
             {showError && embeddingErrorMsg && (
-              <SizableText className="text-xs text-red-500">{embeddingErrorMsg}</SizableText>
+              <SizableText className="text-xs text-destructive mt-1">{embeddingErrorMsg}</SizableText>
             )}
           </YStack>
           <div className="setup-section">
@@ -113,7 +113,7 @@ const InitialSetupSinglePage: React.FC<OldInitialSettingsProps> = ({ readyForInd
         </YStack>
         <div className="flex justify-end">
           <Button
-            className=" setup-cta-btn mb-3 mt-4 h-10 w-[80px] cursor-pointer border-none bg-blue-500 px-2 py-0 text-center hover:bg-blue-600"
+            className="setup-cta-btn mb-3 mt-4 h-10 min-w-[90px] cursor-pointer border-none bg-primary px-3 py-0 text-center font-medium text-primary-foreground hover:bg-primary/90"
             onClick={handleNext}
             placeholder=""
           >

@@ -137,16 +137,16 @@ const SearchBar: React.FC<SearchBarProps> = ({ editor }) => {
   return (
     <div
       ref={searchBarRef}
-      className="editor-search-popover fixed right-4 top-10 animate-shift-in-down rounded-[12px]"
+      className="editor-search-popover fixed right-4 top-10 animate-shift-in-down rounded-[12px] max-w-[calc(100vw-32px)] border border-border bg-popover text-popover-foreground shadow-2xl backdrop-blur-md"
       style={{
         zIndex: 1000,
-        outline: 'rgba(35, 131, 226, 0.14) solid 3px',
+        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2)',
       }}
     >
       <XStack
         alignItems="center"
         width="100%"
-        className={`rounded-t-md ${!showReplace ? 'rounded-b-md' : ''} bg-gray-800 p-2 shadow-lg`}
+        className={`rounded-t-[11px] ${!showReplace ? 'rounded-b-[11px]' : ''} bg-background/95 p-2`}
       >
         <div className="relative flex-1">
           <input
@@ -156,16 +156,20 @@ const SearchBar: React.FC<SearchBarProps> = ({ editor }) => {
             aria-label={t('search.find')}
             // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
-            className="w-full bg-transparent p-1 pr-16 text-white focus:outline-none"
+            className="w-full bg-transparent p-1.5 pr-20 text-foreground placeholder:text-muted-foreground focus:outline-none text-sm"
           />
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-white">
+          <div
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground select-none"
+            role="status"
+            aria-live="polite"
+          >
             {searchLocation.resultsExist ? `${searchLocation.currentIndex} / ${searchLocation.totalResults}` : '0 / 0'}
           </div>
         </div>
 
-        <div className="mx-2 h-6 w-px bg-gray-500" />
+        <div className="mx-2 h-5 w-px bg-border" />
 
-        <XStack alignItems="center" gap={10}>
+        <XStack alignItems="center" gap={6}>
           <StyledIconButton
             aria-label={t('search.previousResult')}
             onPress={() => {
@@ -173,7 +177,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ editor }) => {
               goToSelection()
             }}
           >
-            <ChevronUp {...iconProps} />
+            <ChevronUp size={16} className="text-foreground hover:text-primary transition-colors cursor-pointer" />
           </StyledIconButton>
           <StyledIconButton
             aria-label={t('search.nextResult')}
@@ -182,34 +186,33 @@ const SearchBar: React.FC<SearchBarProps> = ({ editor }) => {
               goToSelection()
             }}
           >
-            <ChevronDown {...iconProps} />
+            <ChevronDown size={16} className="text-foreground hover:text-primary transition-colors cursor-pointer" />
           </StyledIconButton>
           {(showReplace || searchLocation.resultsExist) && (
             <StyledIconButton aria-label={t('search.toggleReplace')} onPress={toggleReplace}>
-              <Replace size={16} color="white" cursor="pointer" />
+              <Replace size={15} className="text-foreground hover:text-primary transition-colors cursor-pointer" />
             </StyledIconButton>
           )}
           <StyledIconButton aria-label={t('search.close')} onPress={toggleSearch}>
-            <X {...iconProps} />
+            <X size={16} className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer" />
           </StyledIconButton>
         </XStack>
       </XStack>
       {showReplace && (
-        <YStack className="animate-shift-in-down">
-          <Separator />
-          <YStack alignItems="center" gap={3} className="rounded-b-md bg-gray-800 p-2 shadow-lg">
+        <YStack className="animate-shift-in-down border-t border-border">
+          <YStack alignItems="center" gap={3} className="rounded-b-[11px] bg-background/95 p-2">
             <input
               value={replaceTerm}
               onChange={(event) => handleReplaceChange(event.target.value)}
               placeholder={t('search.replace')}
               aria-label={t('search.replace')}
-              className="w-full bg-transparent p-1 pr-16 text-white focus:outline-none"
+              className="w-full bg-transparent p-1.5 pr-16 text-foreground placeholder:text-muted-foreground focus:outline-none text-sm"
               // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
             />
-            <div className="flex w-full justify-end gap-1">
+            <div className="flex w-full justify-end gap-1.5 pt-1">
               <Button
-                className="h-10 min-w-0 flex-1 cursor-pointer border-none bg-transparent px-2 py-0 text-center hover:bg-gray-700"
+                className="h-8 min-w-0 flex-1 cursor-pointer border border-border bg-secondary/50 px-2 py-0 text-center text-xs font-normal text-foreground hover:bg-accent"
                 onClick={() => {
                   if (!editor) return
                   editor.commands.replaceAll()
@@ -220,7 +223,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ editor }) => {
               </Button>
 
               <Button
-                className="h-10 min-w-0 flex-1 cursor-pointer border-none bg-blue-600 px-2 py-0 text-center hover:bg-blue-700"
+                className="h-8 min-w-0 flex-1 cursor-pointer border-none bg-primary px-2 py-0 text-center text-xs font-medium text-primary-foreground hover:bg-primary/90"
                 onClick={() => {
                   if (!editor) return
                   editor.commands.replace()

@@ -32,7 +32,7 @@ export const ChatItem: React.FC<ChatItemProps> = ({ chatMetadata, onRequestDelet
   const itemClasses = `
     flex items-center cursor-pointer py-2 px-3 rounded-md font-sans text-xs leading-relaxed
     transition-colors duration-150 ease-in-out
-    ${chatMetadata.id === currentChat?.id ? 'text-white' : 'text-gray-300'}
+    ${chatMetadata.id === currentChat?.id ? 'text-primary font-medium bg-accent/60' : 'text-foreground/80 hover:text-foreground'}
   `
 
   return (
@@ -107,9 +107,9 @@ export const ChatSidebar: React.FC = () => {
             <button
               aria-label={t('chat.startNew')}
               className="chat-new-button flex cursor-pointer items-center justify-center gap-2 rounded-md 
-                      border-0 bg-blue-500 py-2.5 text-white
-                      shadow-md transition-colors duration-200 hover:bg-blue-400 hover:text-gray-200
-                      hover:shadow-lg"
+                      border-0 bg-primary py-2.5 text-primary-foreground
+                      shadow-md transition-colors duration-200 hover:bg-primary/90
+                      hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               type="button"
               onClick={() => openNewChat(undefined)}
             >

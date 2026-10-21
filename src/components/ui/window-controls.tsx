@@ -23,7 +23,7 @@ const WindowControls = ({ onClose, onMaximize, onNewChat }: WindowControlsProps)
             title={t('chat.newChat')}
             aria-label={t('chat.newChat')}
           >
-            <Plus className="size-3 text-neutral-400 hover:text-neutral-300" />
+            <Plus className="size-3 text-muted-foreground hover:text-foreground" />
           </button>
         )}
         <button
@@ -33,7 +33,7 @@ const WindowControls = ({ onClose, onMaximize, onNewChat }: WindowControlsProps)
           title={t('button.maximize')}
           aria-label={t('button.maximize')}
         >
-          <Maximize2 className="size-3 text-neutral-400 hover:text-neutral-300" />
+          <Maximize2 className="size-3 text-muted-foreground hover:text-foreground" />
         </button>
         <button
           type="button"
@@ -42,7 +42,7 @@ const WindowControls = ({ onClose, onMaximize, onNewChat }: WindowControlsProps)
           title={t('button.close')}
           aria-label={t('button.close')}
         >
-          <X className="size-3 text-neutral-400 hover:text-neutral-300" />
+          <X className="size-3 text-muted-foreground hover:text-destructive-foreground" />
         </button>
       </div>
     </div>

@@ -33,6 +33,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
 }) => {
   const { state } = useThemeManager()
   const { t } = useTranslation()
+  const isComposingRef = React.useRef(false)
 
   const handleDbSearchToggle = (checked: boolean) => {
     setAgentConfig((prevConfig) => {
@@ -53,12 +54,19 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
   return (
     <div className="flex w-full">
-      <div className="z-50 flex w-full flex-col overflow-hidden rounded border-2">
+      <div className="z-50 flex w-full flex-col overflow-hidden rounded-lg border border-border bg-background shadow-sm">
         <TextArea
           value={userTextFieldInput}
+          onCompositionStart={() => {
+            isComposingRef.current = true
+          }}
+          onCompositionEnd={() => {
+            isComposingRef.current = false
+          }}
           // @ts-expect-error
           onKeyPress={(e: KeyboardEvent) => {
             if (!e.shiftKey && e.key === 'Enter') {
+              if (isComposingRef.current) return
               e.preventDefault()
               handleSubmitNewMessage()
             }

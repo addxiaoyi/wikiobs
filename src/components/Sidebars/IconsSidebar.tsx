@@ -70,12 +70,13 @@ const IconsSidebar: React.FC<IconsSidebarProps> = ({ getShortcutDescription }) =
     <nav
       ref={iconsRef}
       aria-label={t('app.name')}
-      className="icons-sidebar flex h-full w-[52px] flex-col items-center justify-between py-3"
+      onContextMenu={(e) => e.preventDefault()}
+      className="icons-sidebar flex h-full w-[52px] flex-col items-center justify-between py-3 select-none"
     >
-      <div className="sidebar-brand" title={t('app.name')} aria-label={t('app.name')} aria-hidden="true">
+      <div className="sidebar-brand mb-2" title={t('app.name')} aria-label={t('app.name')} aria-hidden="true">
         <BookOpen size={18} strokeWidth={1.8} />
       </div>
-      <YStack className="icons-sidebar-group items-center gap-1">
+      <YStack className="icons-sidebar-group items-center gap-1 overflow-y-auto overflow-x-hidden no-scrollbar w-full max-h-[calc(100vh-130px)]">
         <button
           type="button"
           className={`icons-sidebar-button flex size-10 items-center justify-center rounded-md transition-colors ${
@@ -85,6 +86,7 @@ const IconsSidebar: React.FC<IconsSidebarProps> = ({ getShortcutDescription }) =
           aria-label={getShortcutDescription('open-files') || t('files.title')}
           aria-keyshortcuts="Control+O"
           aria-pressed={sidebarShowing === 'files'}
+          aria-current={sidebarShowing === 'files' ? 'page' : undefined}
           onClick={() => setSidebarShowing(sidebarShowing === 'files' ? null : 'files')}
         >
           <Files size={22} />
@@ -98,6 +100,7 @@ const IconsSidebar: React.FC<IconsSidebarProps> = ({ getShortcutDescription }) =
           aria-label={t('sidebar.chatHistory')}
           aria-keyshortcuts="Control+T"
           aria-pressed={sidebarShowing === 'chats'}
+          aria-current={sidebarShowing === 'chats' ? 'page' : undefined}
           onClick={() => setSidebarShowing(sidebarShowing === 'chats' ? null : 'chats')}
         >
           <MessageCircle size={22} />
@@ -111,6 +114,7 @@ const IconsSidebar: React.FC<IconsSidebarProps> = ({ getShortcutDescription }) =
           aria-label={getShortcutDescription('open-search') || t('sidebar.semanticSearch')}
           aria-keyshortcuts="Control+P"
           aria-pressed={sidebarShowing === 'search'}
+          aria-current={sidebarShowing === 'search' ? 'page' : undefined}
           onClick={() => setSidebarShowing(sidebarShowing === 'search' ? null : 'search')}
         >
           <Search size={22} />
@@ -210,8 +214,8 @@ const IconsSidebar: React.FC<IconsSidebarProps> = ({ getShortcutDescription }) =
         <button
           type="button"
           className="icons-sidebar-button flex size-10 items-center justify-center rounded-md transition-colors"
-          title={getShortcutDescription('toggle-theme') || t('sidebar.toggleTheme')}
-          aria-label={getShortcutDescription('toggle-theme') || t('sidebar.toggleTheme')}
+          title={theme === 'dark' ? t('theme.switchToLight') : t('theme.switchToDark')}
+          aria-label={theme === 'dark' ? t('theme.switchToLight') : t('theme.switchToDark')}
           onClick={() => themeActions.toggle()}
         >
           {theme === 'dark' ? <Moon size={22} /> : <SunMoon size={22} />}
