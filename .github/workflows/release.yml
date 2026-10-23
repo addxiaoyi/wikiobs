@@ -43,9 +43,14 @@ jobs:
           CI: true
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - name: Publish desktop installers
+        uses: softprops/action-gh-release@v2
         with:
-          name: wikiobs-${{ matrix.os }}
-          path: dist/
-          retention-days: 7
+          files: |
+            release/**/*.exe
+            release/**/*.dmg
+            release/**/*.zip
+            release/**/*.AppImage
+            release/**/*.deb
+            release/**/*.rpm
+          fail_on_unmatched_files: false

@@ -2,6 +2,10 @@
 
 WIKIOBS is a local-first desktop workspace for building and exploring a personal knowledge base. Write Markdown notes, connect ideas with backlinks and a knowledge graph, search locally, and use AI tools with the model provider you choose.
 
+## Download
+
+Get the latest WIKIOBS desktop installer for Windows, macOS, or Linux from [GitHub Releases](https://github.com/addxiaoyi/wikiobs/releases). If no release is listed yet, use the source setup below.
+
 ## Features
 
 - Markdown editing and local file management
