@@ -138,7 +138,7 @@ async function fetchUrl(url: string, signal?: AbortSignal): Promise<string> {
     url,
     {
       headers: {
-        'User-Agent': 'Reor-Wiki-Importer/1.0',
+        'User-Agent': 'WIKIOBS-Wiki-Importer/1.0',
         Accept: 'text/html,application/xhtml+xml',
       },
     },
@@ -196,7 +196,7 @@ async function fetchFromMediaWikiApi(
   const titlesParam = titles.join('|')
   const url = `${apiUrl}?action=query&titles=${encodeURIComponent(titlesParam)}&prop=extracts|revisions&exintro=true&explaintext=true&rvslots=main&format=json`
 
-  const response = await fetchWithRetry(url, { headers: { 'User-Agent': 'Reor-Wiki-Importer/1.0' } }, signal)
+  const response = await fetchWithRetry(url, { headers: { 'User-Agent': 'WIKIOBS-Wiki-Importer/1.0' } }, signal)
   if (!response.ok) throw new Error(`MediaWiki API error: ${response.status}`)
 
   const data: MediaWikiResponse = await response.json()
@@ -343,7 +343,7 @@ export async function importFromWiki(options: WikiImporterOptions): Promise<Impo
         try {
           const response = await fetchWithRetry(
             categoryUrl,
-            { headers: { 'User-Agent': 'Reor-Wiki-Importer/1.0' } },
+            { headers: { 'User-Agent': 'WIKIOBS-Wiki-Importer/1.0' } },
             signal,
           )
           if (!response.ok) throw new Error(`MediaWiki API error: ${response.status}`)

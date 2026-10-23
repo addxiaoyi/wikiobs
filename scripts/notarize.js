@@ -30,7 +30,7 @@ function printDirectoryTree(startPath, indent = '') {
 
 async function notarizeApp() {
   console.log('Notarizing the app...')
-  const productName = 'Reor'
+  const productName = 'WIKIOBS'
 
   // Get the current platform
   const platform = os.platform()

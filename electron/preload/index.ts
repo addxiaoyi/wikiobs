@@ -43,7 +43,7 @@ const electronUtils = {
   openExternal: createIPCHandler<(url: string) => Promise<void>>('open-external'),
   getPlatform: createIPCHandler<() => Promise<string>>('get-platform'),
   openNewWindow: createIPCHandler<() => Promise<void>>('open-new-window'),
-  getReorAppVersion: createIPCHandler<() => Promise<string>>('get-reor-app-version'),
+  getAppVersion: createIPCHandler<() => Promise<string>>('get-reor-app-version'),
   getUserAppPath: createIPCHandler<() => Promise<string>>('get-user-data-path'),
   getDefaultVaultPath: createIPCHandler<() => Promise<string>>('get-default-vault-path'),
 }

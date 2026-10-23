@@ -97,7 +97,7 @@ export async function createEmbeddingFunctionForLocalModel(
   let repoName = ''
   let functionName = ''
   const { pipeline, env } = await import('@xenova/transformers')
-  env.cacheDir = path.join(app.getPath('appData'), 'Reor', 'models', 'embeddings') // set for all. Just to deal with library and remote inconsistencies
+  env.cacheDir = path.join(app.getPath('appData'), 'WIKIOBS', 'models', 'embeddings') // set for all. Just to deal with library and remote inconsistencies
 
   const pathParts = splitDirectoryPathIntoBaseAndRepo(embeddingModelConfig.localPath)
 
@@ -132,7 +132,7 @@ export async function createEmbeddingFunctionForRepo(
   let repoName = ''
   let functionName = ''
   const { pipeline, env } = await import('@xenova/transformers')
-  env.cacheDir = path.join(app.getPath('appData'), 'Reor', 'models', 'embeddings') // set for all. Just to deal with library and remote inconsistencies
+  env.cacheDir = path.join(app.getPath('appData'), 'WIKIOBS', 'models', 'embeddings') // set for all. Just to deal with library and remote inconsistencies
 
   repoName = embeddingModelConfig.repoName
   env.allowRemoteModels = true
@@ -178,7 +178,7 @@ export async function createEmbeddingFunction(
 
 export const rerankSearchedEmbeddings = async (query: string, searchResults: DBEntry[]) => {
   const { env, AutoModelForSequenceClassification, AutoTokenizer } = await import('@xenova/transformers')
-  env.cacheDir = path.join(app.getPath('appData'), 'Reor', 'models', 'reranker') // set for all. Just to deal with library and remote inconsistencies
+  env.cacheDir = path.join(app.getPath('appData'), 'WIKIOBS', 'models', 'reranker') // set for all. Just to deal with library and remote inconsistencies
 
   const tokenizer = await AutoTokenizer.from_pretrained('Xenova/bge-reranker-base')
   const model = await AutoModelForSequenceClassification.from_pretrained('Xenova/bge-reranker-base')
