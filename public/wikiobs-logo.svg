@@ -1,0 +1,269 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1024" height="1024">
+  <defs>
+    <!-- Ambient Radial Glow Behind Gem -->
+    <radialGradient id="auraGlow" cx="50%" cy="48%" r="48%">
+      <stop offset="0%" stop-color="#9333ea" stop-opacity="0.45" />
+      <stop offset="45%" stop-color="#7b68ee" stop-opacity="0.22" />
+      <stop offset="75%" stop-color="#6366f1" stop-opacity="0.08" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Top Left Specular Facet -->
+    <linearGradient id="facetTopLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e9d5ff" />
+      <stop offset="30%" stop-color="#c084fc" />
+      <stop offset="100%" stop-color="#8b5cf6" />
+    </linearGradient>
+
+    <!-- Top Right Specular Facet -->
+    <linearGradient id="facetTopRight" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ddd6fe" />
+      <stop offset="40%" stop-color="#a855f7" />
+      <stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+
+    <!-- Center Upper Diamond -->
+    <linearGradient id="facetCenterTop" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#c4b5fd" />
+      <stop offset="60%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#6d28d9" />
+    </linearGradient>
+
+    <!-- Mid Left Wing -->
+    <linearGradient id="facetMidLeft" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#7c3aed" />
+      <stop offset="50%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#4f46e5" />
+    </linearGradient>
+
+    <!-- Mid Right Wing -->
+    <linearGradient id="facetMidRight" x1="100%" y1="50%" x2="0%" y2="50%">
+      <stop offset="0%" stop-color="#6d28d9" />
+      <stop offset="60%" stop-color="#5b21b6" />
+      <stop offset="100%" stop-color="#3b0764" />
+    </linearGradient>
+
+    <!-- Core Center Diamond / "W" Heart -->
+    <linearGradient id="facetCoreW" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a78bfa" />
+      <stop offset="50%" stop-color="#7b68ee" />
+      <stop offset="100%" stop-color="#4338ca" />
+    </linearGradient>
+
+    <!-- Deep Obsidian Lower Left -->
+    <linearGradient id="facetLowerLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#581c87" />
+      <stop offset="60%" stop-color="#3b0764" />
+      <stop offset="100%" stop-color="#1e1138" />
+    </linearGradient>
+
+    <!-- Deep Obsidian Lower Right -->
+    <linearGradient id="facetLowerRight" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4c1d95" />
+      <stop offset="60%" stop-color="#2e1065" />
+      <stop offset="100%" stop-color="#140a26" />
+    </linearGradient>
+
+    <!-- Bottom Keel Left -->
+    <linearGradient id="facetKeelLeft" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#4338ca" />
+      <stop offset="100%" stop-color="#1e1b4b" />
+    </linearGradient>
+
+    <!-- Bottom Keel Right -->
+    <linearGradient id="facetKeelRight" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#3730a3" />
+      <stop offset="100%" stop-color="#0f0e26" />
+    </linearGradient>
+
+    <!-- Glow Filter for Cyber Neural Nodes -->
+    <filter id="nodeGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3.5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <!-- Specular Highlight Glint -->
+    <linearGradient id="glint" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#c084fc" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+
+  <!-- Ambient Backdrop Glow -->
+  <circle cx="256" cy="256" r="235" fill="url(#auraGlow)" />
+
+  <!-- Outer Facet Shell Shadow -->
+  <polygon
+    points="256,38 418,146 448,284 362,428 256,482 150,428 64,284 94,146"
+    fill="#0e0a1a"
+    stroke="#7b68ee"
+    stroke-opacity="0.3"
+    stroke-width="1.5"
+  />
+
+  <!-- ==================== FACET GEOMETRY ==================== -->
+  <!-- Top Left Facet (Reflective) -->
+  <polygon
+    points="256,38 94,146 178,210 256,168"
+    fill="url(#facetTopLeft)"
+    stroke="#d8b4fe"
+    stroke-width="1.8"
+    stroke-linejoin="round"
+  />
+
+  <!-- Top Right Facet (Specular Violet) -->
+  <polygon
+    points="256,38 256,168 334,210 418,146"
+    fill="url(#facetTopRight)"
+    stroke="#c084fc"
+    stroke-width="1.8"
+    stroke-linejoin="round"
+  />
+
+  <!-- Upper Center Rhombus -->
+  <polygon
+    points="256,168 178,210 256,268 334,210"
+    fill="url(#facetCenterTop)"
+    stroke="#a855f7"
+    stroke-width="1.5"
+    stroke-linejoin="round"
+  />
+
+  <!-- Outer Left Shoulder -->
+  <polygon
+    points="94,146 64,284 162,298 178,210"
+    fill="url(#facetMidLeft)"
+    stroke="#818cf8"
+    stroke-width="1.5"
+    stroke-linejoin="round"
+  />
+
+  <!-- Outer Right Shoulder -->
+  <polygon
+    points="418,146 334,210 350,298 448,284"
+    fill="url(#facetMidRight)"
+    stroke="#6366f1"
+    stroke-width="1.5"
+    stroke-linejoin="round"
+  />
+
+  <!-- Central "W" Peak Left -->
+  <polygon
+    points="178,210 162,298 214,354 256,268"
+    fill="url(#facetCoreW)"
+    stroke="#a78bfa"
+    stroke-width="1.6"
+    stroke-linejoin="round"
+  />
+
+  <!-- Central "W" Peak Right -->
+  <polygon
+    points="256,268 214,354 256,378 298,354"
+    fill="#6d28d9"
+    stroke="#9333ea"
+    stroke-width="1.5"
+    stroke-linejoin="round"
+  />
+
+  <polygon
+    points="256,268 298,354 350,298 334,210"
+    fill="url(#facetCoreW)"
+    stroke="#a78bfa"
+    stroke-width="1.6"
+    stroke-linejoin="round"
+  />
+
+  <!-- Mid-Lower Left Flank -->
+  <polygon
+    points="64,284 150,428 214,354 162,298"
+    fill="url(#facetLowerLeft)"
+    stroke="#581c87"
+    stroke-width="1.5"
+    stroke-linejoin="round"
+  />
+
+  <!-- Mid-Lower Right Flank -->
+  <polygon
+    points="448,284 350,298 298,354 362,428"
+    fill="url(#facetLowerRight)"
+    stroke="#4c1d95"
+    stroke-width="1.5"
+    stroke-linejoin="round"
+  />
+
+  <!-- Lower Left Keel to Tip -->
+  <polygon
+    points="150,428 256,482 256,378 214,354"
+    fill="url(#facetKeelLeft)"
+    stroke="#4338ca"
+    stroke-width="1.5"
+    stroke-linejoin="round"
+  />
+
+  <!-- Lower Right Keel to Tip -->
+  <polygon
+    points="362,428 298,354 256,378 256,482"
+    fill="url(#facetKeelRight)"
+    stroke="#3730a3"
+    stroke-width="1.5"
+    stroke-linejoin="round"
+  />
+
+  <!-- ==================== WIKIOBS KNOWLEDGE NETWORK OVERLAY ==================== -->
+  <!-- Neural Network Link Lines (Knowledge Graph Motif) -->
+  <g stroke="#e0e7ff" stroke-width="1.2" stroke-opacity="0.85" stroke-dasharray="none">
+    <line x1="256" y1="168" x2="178" y2="210" />
+    <line x1="256" y1="168" x2="334" y2="210" />
+    <line x1="178" y1="210" x2="256" y2="268" />
+    <line x1="334" y1="210" x2="256" y2="268" />
+    <line x1="256" y1="268" x2="214" y2="354" />
+    <line x1="256" y1="268" x2="298" y2="354" />
+    <line x1="214" y1="354" x2="256" y2="378" />
+    <line x1="298" y1="354" x2="256" y2="378" />
+  </g>
+
+  <!-- Luminous Knowledge Graph Nodes -->
+  <g filter="url(#nodeGlow)">
+    <!-- Apex Node -->
+    <circle cx="256" cy="38" r="4.5" fill="#ffffff" />
+    <circle cx="256" cy="38" r="7" fill="#c084fc" fill-opacity="0.4" />
+
+    <!-- Upper Central Node -->
+    <circle cx="256" cy="168" r="5" fill="#f5f3ff" />
+    <circle cx="256" cy="168" r="8" fill="#a855f7" fill-opacity="0.5" />
+
+    <!-- Left Wing Node -->
+    <circle cx="178" cy="210" r="4" fill="#ffffff" />
+    <circle cx="178" cy="210" r="7" fill="#818cf8" fill-opacity="0.45" />
+
+    <!-- Right Wing Node -->
+    <circle cx="334" cy="210" r="4" fill="#ffffff" />
+    <circle cx="334" cy="210" r="7" fill="#818cf8" fill-opacity="0.45" />
+
+    <!-- Center Heart Node (Core Hub) -->
+    <circle cx="256" cy="268" r="6" fill="#ffffff" />
+    <circle cx="256" cy="268" r="10" fill="#7b68ee" fill-opacity="0.6" />
+
+    <!-- Lower "W" Left Joint -->
+    <circle cx="214" cy="354" r="4.5" fill="#ffffff" />
+    <circle cx="214" cy="354" r="7.5" fill="#9333ea" fill-opacity="0.5" />
+
+    <!-- Lower "W" Right Joint -->
+    <circle cx="298" cy="354" r="4.5" fill="#ffffff" />
+    <circle cx="298" cy="354" r="7.5" fill="#9333ea" fill-opacity="0.5" />
+
+    <!-- Base Convergence Node -->
+    <circle cx="256" cy="378" r="4" fill="#ede9fe" />
+    <circle cx="256" cy="378" r="7" fill="#6366f1" fill-opacity="0.4" />
+  </g>
+
+  <!-- Top Apex Glint -->
+  <path
+    d="M 256 34 L 260 48 L 274 52 L 260 56 L 256 70 L 252 56 L 238 52 L 252 48 Z"
+    fill="url(#glint)"
+  />
+</svg>
