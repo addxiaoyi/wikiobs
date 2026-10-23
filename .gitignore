@@ -19,6 +19,14 @@ release
 /.playwright-mcp/
 /.smoke-vault/
 /.tmp-*
+/.agents/
+/.tamagui/
+/.vscode/
+/*.png
+/*.mjs
+/*.py
+/*.bat
+/*.json
 
 # Editor directories and files
 .vscode/.debug.env

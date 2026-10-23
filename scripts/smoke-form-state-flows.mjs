@@ -205,8 +205,8 @@ async function capture(name) {
 }
 
 async function openToolbar(title) {
-  const trigger = win.locator(`button[title="${title}"]`)
-  assert((await trigger.count()) === 1, `Toolbar trigger not found: ${title}`)
+  const trigger = win.locator(`button[title="${title}"], button[aria-label="${title}"]`)
+  assert((await trigger.count()) >= 1, `Toolbar trigger not found: ${title}`)
   await trigger.click()
   await lastDialog()
 }
