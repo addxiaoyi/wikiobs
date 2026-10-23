@@ -490,18 +490,23 @@ const plugin = {
   unload: createIPCHandler<(pluginId: string) => Promise<boolean>>('plugins:unload'),
   getApi: createIPCHandler<(pluginId: string) => Promise<Record<string, unknown>>>('plugins:get-api'),
   marketplace: {
-    list: createIPCHandler<() => Promise<Array<{
-      id: string
-      name: string
-      version: string
-      description: string
-      author: string
-      permissions: string[]
-      installed: boolean
-    }>>>('plugins:marketplace:list'),
-    install: createIPCHandler<(pluginId: string) => Promise<{ success: boolean; error?: string; plugin?: Plugin }>>(
-      'plugins:marketplace:install',
-    ),
+    list: createIPCHandler<
+      () => Promise<
+        Array<{
+          id: string
+          name: string
+          version: string
+          description: string
+          author: string
+          permissions: string[]
+          installed: boolean
+        }>
+      >
+    >('plugins:marketplace:list'),
+    install:
+      createIPCHandler<(pluginId: string) => Promise<{ success: boolean; error?: string; plugin?: Plugin }>>(
+        'plugins:marketplace:install',
+      ),
   },
 }
 
