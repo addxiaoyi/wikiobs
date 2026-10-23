@@ -1,10 +1,10 @@
 {
-  "name": "reor-project",
+  "name": "wikiobs",
   "version": "0.2.31",
-  "productName": "Reor",
+  "productName": "WIKIOBS",
   "main": "dist-electron/main/index.js",
-  "description": "An AI note-taking app that runs models locally.",
-  "author": "Sam L'Huillier",
+  "description": "WIKIOBS - local-first knowledge workspace",
+  "author": "WIKIOBS Contributors",
   "license": "AGPL-3.0",
   "private": false,
   "debug": {
@@ -31,6 +31,7 @@
     "e2e:search-drag": "node scripts/smoke-search-drag.mjs",
     "e2e:multivault": "node scripts/smoke-multivault.mjs",
     "e2e:multivault-deep": "node scripts/smoke-multivault-deep.mjs",
+    "e2e:multivault-two-windows": "node scripts/smoke-multivault-two-windows.mjs",
     "e2e:warnings": "node scripts/smoke-warnings.mjs",
     "e2e:a11y-buttons": "node scripts/smoke-a11y-buttons.mjs",
     "e2e:obsidian": "node scripts/smoke-obsidian.mjs",
@@ -73,7 +74,7 @@
     "e2e:settings-utility": "node scripts/smoke-settings-utility-flows.mjs",
     "pree2e:sidebar-interactions": "vite build --mode=test",
     "e2e:sidebar-interactions": "node scripts/smoke-sidebar-interactions.mjs",
-    "e2e:visual": "node scripts/smoke-animation-stability.mjs && node scripts/smoke-modal-lifecycle.mjs && node scripts/smoke-nested-form-flows.mjs && node scripts/smoke-form-state-flows.mjs && node scripts/smoke-settings-utility-flows.mjs && node scripts/smoke-sidebar-interactions.mjs && node scripts/smoke-progress-reflow.mjs && node scripts/smoke-animation-race.mjs && node scripts/smoke-multiview-audit.mjs"
+    "e2e:visual": "node scripts/smoke-animation-stability.mjs && node scripts/smoke-nested-form-flows.mjs && node scripts/smoke-form-state-flows.mjs && node scripts/smoke-settings-utility-flows.mjs && node scripts/smoke-sidebar-interactions.mjs && node scripts/smoke-progress-reflow.mjs && node scripts/smoke-animation-race.mjs && node scripts/smoke-multiview-audit.mjs"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^0.0.47",
@@ -84,6 +85,8 @@
     "@floating-ui/react": "^0.27.4",
     "@headlessui/react": "^1.7.19",
     "@heroicons/react": "^2.1.4",
+    "@hugeicons/core-free-icons": "^4.3.5",
+    "@hugeicons/react": "^1.1.10",
     "@huggingface/hub": "^0.12.0",
     "@mantine/core": "^6.0.22",
     "@mantine/hooks": "^6.0.13",
@@ -274,6 +277,10 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/tests/e2e/"
+    ],
     "transform": {
       "^.+\\.tsx?$": [
         "ts-jest",
