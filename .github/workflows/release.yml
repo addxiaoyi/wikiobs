@@ -44,10 +44,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            release/**/*.exe
-            release/**/*.dmg
-            release/**/*.zip
-            release/**/*.AppImage
-            release/**/*.deb
-            release/**/*.rpm
+            release/**/WIKIOBS_*.exe
+            release/**/WIKIOBS_*.dmg
+            release/**/WIKIOBS_*.zip
+            release/**/WIKIOBS_*.AppImage
+            release/**/WIKIOBS_*.deb
+            release/**/WIKIOBS_*.rpm
           fail_on_unmatched_files: false
