@@ -1,3 +1,0 @@
-# Second
-
-Another note.

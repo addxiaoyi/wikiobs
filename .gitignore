@@ -14,6 +14,12 @@ dist-electron
 release
 *.local
 
+# Local visual test output and scratch probes
+/artifacts/
+/.playwright-mcp/
+/.smoke-vault/
+/.tmp-*
+
 # Editor directories and files
 .vscode/.debug.env
 .idea
