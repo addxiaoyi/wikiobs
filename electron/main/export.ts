@@ -39,8 +39,17 @@ interface NoteMetadata {
 const store = new Store()
 
 // 简单的 markdown 转 HTML
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 function markdownToHtml(markdown: string): string {
-  let html = markdown
+  let html = escapeHtml(markdown)
 
   // 标题
   html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>')
@@ -79,7 +88,7 @@ function generatePdfHtml(notes: NoteMetadata[], title: string): string {
       const content = note.content ? markdownToHtml(note.content) : ''
       return `
         <article class="note">
-          <h2>${note.title}</h2>
+          <h2>${escapeHtml(note.title)}</h2>
           <div class="meta">
             <span>Created: ${new Date(note.created).toLocaleDateString()}</span>
             <span>Modified: ${new Date(note.modified).toLocaleDateString()}</span>
@@ -96,7 +105,7 @@ function generatePdfHtml(notes: NoteMetadata[], title: string): string {
 <html>
 <head>
   <meta charset="utf-8">
-  <title>${title}</title>
+  <title>${escapeHtml(title)}</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px 20px; line-height: 1.6; }
     h1 { border-bottom: 2px solid #333; padding-bottom: 10px; }

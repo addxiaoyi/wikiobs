@@ -1,9 +1,7 @@
-import React, { useCallback, useMemo } from 'react'
-import { HiOutlinePencilAlt } from 'react-icons/hi'
+import React, { useCallback, useMemo, useState } from 'react'
+import { Copy, Check, PenLine } from 'lucide-react'
 import { toast } from 'react-toastify'
 import { ToolCallPart } from 'ai'
-import { FaRegCopy } from 'react-icons/fa'
-import { YStack, Stack, Text } from 'tamagui'
 import { Chat, ReorChatMessage } from '../../../lib/llm/types'
 import { extractMessagePartsFromAssistantMessage, findToolResultMatchingToolCall } from '../../../lib/llm/chat'
 import { ToolCallComponent } from './ToolCalls'
@@ -26,6 +24,7 @@ const AssistantMessage: React.FC<AssistantMessageProps> = ({ message, setCurrent
   const { openContent } = useContentContext()
   const { saveChat } = useChatContext()
   const { t } = useTranslation()
+  const [copied, setCopied] = useState(false)
 
   const { textParts, toolCalls } = useMemo(() => {
     return extractMessagePartsFromAssistantMessage(message)
@@ -34,6 +33,8 @@ const AssistantMessage: React.FC<AssistantMessageProps> = ({ message, setCurrent
   const copyToClipboard = () => {
     const content = typeof message.content === 'string' ? message.content : JSON.stringify(message.content, null, 2)
     navigator.clipboard.writeText(content)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
     toast.success(t('chat.copied'))
   }
 
@@ -70,42 +71,31 @@ const AssistantMessage: React.FC<AssistantMessageProps> = ({ message, setCurrent
     return (
       <>
         {textParts.map((text, index) => (
-          <Stack>
-            <Stack>
-              <Text color="$color11">
-                {/* eslint-disable-next-line react/no-array-index-key */}
-                <MarkdownRenderer key={index} content={text} />
-              </Text>
-            </Stack>
-            <div className="mt-0 flex">
-              <YStack
-                hoverStyle={{
-                  backgroundColor: '$gray7',
-                }}
-                cursor="pointer"
-                alignItems="center"
-                justifyContent="center"
-                px={4}
-                borderRadius="$1"
-                onPress={copyToClipboard}
-              >
-                <FaRegCopy color="gray" size={16} className="text-gray-200" title={t('chat.copy')} />
-              </YStack>
-              <YStack
-                hoverStyle={{
-                  backgroundColor: '$gray7',
-                }}
-                cursor="pointer"
-                alignContent="center"
-                justifyContent="center"
-                px={4}
-                borderRadius="$1"
-                onPress={createNewNoteFromMessage}
-              >
-                <HiOutlinePencilAlt color="gray" size={18} className="text-gray-200" title={t('files.newNote')} />
-              </YStack>
+          <div key={`text-part-${index}`} className="mb-2">
+            <div className="prose prose-sm dark:prose-invert max-w-none text-foreground leading-relaxed">
+              <MarkdownRenderer content={text} />
             </div>
-          </Stack>
+            <div className="mt-2 flex items-center gap-1.5 opacity-60 transition-opacity hover:opacity-100 select-none">
+              <button
+                type="button"
+                onClick={copyToClipboard}
+                className="flex cursor-pointer items-center gap-1 rounded-md border border-border/50 bg-secondary/30 px-2 py-0.5 text-[11px] text-muted-foreground transition-all duration-150 hover:border-border hover:bg-secondary hover:text-foreground active:scale-95"
+                title={t('chat.copy')}
+              >
+                {copied ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+                <span>{copied ? '已复制' : '复制'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={createNewNoteFromMessage}
+                className="flex cursor-pointer items-center gap-1 rounded-md border border-border/50 bg-secondary/30 px-2 py-0.5 text-[11px] text-muted-foreground transition-all duration-150 hover:border-border hover:bg-secondary hover:text-foreground active:scale-95"
+                title={t('files.newNote')}
+              >
+                <PenLine size={12} />
+                <span>转为笔记</span>
+              </button>
+            </div>
+          </div>
         ))}
         {toolCalls.map((toolCall) => (
           <ToolCallComponent
@@ -120,9 +110,9 @@ const AssistantMessage: React.FC<AssistantMessageProps> = ({ message, setCurrent
   }
 
   return (
-    <Stack marginBottom={7} width="100%">
-      <YStack flex={1}>{renderContent()}</YStack>
-    </Stack>
+    <div className="mb-5 flex w-full flex-col items-start gap-1">
+      <div className="w-full text-left leading-relaxed text-foreground">{renderContent()}</div>
+    </div>
   )
 }
 

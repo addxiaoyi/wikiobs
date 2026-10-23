@@ -1,20 +1,22 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react'
 import ReactDOM from 'react-dom'
-import { YStack, XStack } from '@tamagui/stacks'
-import { X } from '@tamagui/lucide-icons'
+import { X } from 'lucide-react'
 import gsap from 'gsap'
 
 import { animateModalIn, animateModalOut } from '@/lib/gsap-animations'
 import { useTranslation } from '@/lib/i18n'
+import { cn } from '@/lib/ui'
 
 interface ModalProps {
   isOpen: boolean
   onClose: () => void
   children: React.ReactNode
   hideCloseButton?: boolean
+  className?: string
+  embedded?: boolean
 }
 
-const ReorModal: React.FC<ModalProps> = ({ isOpen, onClose, children, hideCloseButton }) => {
+const ModernModal: React.FC<ModalProps> = ({ isOpen, onClose, children, hideCloseButton, className, embedded }) => {
   const modalRef = useRef<HTMLDivElement>(null)
   const backdropRef = useRef<HTMLDivElement>(null)
   const { t } = useTranslation()
@@ -27,9 +29,10 @@ const ReorModal: React.FC<ModalProps> = ({ isOpen, onClose, children, hideCloseB
   }, [onClose])
 
   useEffect(() => {
+    if (embedded) return
     if (isOpen && animState === 'closed') setAnimState('entering')
     if (!isOpen && (animState === 'open' || animState === 'entering')) setAnimState('exiting')
-  }, [animState, isOpen])
+  }, [animState, isOpen, embedded])
 
   useEffect(() => {
     if (animState !== 'entering' || !backdropRef.current || !modalRef.current) return undefined
@@ -82,64 +85,67 @@ const ReorModal: React.FC<ModalProps> = ({ isOpen, onClose, children, hideCloseB
     return () => document.removeEventListener('keydown', handleEscape)
   }, [handleClose, isOpen])
 
+  if (embedded) {
+    return (
+      <div
+        className={cn(
+          'size-full flex flex-col bg-background text-foreground overflow-y-auto p-6 md:p-8',
+          className?.replace(/max-w-\[[^\]]+\]/g, 'max-w-4xl mx-auto').replace(/rounded-\S+/g, 'rounded-xl'),
+        )}
+      >
+        <div className="relative w-full">
+          {!hideCloseButton && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute right-0 top-0 z-20 flex size-7 cursor-pointer items-center justify-center rounded-lg border border-border text-muted-foreground transition-all hover:bg-muted hover:text-foreground active:scale-95"
+              aria-label={t('button.close')}
+            >
+              <X size={15} strokeWidth={2} />
+            </button>
+          )}
+          {children}
+        </div>
+      </div>
+    )
+  }
+
   if (animState === 'closed') return null
 
   const modalContent = (
-    <YStack
+    <div
       ref={backdropRef}
-      // Tamagui's shared position type omits the web-only fixed value.
-      // @ts-expect-error fixed is valid in the Electron renderer.
-      position="fixed"
-      top={0}
-      right={0}
-      bottom={0}
-      left={0}
-      width="100vw"
-      height="100vh"
-      alignItems="center"
-      justifyContent="center"
-      backgroundColor="rgba(0, 0, 0, 0.4)"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/45 dark:bg-black/65 backdrop-blur-xl"
       role="presentation"
-      onPress={handleClose}
-      zIndex={9999}
+      onClick={handleClose}
     >
-      <YStack
+      <div
         ref={modalRef}
-        borderRadius="$4"
-        borderWidth={1}
-        borderColor="$gray7"
-        backgroundColor="$background"
-        shadowColor="$shadowColor"
-        shadowOpacity={0.5}
-        shadowRadius={10}
-        padding="$4"
-        width="calc(100vw - 32px)"
-        maxWidth={520}
-        maxHeight="calc(100vh - 32px)"
-        style={{ overflow: 'auto' }}
         role="dialog"
         aria-modal
-        onPress={(event) => event.stopPropagation()}
+        onClick={(event) => event.stopPropagation()}
+        className={cn(
+          'relative max-h-[calc(100vh-48px)] w-[calc(100vw-32px)] max-w-[480px] overflow-y-auto rounded-2xl border border-[var(--line)] bg-[var(--surface-1)] p-6 text-foreground shadow-[0_24px_64px_rgba(0,0,0,0.25)] backdrop-blur-2xl custom-scrollbar',
+          className,
+        )}
       >
         {!hideCloseButton && (
-          <XStack position="absolute" top={10} right={15}>
-            <button
-              type="button"
-              onClick={handleClose}
-              className="cursor-pointer rounded-full p-1 transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-700"
-              style={{ background: 'transparent', border: 'none' }}
-              aria-label={t('button.close')}
-            >
-              <X size={18} />
-            </button>
-          </XStack>
+          <button
+            type="button"
+            onClick={handleClose}
+            className="absolute right-4 top-4 z-20 flex size-7 cursor-pointer items-center justify-center rounded-lg border border-transparent text-[var(--ink-muted)] transition-all hover:bg-[var(--accent-soft)] hover:text-[#7b68ee] active:scale-95"
+            aria-label={t('button.close')}
+          >
+            <X size={15} strokeWidth={2} />
+          </button>
         )}
         {children}
-      </YStack>
-    </YStack>
+      </div>
+    </div>
   )
 
   return ReactDOM.createPortal(modalContent, document.body)
 }
 
-export default ReorModal
+export const ReorModal = ModernModal
+export default ModernModal

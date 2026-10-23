@@ -97,9 +97,8 @@ function getOllamaBaseUrl(store: Store<StoreSchema>): string {
   const llmAPIs = store.get(StoreKeys.LLMAPIs) || []
   const ollamaAPI = llmAPIs.find((api: LLMAPIConfig) => api.apiInterface === 'ollama')
   if (ollamaAPI?.apiURL) {
-    // 兼容 /v1/ 后缀（OpenAI 兼容格式）和原生格式
-    const baseUrl = ollamaAPI.apiURL.replace(/\/v1\/?$/, '')
-    return baseUrl
+    // 规范化：去除末尾的 /v1 或 /api 或斜杠，保留 host:port 根地址
+    return ollamaAPI.apiURL.replace(/(\/v1|\/api)?\/?$/, '')
   }
   return 'http://localhost:11434' // 默认回退
 }

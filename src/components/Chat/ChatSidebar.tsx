@@ -1,13 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { ThemeProvider } from '@mui/material/styles'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import DialogTitle from '@mui/material/DialogTitle'
-import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
-import { IoChatbubbles } from 'react-icons/io5'
-import { RiChatNewFill, RiArrowDownSLine } from 'react-icons/ri'
+import { MessageSquare, Plus, ChevronDown, Trash2, PanelLeftClose } from 'lucide-react'
 import { YStack, XStack, SizableText } from 'tamagui'
 import gsap from 'gsap'
 import { useChatContext } from '@/contexts/ChatContext'
@@ -16,7 +8,7 @@ import { useTranslation } from '@/lib/i18n'
 import { ChatMetadata } from '../../lib/llm/types'
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu'
 import { staggerFadeInUp } from '@/lib/gsap-animations'
-import { appMuiTheme } from '@/theme/appMuiTheme'
+import ConfirmDialog from '../Common/ConfirmDialog'
 
 export interface ChatItemProps {
   chatMetadata: ChatMetadata
@@ -29,11 +21,11 @@ export const ChatItem: React.FC<ChatItemProps> = ({ chatMetadata, onRequestDelet
   const { t } = useTranslation()
 
   const isSelected = chatMetadata.id === currentChat?.id
-  const itemClasses = `
-    flex items-center cursor-pointer py-1.5 px-2.5 rounded-lg font-sans text-xs
-    transition-all duration-75
-    ${isSelected ? 'text-white font-medium bg-white/[0.12] shadow-sm' : 'text-neutral-400 hover:text-white hover:bg-white/[0.05]'}
-  `
+  const itemClasses = `group relative flex items-center justify-between cursor-pointer py-1.5 px-2.5 rounded-md font-sans text-xs transition-all duration-75 ${
+    isSelected
+      ? 'font-medium bg-[#7b68ee]/15 text-[#7b68ee] dark:text-[#a29bfe] border-l-2 border-[#7b68ee] shadow-sm'
+      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+  }`
 
   return (
     <ContextMenu>
@@ -49,26 +41,35 @@ export const ChatItem: React.FC<ChatItemProps> = ({ chatMetadata, onRequestDelet
               openContent(chatMetadata.id)
             }
           }}
+          className={itemClasses}
+          onClick={() => openContent(chatMetadata.id)}
         >
-          <XStack
-            backgroundColor={isSelected ? '$gray7' : undefined}
-            gap="$2"
-            alignItems="center"
-            hoverStyle={{
-              backgroundColor: '$gray7',
-            }}
-            onPress={() => openContent(chatMetadata.id)}
-            className={itemClasses}
-          >
-            <IoChatbubbles />
-            <SizableText fontSize={11} fontWeight={500} ellipse className="flex-1">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <MessageSquare size={13} className={`shrink-0 ${isSelected ? 'text-[#7b68ee]' : 'text-muted-foreground'}`} />
+            <span className="truncate text-xs font-medium">
               {chatMetadata.displayName}
-            </SizableText>
-          </XStack>
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onRequestDelete(chatMetadata)
+            }}
+            className="flex size-5 items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-red-400 group-hover:opacity-100"
+            title={t('chat.deleteChat')}
+            aria-label={t('chat.deleteChat')}
+          >
+            <Trash2 size={12} />
+          </button>
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent>
-        <ContextMenuItem onClick={() => onRequestDelete(chatMetadata)}>{t('chat.deleteChat')}</ContextMenuItem>
+        <ContextMenuItem onClick={() => onRequestDelete(chatMetadata)} className="flex items-center gap-2 text-red-400">
+          <Trash2 size={13} className="text-red-400" />
+          <span>{t('chat.deleteChat')}</span>
+        </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
   )
@@ -79,12 +80,12 @@ export const ChatSidebar: React.FC = () => {
   const [chatToDelete, setChatToDelete] = useState<ChatMetadata | null>(null)
   const listRef = useRef<HTMLUListElement>(null)
 
-  const { allChatsMetadata, openNewChat, deleteChat } = useChatContext()
+  const { allChatsMetadata, openNewChat, deleteChat, setSidebarShowing } = useChatContext()
   const { t } = useTranslation()
 
   const toggleRecents = () => setIsRecentsOpen((prev) => !prev)
 
-  // GSAP: 聊天列表错位入场（替代 CSS animation-delay）
+  // GSAP: 聊天列表错位入场
   useEffect(() => {
     if (!listRef.current || !isRecentsOpen) return
 
@@ -100,35 +101,50 @@ export const ChatSidebar: React.FC = () => {
   }, [allChatsMetadata, isRecentsOpen])
 
   return (
-    <YStack backgroundColor="$gray3" className="flex h-full flex-col overflow-y-auto px-2 pb-4 pt-2.5">
+    <YStack className="file-sidebar-surface flex h-full flex-col overflow-y-auto px-2.5 pb-4 pt-2.5 select-none">
       <div className="flex h-full flex-col gap-2">
-        <div className="flex min-h-0 flex-1 flex-col gap-4">
-          <div className="mb-2 flex flex-col gap-3">
+        <div className="flex min-h-0 flex-1 flex-col gap-3">
+          {/* Header Action & New Chat Button */}
+          <div className="flex items-center justify-between pb-1">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              {t('sidebar.chatHistory')}
+            </span>
             <button
-              aria-label={t('chat.startNew')}
-              className="chat-new-button flex cursor-pointer items-center justify-center gap-2 rounded-lg 
-                      border border-white/10 bg-white/[0.08] py-2 text-white shadow-sm
-                      transition-all duration-75 hover:bg-white/[0.14] hover:border-white/20 active:scale-[0.99]
-                      focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/40"
+              className="flex size-6 cursor-pointer items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              title="收起侧栏"
+              aria-label="收起侧栏"
+              onClick={() => setSidebarShowing(null)}
               type="button"
-              onClick={() => openNewChat(undefined)}
             >
-              <RiChatNewFill className="text-base" />
-              <span className="text-xs font-semibold tracking-wide">{t('chat.startNew')}</span>
+              <PanelLeftClose size={13} strokeWidth={1.8} />
             </button>
           </div>
 
-          <div className="flex-1">
+          <button
+            aria-label={t('chat.startNew')}
+            className="chat-new-button flex cursor-pointer items-center justify-center gap-2 rounded-md 
+                    bg-[#7b68ee] hover:bg-[#6c5ce7] py-2 text-white shadow-sm
+                    transition-all duration-75 active:scale-[0.99]
+                    focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/40"
+            type="button"
+            onClick={() => openNewChat(undefined)}
+          >
+            <Plus size={15} strokeWidth={2.2} />
+            <span className="text-xs font-semibold tracking-wide">{t('chat.startNew')}</span>
+          </button>
+
+          <div className="flex-1 overflow-y-auto no-scrollbar">
             <button
               type="button"
-              className="flex w-full cursor-pointer items-center justify-between border-0 bg-transparent p-1 text-left text-muted-foreground"
+              className="flex w-full cursor-pointer items-center justify-between border-0 bg-transparent py-1.5 text-left text-muted-foreground hover:text-foreground transition-colors"
               onClick={toggleRecents}
               aria-expanded={isRecentsOpen}
               aria-controls="chat-recents-list"
             >
-              <h4 className="mb-0 mt-1 text-xs font-medium tracking-wider">{t('chat.recents')}</h4>
-              <RiArrowDownSLine
-                className={`mt-1 transition-transform duration-200 ${!isRecentsOpen ? 'rotate-0' : 'rotate-180'}`}
+              <span className="text-xs font-medium tracking-wide">{t('chat.recents')}</span>
+              <ChevronDown
+                size={14}
+                className={`transition-transform duration-150 ${isRecentsOpen ? 'rotate-0' : '-rotate-90'}`}
                 aria-hidden="true"
               />
             </button>
@@ -137,12 +153,12 @@ export const ChatSidebar: React.FC = () => {
                 <div
                   id="chat-recents-list"
                   role="status"
-                  className="mx-2 mt-4 rounded-md border border-dashed border-white/15 px-3 py-4 text-center text-xs text-muted-foreground"
+                  className="mt-3 rounded-md border border-dashed border-border px-3 py-6 text-center text-xs text-muted-foreground"
                 >
                   {t('chat.emptyHistory')}
                 </div>
               ) : (
-                <ul id="chat-recents-list" ref={listRef} className="m-0 flex list-none flex-col gap-0.5 p-0">
+                <ul id="chat-recents-list" ref={listRef} className="m-0 flex list-none flex-col gap-0.5 p-0 mt-1">
                   {allChatsMetadata
                     .slice()
                     .sort((a, b) => Number(b.timeOfLastMessage) - Number(a.timeOfLastMessage))
@@ -157,36 +173,21 @@ export const ChatSidebar: React.FC = () => {
         </div>
       </div>
 
-      <ThemeProvider theme={appMuiTheme}>
-        <Dialog
-          open={Boolean(chatToDelete)}
-          onClose={() => setChatToDelete(null)}
-          aria-labelledby="delete-chat-dialog-title"
-          aria-describedby="delete-chat-dialog-description"
-        >
-          <DialogTitle id="delete-chat-dialog-title">{t('chat.deleteChat')}</DialogTitle>
-          <DialogContent>
-            <Typography id="delete-chat-dialog-description" variant="body2" color="text.secondary">
-              {chatToDelete ? t('chat.deleteConfirm', { name: chatToDelete.displayName }) : ''}
-            </Typography>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setChatToDelete(null)}>{t('button.cancel')}</Button>
-            <Button
-              color="error"
-              variant="contained"
-              onClick={() => {
-                if (!chatToDelete) return
-                const chatId = chatToDelete.id
-                setChatToDelete(null)
-                deleteChat(chatId)
-              }}
-            >
-              {t('button.delete')}
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </ThemeProvider>
+      <ConfirmDialog
+        isOpen={Boolean(chatToDelete)}
+        title={t('chat.deleteChat')}
+        message={chatToDelete ? t('chat.deleteConfirm', { name: chatToDelete.displayName }) : ''}
+        confirmText={t('button.delete')}
+        cancelText={t('button.cancel')}
+        isDestructive
+        onConfirm={() => {
+          if (!chatToDelete) return
+          const chatId = chatToDelete.id
+          setChatToDelete(null)
+          deleteChat(chatId)
+        }}
+        onCancel={() => setChatToDelete(null)}
+      />
     </YStack>
   )
 }

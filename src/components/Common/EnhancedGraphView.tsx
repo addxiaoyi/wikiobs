@@ -1,25 +1,22 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
-import { useTheme } from '@mui/material/styles'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
-import IconButton from '@mui/material/IconButton'
-import Tooltip from '@mui/material/Tooltip'
-import Slider from '@mui/material/Slider'
-import Paper from '@mui/material/Paper'
-import Chip from '@mui/material/Chip'
-import Menu from '@mui/material/Menu'
-import MenuItem from '@mui/material/MenuItem'
-import FormControl from '@mui/material/FormControl'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Switch from '@mui/material/Switch'
-import InputLabel from '@mui/material/InputLabel'
-import Select from '@mui/material/Select'
 import gsap from 'gsap'
-import { RotateCcw } from 'lucide-react'
+import { RotateCcw, Search } from 'lucide-react'
 
 import { Easing, staggerFadeIn, slideInRight } from '@/lib/gsap-animations'
 import { useTranslation } from '@/lib/i18n'
+import { Slider } from '@/components/ui/slider'
+import { Switch } from '@/components/ui/switch'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { cn } from '@/lib/ui'
 
 interface GraphNode {
   id: string
@@ -74,8 +71,7 @@ const EnhancedGraphView: React.FC<EnhancedGraphViewProps> = ({
   height = 600,
 }) => {
   const { t } = useTranslation()
-  const muiTheme = useTheme()
-  const isDark = muiTheme.palette.mode === 'dark' || (typeof document !== 'undefined' && document.documentElement.classList.contains('dark'))
+  const isDark = typeof document !== 'undefined' ? (document.documentElement.classList.contains('dark') || true) : true
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const controlBarRef = useRef<HTMLDivElement>(null)
@@ -119,14 +115,14 @@ const EnhancedGraphView: React.FC<EnhancedGraphViewProps> = ({
     const clusterList: ClusterInfo[] = []
     let colorIdx = 0
 
-    clusterMap.forEach((clusterNodes, tag) => {
+    clusterMap.forEach((groupNodes, tag) => {
       clusterList.push({
         id: tag,
         label: tag,
         color: clusterColors[colorIdx % clusterColors.length],
-        nodeCount: clusterNodes.length,
+        nodeCount: groupNodes.length,
       })
-      colorIdx++
+      colorIdx += 1
     })
 
     setClusters(clusterList)
@@ -136,165 +132,77 @@ const EnhancedGraphView: React.FC<EnhancedGraphViewProps> = ({
     performClustering()
   }, [performClustering])
 
-  // ============================================================
-  // GSAP 容器入场动画
-  // ============================================================
+  // GSAP 动画：控制栏入场
   useEffect(() => {
-    if (!containerRef.current) return
-
-    const container = containerRef.current
-    const ctx = gsap.context(() => {
-      // 画布淡入 + 轻微上移
-      const canvasEl = container.querySelector('canvas') as HTMLElement
-      if (canvasEl) {
-        gsap.fromTo(
-          canvasEl,
-          { autoAlpha: 0 },
-          {
-            autoAlpha: 1,
-            duration: 0.6,
-            ease: Easing.smooth,
-            clearProps: 'opacity,visibility,transform',
-            overwrite: 'auto',
-          },
-        )
-      }
-    }, container)
-
-    return () => ctx.revert()
-  }, [])
-
-  // ============================================================
-  // GSAP 控制栏入场动画
-  // ============================================================
-  useEffect(() => {
-    if (!controlBarRef.current) return
-
-    const bar = controlBarRef.current
-    const ctx = gsap.context(() => {
+    if (controlBarRef.current) {
       gsap.fromTo(
-        bar,
-        { autoAlpha: 0 },
-        {
-          autoAlpha: 1,
-          duration: 0.5,
-          delay: 0.2,
-          ease: Easing.smooth,
-          clearProps: 'opacity,visibility,transform',
-          overwrite: 'auto',
-        },
+        controlBarRef.current,
+        { y: -30, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.4, ease: Easing.smooth },
       )
-
-      const controls = bar.querySelectorAll('.MuiFormControl-root, div')
-      if (controls.length) {
-        staggerFadeIn(controls, 0.3, 0.05, 0.3)
-      }
-    }, bar)
-
-    return () => ctx.revert()
+    }
   }, [])
 
-  // ============================================================
-  // GSAP 节点详情面板滑入
-  // ============================================================
+  // GSAP 动画：节点详情面板滑入
   useEffect(() => {
     if (selectedNode && detailPanelRef.current) {
-      const panel = detailPanelRef.current
-      const ctx = gsap.context(() => {
-        slideInRight(panel, 0.35, 0)
-      }, panel)
-      return () => ctx.revert()
+      slideInRight(detailPanelRef.current, 0.3)
     }
   }, [selectedNode])
 
-  // ============================================================
-  // GSAP 图例入场
-  // ============================================================
+  // GSAP 动画：节点新增/更新脉冲
   useEffect(() => {
-    if (!legendRef.current || clusters.length === 0) return
-
-    const legend = legendRef.current
-    const ctx = gsap.context(() => {
+    if (nodes.length > prevNodeCountRef.current && canvasRef.current) {
       gsap.fromTo(
-        legend,
-        { autoAlpha: 0 },
-        {
-          autoAlpha: 1,
-          duration: 0.45,
-          delay: 0.4,
-          ease: Easing.smooth,
-          clearProps: 'opacity,visibility,transform',
-          overwrite: 'auto',
-        },
+        canvasRef.current,
+        { filter: 'brightness(1.3)' },
+        { filter: 'brightness(1)', duration: 0.6, ease: Easing.smooth },
       )
-    }, legend)
+    }
+    prevNodeCountRef.current = nodes.length
+  }, [nodes.length])
 
-    return () => ctx.revert()
+  // GSAP 动画：图例入场
+  useEffect(() => {
+    if (legendRef.current && clusters.length > 0) {
+      staggerFadeIn(legendRef.current.children, 0.3, 0.04)
+    }
   }, [clusters.length])
 
-  // 过滤节点
-  const filteredNodes = React.useMemo(() => {
-    let result = nodes
-
-    // 按聚类过滤
+  // 筛选节点
+  const filteredNodes = nodes.filter((node) => {
+    // 聚类筛选
     if (selectedCluster) {
-      result = result.filter((n) => (n.tags || [])[0] === selectedCluster)
+      const tags = node.tags || []
+      const primaryTag = tags[0] || 'Uncategorized'
+      if (primaryTag !== selectedCluster) return false
     }
-
-    // 按搜索过滤
-    if (searchQuery) {
+    // 搜索筛选
+    if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase()
-      result = result.filter(
-        (n) =>
-          n.label.toLowerCase().includes(query) ||
-          (n.tags || []).some((tag: string) => tag.toLowerCase().includes(query)),
-      )
+      const matchLabel = node.label.toLowerCase().includes(query)
+      const matchTag = (node.tags || []).some((t) => t.toLowerCase().includes(query))
+      return matchLabel || matchTag
     }
+    return true
+  })
 
-    return result
-  }, [nodes, selectedCluster, searchQuery])
+  // 筛选边
+  const filteredEdges = edges.filter((edge) => {
+    const sourceExists = filteredNodes.some((n) => n.id === edge.source)
+    const targetExists = filteredNodes.some((n) => n.id === edge.target)
+    return sourceExists && targetExists
+  })
 
-  // 节点数变化时的数据更新动画
-  useEffect(() => {
-    if (nodes.length !== prevNodeCountRef.current && containerRef.current) {
-      prevNodeCountRef.current = nodes.length
-
-      const canvasEl = containerRef.current.querySelector('canvas') as HTMLElement
-      if (canvasEl) {
-        const ctx = gsap.context(() => {
-          gsap.fromTo(
-            canvasEl,
-            { autoAlpha: 0.6, scale: 0.98 },
-            {
-              autoAlpha: 1,
-              scale: 1,
-              duration: 0.3,
-              ease: Easing.smooth,
-              clearProps: 'opacity,visibility,transform',
-              overwrite: 'auto',
-            },
-          )
-        })
-        return () => ctx.revert()
-      }
-    }
-  }, [nodes.length, filteredNodes.length])
-
-  // 过滤边
-  const filteredEdges = React.useMemo(() => {
-    const nodeIds = new Set(filteredNodes.map((n) => n.id))
-    return edges.filter((e) => nodeIds.has(e.source) && nodeIds.has(e.target))
-  }, [edges, filteredNodes])
-
-  // 计算节点位置
+  // 自动布局（力导向简化版 / 网格 / 径向）
   const layoutNodes = React.useMemo(() => {
-    const padding = 50
     const centerX = width / 2
     const centerY = height / 2
-    const radius = Math.max(0, Math.min(width, height) / 2 - padding)
+    const radius = Math.min(width, height) * 0.35
 
     if (layoutMode === 'grid') {
       const cols = Math.ceil(Math.sqrt(filteredNodes.length))
+      const padding = 60
       const cellW = (width - padding * 2) / Math.max(cols, 1)
       const cellH = (height - padding * 2) / Math.max(Math.ceil(filteredNodes.length / cols), 1)
 
@@ -389,9 +297,9 @@ const EnhancedGraphView: React.FC<EnhancedGraphViewProps> = ({
             ctx.setLineDash([4, 4])
             ctx.strokeStyle = isDark ? '#64748b' : '#94a3b8'
           } else if (edge.type === 'link') {
-            ctx.strokeStyle = '#3b82f6'
+            ctx.strokeStyle = isDark ? '#ffffff' : '#0f172a'
           } else if (edge.type === 'mention') {
-            ctx.strokeStyle = '#f97316'
+            ctx.strokeStyle = isDark ? '#94a3b8' : '#64748b'
           }
 
           ctx.stroke()
@@ -556,6 +464,13 @@ const EnhancedGraphView: React.FC<EnhancedGraphViewProps> = ({
     }
   }
 
+  useEffect(() => {
+    if (!contextMenu) return undefined
+    const handleWindowClick = () => setContextMenu(null)
+    window.addEventListener('click', handleWindowClick)
+    return () => window.removeEventListener('click', handleWindowClick)
+  }, [contextMenu])
+
   const handleWheel = useCallback(
     (e: WheelEvent) => {
       e.preventDefault()
@@ -651,173 +566,133 @@ const EnhancedGraphView: React.FC<EnhancedGraphViewProps> = ({
   }
 
   return (
-    <Box ref={containerRef} sx={{ position: 'relative', width: '100%', maxWidth: '100%', height, overflow: 'hidden' }}>
-      {/* 控制栏 */}
-      <Paper
+    <div
+      ref={containerRef}
+      className="relative w-full max-w-full overflow-hidden select-none"
+      style={{ height }}
+    >
+      {/* 悬浮控制栏 */}
+      <div
         ref={controlBarRef}
-        sx={{
-          position: 'absolute',
-          top: 8,
-          left: 8,
-          right: 8,
-          p: 1,
-          zIndex: 10,
-          display: { xs: 'grid', md: 'flex' },
-          gridTemplateColumns: { xs: 'minmax(0, 1fr) minmax(0, 1fr)', md: 'none' },
-          gap: 1,
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          '& .MuiFormControl-root': { minWidth: 0, width: { xs: '100%', sm: 'auto' } },
-          '& .MuiSlider-root': { minWidth: { xs: 64, sm: 72 }, maxWidth: 100 },
-          '& .MuiFormControlLabel-root': { m: 0, minWidth: 0 },
-        }}
+        className="absolute top-2.5 inset-x-2.5 z-10 flex flex-wrap items-center gap-2.5 rounded-xl border border-border bg-card/90 backdrop-blur-xl px-3 py-2 text-xs shadow-xl text-card-foreground"
       >
         {/* 缩放控制 */}
-        <Box sx={{ display: 'flex', minWidth: 0, alignItems: 'center', gap: 0.5 }}>
-          <Typography variant="caption" sx={{ flexShrink: 0 }}>
-            {t('graph.zoomLabel')}
-          </Typography>
-          <Slider
-            value={zoom}
-            min={0.3}
-            max={3}
-            step={0.1}
-            onChange={(_, v) => setZoom(v as number)}
-            sx={{ width: { xs: 64, sm: 100 } }}
-            size="small"
-            aria-label={t('graph.zoomLabel')}
-          />
-          <Typography variant="caption" sx={{ minWidth: 32, flexShrink: 0 }}>
-            {Math.round(zoom * 100)}%
-          </Typography>
-        </Box>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-muted-foreground font-medium">{t('graph.zoomLabel')}</span>
+          <div className="w-20">
+            <Slider
+              value={[zoom]}
+              min={0.3}
+              max={3}
+              step={0.1}
+              onValueChange={(vals) => setZoom(vals[0])}
+              aria-label={t('graph.zoomLabel')}
+            />
+          </div>
+          <span className="w-9 font-mono text-[11px] text-foreground text-right">{Math.round(zoom * 100)}%</span>
+        </div>
+
+        <div className="h-4 w-px bg-border hidden sm:block" />
 
         {/* 布局模式 */}
-        <FormControl size="small" sx={{ minWidth: { xs: 88, sm: 100 } }}>
-          <InputLabel>{t('graph.layoutLabel')}</InputLabel>
-          <Select
-            value={layoutMode}
-            label={t('graph.layoutLabel')}
-            onChange={(e) => setLayoutMode(e.target.value as 'radial' | 'grid')}
-          >
-            <MenuItem value="radial">{t('graph.radial')}</MenuItem>
-            <MenuItem value="grid">{t('graph.grid')}</MenuItem>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="text-muted-foreground font-medium">{t('graph.layoutLabel')}</span>
+          <Select value={layoutMode} onValueChange={(v) => setLayoutMode(v as 'radial' | 'grid')}>
+            <SelectTrigger className="h-7 w-24 bg-background border-border text-foreground text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="border-border bg-popover text-popover-foreground">
+              <SelectItem value="radial" className="text-xs">{t('graph.radial')}</SelectItem>
+              <SelectItem value="grid" className="text-xs">{t('graph.grid')}</SelectItem>
+            </SelectContent>
           </Select>
-        </FormControl>
+        </div>
+
+        <div className="h-4 w-px bg-border hidden sm:block" />
 
         {/* 聚类筛选 */}
-        <FormControl size="small" sx={{ minWidth: { xs: 104, sm: 120 } }}>
-          <InputLabel>{t('graph.clusterLabel')}</InputLabel>
-          <Select
-            value={selectedCluster || ''}
-            label={t('graph.clusterLabel')}
-            onChange={(e) => setSelectedCluster(e.target.value || null)}
-          >
-            <MenuItem value="">{t('graph.allClusters')}</MenuItem>
-            {clusters.map((c) => (
-              <MenuItem key={c.id} value={c.id}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Box
-                    sx={{
-                      width: 12,
-                      height: 12,
-                      borderRadius: '50%',
-                      bgcolor: c.color,
-                    }}
-                  />
-                  <span>
-                    {c.label} ({c.nodeCount})
-                  </span>
-                </Box>
-              </MenuItem>
-            ))}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="text-muted-foreground font-medium">{t('graph.clusterLabel')}</span>
+          <Select value={selectedCluster || 'ALL'} onValueChange={(v) => setSelectedCluster(v === 'ALL' ? null : v)}>
+            <SelectTrigger className="h-7 w-28 bg-background border-border text-foreground text-xs truncate">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="border-border bg-popover text-popover-foreground max-h-56">
+              <SelectItem value="ALL" className="text-xs">{t('graph.allClusters')}</SelectItem>
+              {clusters.map((c) => (
+                <SelectItem key={c.id} value={c.id} className="text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <span className="size-2 rounded-full shrink-0" style={{ backgroundColor: c.color }} />
+                    <span className="truncate">{c.label} ({c.nodeCount})</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
-        </FormControl>
+        </div>
+
+        <div className="h-4 w-px bg-border hidden sm:block" />
 
         {/* 标签开关 */}
-        <FormControlLabel
-          control={<Switch size="small" checked={showLabels} onChange={(e) => setShowLabels(e.target.checked)} />}
-          label={<Typography variant="caption">{t('graph.labels')}</Typography>}
-        />
+        <div className="flex items-center gap-2 shrink-0">
+          <Switch
+            id="graph-labels-toggle"
+            checked={showLabels}
+            onCheckedChange={setShowLabels}
+          />
+          <label htmlFor="graph-labels-toggle" className="text-xs text-foreground cursor-pointer">
+            {t('graph.labels')}
+          </label>
+        </div>
 
         {/* 搜索 */}
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-            minWidth: 0,
-            gridColumn: { xs: '1 / -1', md: 'auto' },
-          }}
-        >
-          <input
-            type="text"
-            placeholder={t('graph.searchPlaceholder')}
-            aria-label={t('graph.searchPlaceholder')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              padding: '4px 8px',
-              border: '1px solid #ccc',
-              borderRadius: 4,
-              width: 'clamp(120px, 22vw, 150px)',
-              minWidth: 0,
-              fontSize: 12,
-            }}
-          />
-        </Box>
+        <div className="flex items-center gap-1.5 min-w-0 flex-1 sm:max-w-44 ml-auto">
+          <div className="relative w-full">
+            <Search size={12} className="absolute left-2.5 top-2 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder={t('graph.searchPlaceholder')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-7 pl-7 bg-background border-border text-foreground text-xs placeholder:text-muted-foreground w-full"
+            />
+          </div>
+        </div>
 
         {/* 重置视图 */}
-        <Tooltip title={t('graph.resetView')}>
-          <IconButton size="small" onClick={handleResetView} aria-label={t('graph.resetView')}>
-            <RotateCcw size={16} aria-hidden="true" />
-          </IconButton>
-        </Tooltip>
-      </Paper>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={handleResetView}
+                aria-label={t('graph.resetView')}
+                className="flex size-7 items-center justify-center rounded-md border border-border bg-secondary/50 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground shrink-0"
+              >
+                <RotateCcw size={13} />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent className="text-xs border-border bg-popover text-popover-foreground">
+              {t('graph.resetView')}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
 
       {/* 图谱画布 */}
-      <Box role="group" sx={{ width: '100%', outline: 'none' }}>
-        <Typography
-          id="graph-canvas-status"
-          aria-live="polite"
-          component="span"
-          sx={{
-            position: 'absolute',
-            width: 1,
-            height: 1,
-            padding: 0,
-            margin: -1,
-            overflow: 'hidden',
-            clip: 'rect(0, 0, 0, 0)',
-            whiteSpace: 'nowrap',
-            border: 0,
-          }}
-        >
+      <div role="group" className="w-full outline-none">
+        <span id="graph-canvas-status" aria-live="polite" className="sr-only">
           {selectedNode ? t('graph.selectedNode', { label: selectedNode.label }) : t('graph.noSelectedNode')}
-        </Typography>
-        <Typography
-          id="graph-canvas-help"
-          component="span"
-          sx={{
-            position: 'absolute',
-            width: 1,
-            height: 1,
-            padding: 0,
-            margin: -1,
-            overflow: 'hidden',
-            clip: 'rect(0, 0, 0, 0)',
-            whiteSpace: 'nowrap',
-            border: 0,
-          }}
-        >
+        </span>
+        <span id="graph-canvas-help" className="sr-only">
           {t('graph.canvasHelp')}
-        </Typography>
+        </span>
+
         {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
         <div
           role="application"
           aria-label={t('graph.canvasLabel')}
           aria-describedby="graph-canvas-help graph-canvas-status"
-          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
           tabIndex={0}
           onKeyDown={handleCanvasKeyDown}
           style={{ outline: 'none' }}
@@ -828,12 +703,8 @@ const EnhancedGraphView: React.FC<EnhancedGraphViewProps> = ({
             tabIndex={-1}
             width={width}
             height={height}
-            style={{
-              border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
-              borderRadius: 4,
-              backgroundColor: isDark ? '#090d16' : '#f8fafc',
-              cursor,
-            }}
+            className="rounded-lg bg-background border border-border"
+            style={{ cursor }}
             onMouseMove={handleMouseMove}
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
@@ -842,21 +713,8 @@ const EnhancedGraphView: React.FC<EnhancedGraphViewProps> = ({
             onContextMenu={handleContextMenu}
           />
         </div>
-        <Box
-          component="ul"
-          aria-label={t('graph.nodeList')}
-          sx={{
-            position: 'absolute',
-            width: 1,
-            height: 1,
-            padding: 0,
-            margin: -1,
-            overflow: 'hidden',
-            clip: 'rect(0, 0, 0, 0)',
-            whiteSpace: 'nowrap',
-            border: 0,
-          }}
-        >
+
+        <ul aria-label={t('graph.nodeList')} className="sr-only">
           {layoutNodes.map((node) => {
             const linkCount = filteredEdges.filter((edge) => edge.source === node.id || edge.target === node.id).length
             const tags = node.tags?.length ? node.tags.join(', ') : t('graph.noTags')
@@ -883,149 +741,156 @@ const EnhancedGraphView: React.FC<EnhancedGraphViewProps> = ({
               </li>
             )
           })}
-        </Box>
-      </Box>
+        </ul>
+      </div>
 
-      {/* 图例 */}
+      {/* 单节点提示 */}
       {layoutNodes.length < 2 && (
-        <Paper
-          sx={{
-            position: 'absolute',
-            top: 88,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            px: 1.5,
-            py: 0.75,
-            zIndex: 9,
-            bgcolor: 'rgba(29, 33, 41, 0.86)',
-            color: '#94a3b8',
-            border: '1px solid rgba(148, 163, 184, 0.14)',
-            borderRadius: 2,
-          }}
-        >
-          <Typography variant="caption">{t('graph.singleNodeHint')}</Typography>
-        </Paper>
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 px-3 py-1.5 z-10 rounded-lg bg-card border border-border text-muted-foreground text-xs shadow-md">
+          {t('graph.singleNodeHint')}
+        </div>
       )}
 
-      <Paper
+      {/* 图例 */}
+      <div
         ref={legendRef}
-        sx={{
-          position: 'absolute',
-          bottom: 12,
-          left: 12,
-          p: 1.25,
-          zIndex: 10,
-          bgcolor: 'rgba(29, 33, 41, 0.92)',
-          color: '#e2e8f0',
-          border: '1px solid rgba(148, 163, 184, 0.16)',
-          borderRadius: 2,
-        }}
+        className="absolute bottom-3 left-3 z-10 rounded-xl border border-border bg-card/92 backdrop-blur-md p-2.5 text-xs text-card-foreground shadow-xl max-w-sm"
       >
-        <Typography variant="caption" sx={{ fontWeight: 'bold' }}>
-          {t('graph.clusters')}:
-        </Typography>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
-          {clusters.slice(0, 6).map((c) => (
-            <Chip
-              key={c.id}
-              label={c.label}
-              size="small"
-              sx={{ bgcolor: `${c.color}40`, fontSize: 10, cursor: 'pointer' }}
-              onClick={() => setSelectedCluster(selectedCluster === c.id ? null : c.id)}
-            />
-          ))}
+        <div className="font-semibold text-foreground mb-1.5">{t('graph.clusters')}:</div>
+        <div className="flex flex-wrap gap-1">
+          {clusters.slice(0, 6).map((c) => {
+            const isSelected = selectedCluster === c.id
+            return (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => setSelectedCluster(isSelected ? null : c.id)}
+                className={cn(
+                  'flex items-center gap-1 px-2 py-0.5 rounded text-[10px] transition-all border',
+                  isSelected
+                    ? 'border-primary/50 text-foreground font-medium shadow-sm'
+                    : 'border-border text-muted-foreground hover:border-primary/30',
+                )}
+                style={{ backgroundColor: `${c.color}25` }}
+              >
+                <span className="size-1.5 rounded-full" style={{ backgroundColor: c.color }} />
+                <span>{c.label}</span>
+              </button>
+            )
+          })}
           {clusters.length > 6 && (
-            <Typography variant="caption" sx={{ ml: 1 }}>
+            <span className="text-[10px] text-muted-foreground self-center ml-1">
               +{clusters.length - 6} more
-            </Typography>
+            </span>
           )}
-        </Box>
-      </Paper>
+        </div>
+      </div>
 
       {/* 节点详情面板 */}
       {selectedNode && (
-        <Paper
+        <div
           ref={detailPanelRef}
-          sx={{
-            position: 'absolute',
-            top: 60,
-            right: 8,
-            p: 2,
-            zIndex: 10,
-            maxWidth: 200,
-          }}
+          className="absolute top-16 right-3 z-10 w-56 rounded-xl border border-border bg-card/95 backdrop-blur-md p-3 text-card-foreground shadow-xl space-y-2"
         >
-          <Typography variant="subtitle2">{selectedNode.label}</Typography>
-          <Typography variant="caption" color="text.secondary" display="block">
-            {selectedNode.id}
-          </Typography>
+          <div>
+            <div className="text-xs font-semibold text-foreground truncate">{selectedNode.label}</div>
+            <div className="text-[10px] text-muted-foreground font-mono truncate">{selectedNode.id}</div>
+          </div>
           {(selectedNode.tags || []).length > 0 && (
-            <Box sx={{ mt: 1 }}>
+            <div className="flex flex-wrap gap-1">
               {(selectedNode.tags || []).map((tag: string) => (
-                <Chip key={tag} label={tag} size="small" sx={{ mr: 0.5, mb: 0.5 }} />
+                <span
+                  key={tag}
+                  className="rounded bg-secondary border border-border px-1.5 py-0.5 text-[10px] text-foreground"
+                >
+                  #{tag}
+                </span>
               ))}
-            </Box>
+            </div>
           )}
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
-            <Button size="small" variant="contained" onClick={handleOpenSelectedNode} disabled={!selectedNode.filePath}>
+          <div className="flex flex-col gap-1.5 pt-1 border-t border-border">
+            <Button
+              size="sm"
+              variant="accent"
+              onClick={handleOpenSelectedNode}
+              disabled={!selectedNode.filePath}
+              className="h-6 text-[11px] w-full"
+            >
               {t('graph.openNote')}
             </Button>
-            <Button size="small" variant="outlined" onClick={handleShowSelectedDetails}>
-              {t('graph.viewDetails')}
-            </Button>
-            <Button size="small" variant="outlined" onClick={handleFindSelectedRelated}>
-              {t('graph.findRelated')}
-            </Button>
-          </Box>
-        </Paper>
+            <div className="flex gap-1.5">
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={handleShowSelectedDetails}
+                className="h-6 text-[11px] flex-1"
+              >
+                {t('graph.viewDetails')}
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={handleFindSelectedRelated}
+                className="h-6 text-[11px] flex-1"
+              >
+                {t('graph.findRelated')}
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* 右键菜单 */}
-      <Menu
-        open={!!contextMenu}
-        onClose={() => setContextMenu(null)}
-        anchorReference="anchorPosition"
-        anchorPosition={contextMenu ? { top: contextMenu.y, left: contextMenu.x } : undefined}
-      >
-        <MenuItem
-          onClick={() => {
-            onNodeClick?.(contextMenu!.node)
-            setContextMenu(null)
-          }}
+      {contextMenu && (
+        <div
+          className="fixed z-50 min-w-36 rounded-lg border border-border bg-popover p-1 text-xs text-popover-foreground shadow-2xl backdrop-blur-md"
+          style={{ top: contextMenu.y, left: contextMenu.x }}
+          onClick={(e) => e.stopPropagation()}
         >
-          {t('graph.openNote')}
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            if (!contextMenu) return
-            setSelectedNode(contextMenu.node)
-            setRelatedNodeIds([])
-            setContextMenu(null)
-          }}
-        >
-          {t('graph.viewDetails')}
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            if (!contextMenu) return
-            const nodeId = contextMenu.node.id
-            const relatedIds = edges.reduce<string[]>(
-              (ids, edge) => {
-                if (edge.source === nodeId) ids.push(edge.target)
-                if (edge.target === nodeId) ids.push(edge.source)
-                return ids
-              },
-              [nodeId],
-            )
-            setSelectedNode(contextMenu.node)
-            setRelatedNodeIds([...new Set(relatedIds)])
-            setContextMenu(null)
-          }}
-        >
-          {t('graph.findRelated')}
-        </MenuItem>
-      </Menu>
-    </Box>
+          <button
+            type="button"
+            className="flex w-full items-center px-2.5 py-1.5 rounded text-left hover:bg-accent hover:text-accent-foreground transition-colors"
+            onClick={() => {
+              onNodeClick?.(contextMenu.node)
+              setContextMenu(null)
+            }}
+          >
+            {t('graph.openNote')}
+          </button>
+          <button
+            type="button"
+            className="flex w-full items-center px-2.5 py-1.5 rounded text-left hover:bg-accent hover:text-accent-foreground transition-colors"
+            onClick={() => {
+              setSelectedNode(contextMenu.node)
+              setRelatedNodeIds([])
+              setContextMenu(null)
+            }}
+          >
+            {t('graph.viewDetails')}
+          </button>
+          <button
+            type="button"
+            className="flex w-full items-center px-2.5 py-1.5 rounded text-left hover:bg-accent hover:text-accent-foreground transition-colors"
+            onClick={() => {
+              const nodeId = contextMenu.node.id
+              const relatedIds = edges.reduce<string[]>(
+                (ids, edge) => {
+                  if (edge.source === nodeId) ids.push(edge.target)
+                  if (edge.target === nodeId) ids.push(edge.source)
+                  return ids
+                },
+                [nodeId],
+              )
+              setSelectedNode(contextMenu.node)
+              setRelatedNodeIds([...new Set(relatedIds)])
+              setContextMenu(null)
+            }}
+          >
+            {t('graph.findRelated')}
+          </button>
+        </div>
+      )}
+    </div>
   )
 }
 

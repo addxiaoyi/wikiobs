@@ -1,9 +1,8 @@
 import React, { createContext, useContext, useMemo, ReactNode, useState, useCallback, useEffect } from 'react'
 
-import posthog from 'posthog-js'
 import { useChatContext } from './ChatContext'
 import { useFileContext } from './FileContext'
-import { getFilesInDirectory, getNextAvailableFileNameGivenBaseName } from '@/lib/file'
+import { getFilesInDirectory, getNextAvailableFileNameGivenBaseName, removeFileExtension } from '@/lib/file'
 
 interface ContentContextType {
   showEditor: boolean
@@ -86,10 +85,30 @@ export const ContentProvider: React.FC<ContentProviderProps> = ({ children }) =>
       )
       const finalPath = await window.path.join(directoryToMakeFileIn, fileName)
       await openContent(finalPath, `## `)
-      posthog.capture('created_new_note_from_new_note_modal')
     },
     [selectedDirectory, flattenedFiles, openContent],
   )
+
+  useEffect(() => {
+    const handleWikiOpen = async (e: Event) => {
+      const customEvent = e as CustomEvent<{ noteName: string }>
+      const targetName = customEvent.detail?.noteName
+      if (!targetName) return
+      const matchingFile = flattenedFiles.find((f) => {
+        const clean = removeFileExtension(f.name).toLowerCase()
+        return clean === targetName.toLowerCase() || f.name.toLowerCase() === targetName.toLowerCase()
+      })
+      if (matchingFile) {
+        await openContent(matchingFile.path)
+      } else {
+        const dir = (await window.electronStore.getVaultDirectoryForWindow()) || ''
+        const newPath = await window.path.join(dir, `${targetName}.md`)
+        await openContent(newPath, `# ${targetName}\n\n`)
+      }
+    }
+    window.addEventListener('wiki-open-note', handleWikiOpen)
+    return () => window.removeEventListener('wiki-open-note', handleWikiOpen)
+  }, [flattenedFiles, openContent])
 
   const ContentContextMemo = useMemo(
     () => ({

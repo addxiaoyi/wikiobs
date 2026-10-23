@@ -8,14 +8,8 @@ import path from 'path'
 import * as fs from 'fs'
 import Store from 'electron-store'
 import { logger } from './common/logger'
-
-// 扩展 globalThis 类型
-declare global {
-  var lanceSearch:
-    | ((query: string, limit: number) => Promise<Array<{ filePath: string; content?: string }>>)
-    | undefined
-  var graphLinks: Array<{ sourceFile: string; targetFile: string; targetTitle?: string; context?: string }> | undefined
-}
+import WindowsManager from './common/windowManager'
+import type LanceDBTableWrapper from './vector-database/lanceTableWrapper'
 
 interface SearchResult {
   filePath: string
@@ -36,7 +30,6 @@ interface BM25Index {
   avgDocLength: number
 }
 
-let bm25Index: BM25Index | null = null
 const store = new Store()
 
 interface CachedFile {
@@ -45,16 +38,28 @@ interface CachedFile {
   mtime: number
 }
 
-let cachedVaultPath: string | null = null
-const cachedFilesMap: Map<string, CachedFile> = new Map()
-let lastScanTimestamp = 0
+interface VaultSearchCache {
+  index: BM25Index | null
+  files: Map<string, CachedFile>
+  lastScanTimestamp: number
+}
+
+const vaultCaches = new Map<string, VaultSearchCache>()
+const graphCache = new Map<
+  string,
+  { checkedAt: number; links: Array<{ sourceFile: string; targetTitle?: string; context?: string }> }
+>()
 const RESCAN_INTERVAL_MS = 5000
 
-function invalidateBM25Index(): void {
-  bm25Index = null
-  cachedFilesMap.clear()
-  cachedVaultPath = null
-  lastScanTimestamp = 0
+function invalidateBM25Index(vaultPath?: string): void {
+  if (vaultPath) {
+    const cacheKey = path.resolve(vaultPath)
+    vaultCaches.delete(cacheKey)
+    graphCache.delete(cacheKey)
+    return
+  }
+  vaultCaches.clear()
+  graphCache.clear()
 }
 
 // 简单的分词器
@@ -67,15 +72,14 @@ function tokenize(text: string): string[] {
 }
 
 // 计算 BM25
-function calculateBM25(queryTerms: string[], docId: string, k1 = 1.5, b = 0.75): number {
-  if (!bm25Index) return 0
-  const docLength = bm25Index.docLengths.get(docId) || 0
+function calculateBM25(index: BM25Index, queryTerms: string[], docId: string, k1 = 1.5, b = 0.75): number {
+  const docLength = index.docLengths.get(docId) || 0
   let score = 0
-  const N = bm25Index.docLengths.size
-  const avgDL = bm25Index.avgDocLength
+  const N = index.docLengths.size
+  const avgDL = index.avgDocLength
 
   for (const term of queryTerms) {
-    const postings = bm25Index.terms.get(term)
+    const postings = index.terms.get(term)
     if (!postings) continue
 
     const ni = new Set(postings.map((p) => p.docId)).size
@@ -91,7 +95,7 @@ function calculateBM25(queryTerms: string[], docId: string, k1 = 1.5, b = 0.75):
 }
 
 // 构建 BM25 索引
-async function buildBM25Index(files: Array<{ path: string; content: string }>) {
+async function buildBM25Index(files: Array<{ path: string; content: string }>): Promise<BM25Index> {
   const index: BM25Index = {
     terms: new Map(),
     docLengths: new Map(),
@@ -125,7 +129,7 @@ async function buildBM25Index(files: Array<{ path: string; content: string }>) {
   }
 
   index.avgDocLength = totalLength / Math.max(files.length, 1)
-  bm25Index = index
+  return index
 }
 
 // 提取文本片段（用于高亮）
@@ -174,20 +178,25 @@ function rrfFusion(results: Map<string, { result: SearchResult; rank: number }>[
 }
 
 // 混合搜索主函数
-async function hybridSearch(query: string, limit: number = 10, filter?: string): Promise<SearchResult[]> {
-  const vaultPath = store.get('vaultDirectory') as string
+async function hybridSearch(
+  query: string,
+  limit: number = 10,
+  filter?: string,
+  vaultPath: string = store.get('vaultDirectory') as string,
+  dbTableClient?: LanceDBTableWrapper,
+): Promise<SearchResult[]> {
   if (!vaultPath || !fs.existsSync(vaultPath)) {
     return []
   }
 
   // 1. 获取向量搜索结果
-  const vectorResults = await getVectorResults(query, limit)
+  const vectorResults = await getVectorResults(query, limit, dbTableClient, vaultPath)
 
   // 2. 获取 BM25 结果
   const bm25Results = await getBM25Results(query, limit, vaultPath)
 
   // 3. 获取 Graph 关系结果
-  const graphResults = await getGraphResults(query, limit)
+  const graphResults = await getGraphResults(query, limit, vaultPath)
 
   // 4. RRF 融合
   const fusedResults = rrfFusion([vectorResults, bm25Results, graphResults])
@@ -202,8 +211,14 @@ async function hybridSearch(query: string, limit: number = 10, filter?: string):
 }
 
 // 带重排的混合搜索
-async function hybridSearchWithReranking(query: string, limit: number = 10, filter?: string): Promise<SearchResult[]> {
-  const results = await hybridSearch(query, limit * 3, filter)
+async function hybridSearchWithReranking(
+  query: string,
+  limit: number = 10,
+  filter?: string,
+  vaultPath?: string,
+  dbTableClient?: LanceDBTableWrapper,
+): Promise<SearchResult[]> {
+  const results = await hybridSearch(query, limit * 3, filter, vaultPath, dbTableClient)
 
   // 简单的重排：结合相关性分数和内容质量
   const reranked = results.map((r) => {
@@ -223,20 +238,25 @@ async function hybridSearchWithReranking(query: string, limit: number = 10, filt
 async function getVectorResults(
   query: string,
   limit: number,
+  dbTableClient?: LanceDBTableWrapper,
+  vaultPath?: string,
 ): Promise<Map<string, { result: SearchResult; rank: number }>> {
   const results = new Map<string, { result: SearchResult; rank: number }>()
 
   try {
-    // 尝试使用现有的向量数据库 IPC
-    // 由于无法直接访问，这里返回模拟结果
-    // 实际应该通过 IPC 调用 lance.ts 的搜索功能
-    const lanceSearch = globalThis.lanceSearch
-    const lanceResults = lanceSearch ? await lanceSearch(query, limit) : null
-    if (lanceResults) {
+    const normalizedVault = vaultPath ? path.resolve(vaultPath) : null
+    const vaultFilter = normalizedVault
+      ? `notepath LIKE '${normalizedVault.replace(/'/g, "''")}${path.sep}%'`
+      : undefined
+    const lanceResults = dbTableClient ? await dbTableClient.search(query, limit, vaultFilter) : []
+    if (lanceResults.length > 0) {
       lanceResults.forEach((r, idx: number) => {
-        results.set(r.filePath, {
+        if (normalizedVault && path.relative(normalizedVault, path.resolve(r.notepath)).startsWith('..')) {
+          return
+        }
+        results.set(r.notepath, {
           result: {
-            filePath: r.filePath,
+            filePath: r.notepath,
             content: r.content || '',
             score: 1 - idx / limit,
             matchType: 'vector',
@@ -255,19 +275,18 @@ async function getVectorResults(
 
 async function ensureBM25Index(vaultPath: string): Promise<Array<{ path: string; content: string }>> {
   const now = Date.now()
-  const isDifferentVault = cachedVaultPath !== vaultPath
-
-  if (bm25Index && !isDifferentVault && now - lastScanTimestamp < RESCAN_INTERVAL_MS) {
-    return Array.from(cachedFilesMap.values())
+  const cacheKey = path.resolve(vaultPath)
+  let cache = vaultCaches.get(cacheKey)
+  if (!cache) {
+    cache = { index: null, files: new Map(), lastScanTimestamp: 0 }
+    vaultCaches.set(cacheKey, cache)
   }
 
-  if (isDifferentVault) {
-    cachedFilesMap.clear()
-    cachedVaultPath = vaultPath
-    bm25Index = null
+  if (cache.index && now - cache.lastScanTimestamp < RESCAN_INTERVAL_MS) {
+    return Array.from(cache.files.values())
   }
 
-  let indexDirty = !bm25Index
+  let indexDirty = !cache.index
   const currentPaths = new Set<string>()
 
   const scanDir = (dir: string) => {
@@ -283,10 +302,10 @@ async function ensureBM25Index(vaultPath: string): Promise<Array<{ path: string;
           currentPaths.add(fullPath)
           try {
             const stat = fs.statSync(fullPath)
-            const cached = cachedFilesMap.get(fullPath)
+            const cached = cache.files.get(fullPath)
             if (!cached || cached.mtime !== stat.mtimeMs) {
               const content = fs.readFileSync(fullPath, 'utf-8')
-              cachedFilesMap.set(fullPath, { path: fullPath, content, mtime: stat.mtimeMs })
+              cache.files.set(fullPath, { path: fullPath, content, mtime: stat.mtimeMs })
               indexDirty = true
             }
           } catch {
@@ -300,19 +319,19 @@ async function ensureBM25Index(vaultPath: string): Promise<Array<{ path: string;
   }
 
   scanDir(vaultPath)
-  lastScanTimestamp = now
+  cache.lastScanTimestamp = now
 
-  for (const cachedPath of cachedFilesMap.keys()) {
+  for (const cachedPath of cache.files.keys()) {
     if (!currentPaths.has(cachedPath)) {
-      cachedFilesMap.delete(cachedPath)
+      cache.files.delete(cachedPath)
       indexDirty = true
     }
   }
 
-  const files = Array.from(cachedFilesMap.values())
+  const files = Array.from(cache.files.values())
 
-  if (indexDirty || !bm25Index) {
-    await buildBM25Index(files)
+  if (indexDirty || !cache.index) {
+    cache.index = await buildBM25Index(files)
   }
 
   return files
@@ -328,13 +347,15 @@ async function getBM25Results(
 
   try {
     const files = await ensureBM25Index(vaultPath)
+    const index = vaultCaches.get(path.resolve(vaultPath))?.index
+    if (!index) return results
 
     // 计算分数
     const queryTerms = tokenize(query)
     const scored = files
       .map((f) => ({
         ...f,
-        score: calculateBM25(queryTerms, f.path),
+        score: calculateBM25(index, queryTerms, f.path),
       }))
       .filter((f) => f.score > 0)
       .sort((a, b) => b.score - a.score)
@@ -363,12 +384,30 @@ async function getBM25Results(
 async function getGraphResults(
   query: string,
   limit: number,
+  vaultPath: string,
 ): Promise<Map<string, { result: SearchResult; rank: number }>> {
   const results = new Map<string, { result: SearchResult; rank: number }>()
 
   try {
     // 查找包含查询词的链接
-    const graphLinks = globalThis.graphLinks || []
+    const cacheKey = path.resolve(vaultPath)
+    let cachedGraph = graphCache.get(cacheKey)
+    if (!cachedGraph || Date.now() - cachedGraph.checkedAt >= RESCAN_INTERVAL_MS) {
+      const { buildKnowledgeGraph } = await import('./knowledge-graph')
+      const graph = await buildKnowledgeGraph({ vaultPath })
+      cachedGraph = {
+        checkedAt: Date.now(),
+        links: graph.links
+          .filter((link) => link.linkType === 'internal')
+          .map((link) => ({
+            sourceFile: path.join(vaultPath, link.sourceFile),
+            targetTitle: link.targetTitle,
+            context: link.context,
+          })),
+      }
+      graphCache.set(cacheKey, cachedGraph)
+    }
+    const graphLinks = cachedGraph.links
     const queryLower = query.toLowerCase()
 
     const matchingLinks = graphLinks.filter(
@@ -398,13 +437,17 @@ async function getGraphResults(
 }
 
 // 注册 IPC handlers
-export function registerHybridSearchHandlers() {
-  ipcMain.handle('hybrid-search', async (_event, query: string, limit?: number, filter?: string) => {
-    return hybridSearch(query, limit, filter)
+export function registerHybridSearchHandlers(windowsManager: WindowsManager) {
+  ipcMain.handle('hybrid-search', async (event, query: string, limit?: number, filter?: string) => {
+    const windowInfo = windowsManager.getWindowInfoForContents(event.sender)
+    if (!windowInfo) throw new Error('Window info not found.')
+    return hybridSearch(query, limit, filter, windowInfo.vaultDirectoryForWindow, windowInfo.dbTableClient)
   })
 
-  ipcMain.handle('hybrid-search-with-reranking', async (_event, query: string, limit?: number, filter?: string) => {
-    return hybridSearchWithReranking(query, limit, filter)
+  ipcMain.handle('hybrid-search-with-reranking', async (event, query: string, limit?: number, filter?: string) => {
+    const windowInfo = windowsManager.getWindowInfoForContents(event.sender)
+    if (!windowInfo) throw new Error('Window info not found.')
+    return hybridSearchWithReranking(query, limit, filter, windowInfo.vaultDirectoryForWindow, windowInfo.dbTableClient)
   })
 
   logger.info('HybridSearch', 'IPC handlers registered')

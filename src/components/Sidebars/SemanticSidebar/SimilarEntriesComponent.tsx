@@ -1,12 +1,10 @@
 import React from 'react'
 
 import { DBQueryResult } from 'electron/main/vector-database/schema'
-import { RefreshCw } from '@tamagui/lucide-icons'
-import { PiGraph } from 'react-icons/pi'
+import { RefreshCw, Share2 } from 'lucide-react'
 
 import '../../../styles/global.css'
-// import ResizableComponent from '@/components/Common/ResizableComponent'
-import { ScrollView, Stack, YStack, XStack, Text, Button } from 'tamagui'
+import { ScrollView, Stack, YStack, XStack, Text } from 'tamagui'
 import { DBResultPreview } from '@/components/File/DBResultPreview'
 import { useFileContext } from '@/contexts/FileContext'
 import Spinner from '@/components/ui/Spinner'
@@ -52,8 +50,8 @@ const SimilarEntriesComponent: React.FC<SimilarEntriesComponentProps> = ({
     )
   } else if (!isLoadingSimilarEntries) {
     content = (
-      <Stack height="100%" width="100%">
-        <Text fontSize="$2" fontFamily="$body" margin={0} lineHeight="$1" color="$gray11" textAlign="center">
+      <Stack flex={1} alignItems="center" justifyContent="center" padding="$6" width="100%">
+        <Text fontSize="$2" fontFamily="$body" margin={0} lineHeight={20} color="$gray10" textAlign="center">
           {t('semantic.noItems')}
         </Text>
       </Stack>
@@ -61,38 +59,31 @@ const SimilarEntriesComponent: React.FC<SimilarEntriesComponentProps> = ({
   }
 
   return (
-    <ScrollView maxHeight="100%" backgroundColor="$gray3">
+    <ScrollView maxHeight="100%" backgroundColor="$background">
       <Stack flex={1}>
         <YStack>
           {/* Header */}
-          <XStack alignItems="center" paddingHorizontal="$4" paddingVertical="$2" borderBottomWidth={1} borderColor="$borderColor" backgroundColor="$background">
-            <XStack flex={1} />
-            <XStack alignItems="center" justifyContent="center">
-              <PiGraph size={16} />
-              <Text marginLeft="$1" fontSize="$2" fontWeight="500" color="$foreground">
-                {titleText}
-              </Text>
-            </XStack>
-            <XStack flex={1} justifyContent="flex-end">
-              {updateSimilarEntries && setSimilarEntries && (
-                <Button
-                  onPress={async () => {
-                    setSimilarEntries([]) // simulate refresh
-                    await saveCurrentlyOpenedFile()
-                    updateSimilarEntries()
-                  }}
-                  size="$2"
-                  backgroundColor="transparent"
-                  borderWidth={0}
-                  padding={0}
-                  aria-label={t('semantic.refresh')}
-                  hoverStyle={{ backgroundColor: '$backgroundHover' }}
-                >
-                  {isLoadingSimilarEntries ? <Spinner size="small" /> : <RefreshCw size={16} />}
-                </Button>
-              )}
-            </XStack>
-          </XStack>
+          <div className="file-sidebar-header flex h-10 items-center justify-between px-3 border-b border-border">
+            <div className="flex items-center gap-1.5 text-foreground">
+              <Share2 size={13} className="text-[#7b68ee]" />
+              <span className="text-[11px] font-semibold uppercase tracking-wider">{titleText}</span>
+            </div>
+            {updateSimilarEntries && setSimilarEntries && (
+              <button
+                type="button"
+                onClick={async () => {
+                  setSimilarEntries([]) // simulate refresh
+                  await saveCurrentlyOpenedFile()
+                  updateSimilarEntries()
+                }}
+                className="flex size-6 cursor-pointer items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                aria-label={t('semantic.refresh')}
+                title={t('semantic.refresh')}
+              >
+                {isLoadingSimilarEntries ? <Spinner size="small" /> : <RefreshCw size={12} strokeWidth={1.8} />}
+              </button>
+            )}
+          </div>
 
           {/* Content */}
           <YStack>{content}</YStack>

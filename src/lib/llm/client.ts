@@ -40,8 +40,15 @@ const resolveLLMClient = async (llmName: string): Promise<LanguageModel> => {
     return anthropic(llmName)
   }
   if (apiConfig.apiInterface === 'ollama') {
+    const rawUrl = (apiConfig.apiURL || 'http://localhost:11434/api').trim()
+    let cleanUrl = rawUrl.replace(/\/+$/, '')
+    if (cleanUrl.endsWith('/v1')) {
+      cleanUrl = cleanUrl.replace(/\/v1$/, '/api')
+    } else if (!cleanUrl.endsWith('/api')) {
+      cleanUrl = `${cleanUrl}/api`
+    }
     const ollama = createOllama({
-      baseURL: apiConfig.apiURL || undefined,
+      baseURL: cleanUrl,
     })
     return ollama(llmName)
   }

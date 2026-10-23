@@ -1,19 +1,32 @@
 import React, { useEffect, useRef } from 'react'
 
-import { MdSettings, MdImportExport, MdSchedule, MdExtension } from 'react-icons/md'
-import { VscNewFolder } from 'react-icons/vsc'
-import { HiOutlinePencilAlt } from 'react-icons/hi'
-import { GlobeIcon, Sparkles, Network } from 'lucide-react'
-
-import { Files, MessageCircle, Search, Moon, SunMoon, BookOpen } from '@tamagui/lucide-icons'
-import { YStack } from 'tamagui'
+import {
+  Files,
+  MessageSquare,
+  Search,
+  PenLine,
+  FolderPlus,
+  Globe,
+  Sparkles,
+  Network,
+  Clock,
+  ArrowUpDown,
+  Compass,
+  Puzzle,
+  Moon,
+  Sun,
+  Settings,
+  BookOpen,
+} from 'lucide-react'
 import gsap from 'gsap'
 import { useTranslation } from '@/lib/i18n'
 import { useModalOpeners } from '../../contexts/ModalContext'
 import { useChatContext } from '@/contexts/ChatContext'
 import { useContentContext } from '@/contexts/ContentContext'
+import { useFileContext } from '@/contexts/FileContext'
 import { useThemeManager } from '@/contexts/ThemeContext'
 import VaultSwitcher from '../Common/VaultSwitcher'
+import { WikiObsLogo } from '../Common/WikiObsLogo'
 import { Easing } from '@/lib/gsap-animations'
 
 export interface IconsSidebarProps {
@@ -38,29 +51,40 @@ const IconsSidebar: React.FC<IconsSidebarProps> = ({ getShortcutDescription }) =
     setIsKnowledgeGraphOpen,
   } = useModalOpeners()
   const { state: theme, actions: themeActions } = useThemeManager()
-  const { createUntitledNote } = useContentContext()
+  const { createUntitledNote, setShowEditor } = useContentContext()
+  const { openOrCreateFile, currentlyOpenFilePath } = useFileContext()
+
+  const openTab = (uri: string) => {
+    setShowEditor(true)
+    openOrCreateFile(uri)
+  }
 
   useEffect(() => {
     if (iconsRef.current) {
       const ctx = gsap.context(() => {
-        gsap.set('.icons-sidebar-group', { opacity: 0, x: -20 })
-        gsap.to('.icons-sidebar-group', {
-          opacity: 1,
-          x: 0,
-          duration: 0.5,
-          stagger: 0.06,
-          ease: Easing.smooth,
-          delay: 0.15,
-        })
-        gsap.set('.icons-sidebar-group-bottom', { opacity: 0, x: -20 })
-        gsap.to('.icons-sidebar-group-bottom', {
-          opacity: 1,
-          x: 0,
-          duration: 0.5,
-          stagger: 0.06,
-          ease: Easing.smooth,
-          delay: 0.45,
-        })
+        gsap.fromTo(
+          '.icons-sidebar-group > *',
+          { opacity: 0 },
+          {
+            opacity: 1,
+            duration: 0.35,
+            stagger: 0.03,
+            ease: Easing.smooth,
+            clearProps: 'all',
+          },
+        )
+        gsap.fromTo(
+          '.icons-sidebar-group-bottom > *',
+          { opacity: 0 },
+          {
+            opacity: 1,
+            duration: 0.35,
+            stagger: 0.04,
+            ease: Easing.smooth,
+            delay: 0.15,
+            clearProps: 'all',
+          },
+        )
       }, iconsRef)
       return () => ctx.revert()
     }
@@ -71,15 +95,21 @@ const IconsSidebar: React.FC<IconsSidebarProps> = ({ getShortcutDescription }) =
       ref={iconsRef}
       aria-label={t('app.name')}
       onContextMenu={(e) => e.preventDefault()}
-      className="icons-sidebar flex h-full w-[52px] flex-col items-center justify-between py-3 select-none"
+      className="icons-sidebar w-10 min-w-10 max-w-10 shrink-0 flex h-full flex-col items-center justify-start py-2 select-none"
     >
-      <div className="sidebar-brand mb-2" title={t('app.name')} aria-label={t('app.name')} aria-hidden="true">
-        <BookOpen size={18} strokeWidth={1.8} />
-      </div>
-      <YStack className="icons-sidebar-group items-center gap-1 overflow-y-auto overflow-x-hidden no-scrollbar w-full max-h-[calc(100vh-130px)]">
+      <button
+        type="button"
+        className="sidebar-brand group mb-1.5 flex size-8 cursor-pointer items-center justify-center rounded-md transition-all duration-200 hover:scale-105 active:scale-95"
+        title="WIKIOBS · 展开/收起侧边栏"
+        aria-label="WIKIOBS · 展开/收起侧边栏"
+        onClick={() => setSidebarShowing(sidebarShowing ? null : 'files')}
+      >
+        <WikiObsLogo size={20} className="drop-shadow-[0_0_8px_rgba(123,104,238,0.5)] transition-transform group-hover:drop-shadow-[0_0_12px_rgba(168,85,247,0.7)]" />
+      </button>
+      <div className="icons-sidebar-group flex-1 min-h-0 w-full flex flex-col items-center gap-1 overflow-y-auto overflow-x-hidden no-scrollbar">
         <button
           type="button"
-          className={`icons-sidebar-button flex size-10 items-center justify-center rounded-md transition-colors ${
+          className={`icons-sidebar-button flex size-8 items-center justify-center rounded-md transition-colors ${
             sidebarShowing === 'files' ? 'is-active' : ''
           }`}
           title={getShortcutDescription('open-files') || t('files.title')}
@@ -89,11 +119,11 @@ const IconsSidebar: React.FC<IconsSidebarProps> = ({ getShortcutDescription }) =
           aria-current={sidebarShowing === 'files' ? 'page' : undefined}
           onClick={() => setSidebarShowing(sidebarShowing === 'files' ? null : 'files')}
         >
-          <Files size={22} />
+          <Files size={16} strokeWidth={1.8} />
         </button>
         <button
           type="button"
-          className={`icons-sidebar-button flex size-10 items-center justify-center rounded-md transition-colors ${
+          className={`icons-sidebar-button flex size-8 items-center justify-center rounded-md transition-colors ${
             sidebarShowing === 'chats' ? 'is-active' : ''
           }`}
           title={t('sidebar.chatHistory')}
@@ -103,11 +133,11 @@ const IconsSidebar: React.FC<IconsSidebarProps> = ({ getShortcutDescription }) =
           aria-current={sidebarShowing === 'chats' ? 'page' : undefined}
           onClick={() => setSidebarShowing(sidebarShowing === 'chats' ? null : 'chats')}
         >
-          <MessageCircle size={22} />
+          <MessageSquare size={16} strokeWidth={1.8} />
         </button>
         <button
           type="button"
-          className={`icons-sidebar-button flex size-10 items-center justify-center rounded-md transition-colors ${
+          className={`icons-sidebar-button flex size-8 items-center justify-center rounded-md transition-colors ${
             sidebarShowing === 'search' ? 'is-active' : ''
           }`}
           title={getShortcutDescription('open-search') || t('sidebar.semanticSearch')}
@@ -117,120 +147,141 @@ const IconsSidebar: React.FC<IconsSidebarProps> = ({ getShortcutDescription }) =
           aria-current={sidebarShowing === 'search' ? 'page' : undefined}
           onClick={() => setSidebarShowing(sidebarShowing === 'search' ? null : 'search')}
         >
-          <Search size={22} />
+          <Search size={16} strokeWidth={1.8} />
         </button>
-        <div className="my-1 h-px w-6 bg-white/10" />
+        <div className="my-1 h-px w-4 bg-border" />
 
         <button
           type="button"
-          className="icons-sidebar-button flex size-10 items-center justify-center rounded-md transition-colors"
+          className="icons-sidebar-button flex size-8 items-center justify-center rounded-md transition-colors"
           title={getShortcutDescription('open-new-note') || t('files.newNote')}
           aria-label={getShortcutDescription('open-new-note') || t('files.newNote')}
           aria-keyshortcuts="Control+N"
           onClick={() => createUntitledNote()}
         >
-          <HiOutlinePencilAlt size={22} />
+          <PenLine size={16} strokeWidth={1.8} />
         </button>
         <button
           type="button"
-          className="icons-sidebar-button flex size-10 items-center justify-center rounded-md transition-colors"
+          className="icons-sidebar-button flex size-8 items-center justify-center rounded-md transition-colors"
           title={getShortcutDescription('open-new-directory-modal') || t('sidebar.newDirectory')}
           aria-label={getShortcutDescription('open-new-directory-modal') || t('sidebar.newDirectory')}
           aria-keyshortcuts="Control+D"
           onClick={() => setIsNewDirectoryModalOpen(true)}
         >
-          <VscNewFolder size={22} />
+          <FolderPlus size={16} strokeWidth={1.8} />
         </button>
 
-        <div className="my-1 h-px w-6 bg-white/10" />
+        <div className="my-1 h-px w-4 bg-border" />
 
         <button
           type="button"
-          className="icons-sidebar-button flex size-10 items-center justify-center rounded-md transition-colors"
+          className={`icons-sidebar-button flex size-8 items-center justify-center rounded-md transition-colors ${
+            currentlyOpenFilePath === 'wikiobs://wiki-importer' ? 'is-active' : ''
+          }`}
           title={t('wikiImporter.title')}
           aria-label={t('wikiImporter.title')}
-          onClick={() => setIsWikiImporterOpen(true)}
+          onClick={() => openTab('wikiobs://wiki-importer')}
         >
-          <GlobeIcon size={22} />
+          <Globe size={16} strokeWidth={1.8} />
         </button>
         <button
           type="button"
-          className="icons-sidebar-button flex size-10 items-center justify-center rounded-md transition-colors"
+          className={`icons-sidebar-button flex size-8 items-center justify-center rounded-md transition-colors ${
+            currentlyOpenFilePath === 'wikiobs://ai-org' ? 'is-active' : ''
+          }`}
           title={t('aiOrg.title')}
           aria-label={t('aiOrg.title')}
-          onClick={() => setIsAIOrganizationOpen(true)}
+          onClick={() => openTab('wikiobs://ai-org')}
         >
-          <Sparkles size={22} />
+          <Sparkles size={16} strokeWidth={1.8} />
         </button>
-        <VaultSwitcher onOpenManagement={() => setIsVaultManagementOpen(true)} />
         <button
           type="button"
-          className="icons-sidebar-button flex size-10 items-center justify-center rounded-md transition-colors"
+          data-testid="sidebar-btn-graph"
+          className={`icons-sidebar-button flex size-8 items-center justify-center rounded-md transition-colors ${
+            currentlyOpenFilePath === 'graph://global' ? 'is-active' : ''
+          }`}
           title={t('graph.title')}
           aria-label={t('graph.title')}
-          onClick={() => setIsKnowledgeGraphOpen(true)}
+          onClick={() => openTab('graph://global')}
         >
-          <Network size={22} />
+          <Network size={16} strokeWidth={1.8} />
         </button>
         <button
           type="button"
-          className="icons-sidebar-button flex size-10 items-center justify-center rounded-md transition-colors"
+          data-testid="sidebar-btn-scheduled"
+          className={`icons-sidebar-button flex size-8 items-center justify-center rounded-md transition-colors ${
+            currentlyOpenFilePath === 'wikiobs://tasks' ? 'is-active' : ''
+          }`}
           title={t('scheduled.title')}
           aria-label={t('scheduled.title')}
-          onClick={() => setIsScheduledTasksOpen(true)}
+          onClick={() => openTab('wikiobs://tasks')}
         >
-          <MdSchedule size={22} />
+          <Clock size={16} strokeWidth={1.8} />
         </button>
         <button
           type="button"
-          className="icons-sidebar-button flex size-10 items-center justify-center rounded-md transition-colors"
+          data-testid="sidebar-btn-export"
+          className={`icons-sidebar-button flex size-8 items-center justify-center rounded-md transition-colors ${
+            currentlyOpenFilePath === 'wikiobs://export' ? 'is-active' : ''
+          }`}
           title={t('export.title')}
           aria-label={t('export.title')}
-          onClick={() => setIsExportOpen(true)}
+          onClick={() => openTab('wikiobs://export')}
         >
-          <MdImportExport size={22} />
+          <ArrowUpDown size={16} strokeWidth={1.8} />
         </button>
         <button
           type="button"
-          className="icons-sidebar-button flex size-10 items-center justify-center rounded-md transition-colors"
+          className={`icons-sidebar-button flex size-8 items-center justify-center rounded-md transition-colors ${
+            currentlyOpenFilePath === 'wikiobs://obsidian' ? 'is-active' : ''
+          }`}
           title={t('obsidianCompat.title')}
           aria-label={t('obsidianCompat.title')}
-          onClick={() => setIsObsidianCompatOpen(true)}
+          onClick={() => openTab('wikiobs://obsidian')}
         >
-          <BookOpen size={22} />
+          <Compass size={16} strokeWidth={1.8} />
         </button>
         <button
           type="button"
-          className="icons-sidebar-button flex size-10 items-center justify-center rounded-md transition-colors"
+          className={`icons-sidebar-button flex size-8 items-center justify-center rounded-md transition-colors ${
+            currentlyOpenFilePath === 'wikiobs://plugins' ? 'is-active' : ''
+          }`}
           title={t('plugin.title')}
           aria-label={t('plugin.title')}
-          onClick={() => setIsPluginManagerOpen(true)}
+          onClick={() => openTab('wikiobs://plugins')}
         >
-          <MdExtension size={22} />
+          <Puzzle size={16} strokeWidth={1.8} />
         </button>
-      </YStack>
-      <YStack className="icons-sidebar-group-bottom items-center gap-1">
-        <div className="mb-1 h-px w-6 bg-white/10" />
+      </div>
+      <div className="icons-sidebar-group-bottom flex w-full flex-col items-center gap-1">
+        <div className="mb-1 h-px w-4 bg-border" />
+        <VaultSwitcher onOpenManagement={() => openTab('wikiobs://vaults')} />
         <button
           type="button"
-          className="icons-sidebar-button flex size-10 items-center justify-center rounded-md transition-colors"
-          title={theme === 'dark' ? t('theme.switchToLight') : t('theme.switchToDark')}
-          aria-label={theme === 'dark' ? t('theme.switchToLight') : t('theme.switchToDark')}
+          data-testid="sidebar-btn-theme-toggle"
+          className="icons-sidebar-button flex size-8 items-center justify-center rounded-md transition-colors"
+          title={theme === 'dark' ? t('theme.switchToLight') || '切换至明亮主题' : t('theme.switchToDark') || '切换至暗色主题'}
+          aria-label={theme === 'dark' ? t('theme.switchToLight') || '切换至明亮主题' : t('theme.switchToDark') || '切换至暗色主题'}
           onClick={() => themeActions.toggle()}
         >
-          {theme === 'dark' ? <Moon size={22} /> : <SunMoon size={22} />}
+          {theme === 'dark' ? <Sun size={16} strokeWidth={1.8} /> : <Moon size={16} strokeWidth={1.8} />}
         </button>
         <button
           type="button"
-          className="icons-sidebar-button settings-entry flex size-10 items-center justify-center rounded-md transition-colors"
+          data-testid="sidebar-btn-settings"
+          className={`icons-sidebar-button flex size-8 items-center justify-center rounded-md transition-colors ${
+            currentlyOpenFilePath === 'wikiobs://settings' ? 'is-active' : ''
+          }`}
           title={getShortcutDescription('open-settings-modal') || t('settings.title')}
           aria-label={getShortcutDescription('open-settings-modal') || t('settings.title')}
           aria-keyshortcuts="Control+,"
-          onClick={() => setIsSettingsModalOpen(true)}
+          onClick={() => openTab('wikiobs://settings')}
         >
-          <MdSettings size={22} />
+          <Settings size={16} strokeWidth={1.8} />
         </button>
-      </YStack>
+      </div>
     </nav>
   )
 }

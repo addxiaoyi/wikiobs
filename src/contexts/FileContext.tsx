@@ -1,9 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import React, { createContext, useContext, ReactNode, useEffect, useRef, useState } from 'react'
+import React, { createContext, useContext, ReactNode, useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { toast } from 'react-toastify'
 import { useDebounce } from 'use-debounce'
 import { FileInfo, FileInfoTree } from 'electron/main/filesystem/types'
+import { isFileNodeDirectory } from '@shared/utils'
 import errorToStringRendererProcess from '@/lib/error'
 import {
   findRelevantDirectoriesToBeExpanded,
@@ -14,6 +15,7 @@ import {
   isPathWithinDirectory,
   getNextAvailableFileNameGivenBaseName,
   sortFilesAndDirectories,
+  removeFileExtension,
 } from '@/lib/file'
 import { SuggestionsState } from '@/components/Editor/BacklinkSuggestionsDisplay'
 import { HighlightData } from '@/components/Editor/HighlightExtension'
@@ -25,6 +27,29 @@ import { hmBlockSchema } from '@/components/Editor/schema'
 import { setGroupTypes } from '@/lib/utils'
 import slashMenuItems from '../components/Editor/slash-menu-items'
 
+export interface TabItem {
+  id: string
+  filePath: string
+  title: string
+}
+
+export const VIRTUAL_URI_TITLES: Record<string, string> = {
+  'graph://global': '全局关系图',
+  'wikiobs://settings': '系统设置',
+  'wikiobs://plugins': '插件中心',
+  'wikiobs://tasks': '计划任务',
+  'wikiobs://export': '导入与导出',
+  'wikiobs://obsidian': 'Obsidian 兼容',
+  'wikiobs://ai-org': 'AI 智能整理',
+  'wikiobs://wiki-importer': '维基导入',
+  'wikiobs://vaults': '知识库管理',
+}
+
+export const isVirtualWorkspaceUri = (filePath: string | null | undefined): boolean => {
+  if (!filePath) return false
+  return filePath.startsWith('graph://') || filePath.startsWith('wikiobs://')
+}
+
 type FileContextType = {
   vaultFilesTree: FileInfoTree
   vaultFilesFlattened: FileInfo[]
@@ -33,6 +58,8 @@ type FileContextType = {
   refreshFiles: () => Promise<void>
   expandedDirectories: Map<string, boolean>
   handleDirectoryToggle: (path: string) => void
+  collapseAllDirectories: () => void
+  expandAllDirectories: () => void
   currentlyOpenFilePath: string | null
   setCurrentlyOpenFilePath: React.Dispatch<React.SetStateAction<string | null>>
   saveCurrentlyOpenedFile: () => Promise<void>
@@ -55,6 +82,13 @@ type FileContextType = {
   deleteFile: (path: string | undefined) => Promise<boolean>
   selectedDirectory: string | null
   setSelectedDirectory: React.Dispatch<React.SetStateAction<string | null>>
+  openTabs: TabItem[]
+  activeTabId: string | null
+  selectTab: (tabId: string) => void
+  closeTab: (tabId: string) => void
+  closeOtherTabs: (tabId: string) => void
+  closeAllTabs: () => void
+  noteStats: { words: number; characters: number }
 }
 
 export const FileContext = createContext<FileContextType | undefined>(undefined)
@@ -151,10 +185,12 @@ export const FileProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     latestMarkdownRef.current = null
     setCurrentlyChangingFilePath(true)
     setSaveError(null)
-    await writeEditorContentToDisk(editor, currentlyOpenFilePath)
-    if (currentlyOpenFilePath && needToIndexEditorContent) {
-      window.database.indexFileInDatabase(currentlyOpenFilePath)
-      setNeedToIndexEditorContent(false)
+    if (currentlyOpenFilePath && !isVirtualWorkspaceUri(currentlyOpenFilePath)) {
+      await writeEditorContentToDisk(editor, currentlyOpenFilePath)
+      if (needToIndexEditorContent) {
+        window.database.indexFileInDatabase(currentlyOpenFilePath)
+        setNeedToIndexEditorContent(false)
+      }
     }
     const fileContent = (await window.fileSystem.readFile(filePath, 'utf-8')) ?? ''
     const frontmatterMatch = fileContent.match(/^---\n[\s\S]*?\n---\n?/)
@@ -175,6 +211,27 @@ export const FileProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }
 
   const openOrCreateFile = async (filePath: string, optionalContentToWriteOnCreate?: string): Promise<void> => {
+    if (isVirtualWorkspaceUri(filePath)) {
+      if (currentlyOpenFilePath && !isVirtualWorkspaceUri(currentlyOpenFilePath)) {
+        await writeEditorContentToDisk(editor, currentlyOpenFilePath)
+        if (needToIndexEditorContent) {
+          window.database.indexFileInDatabase(currentlyOpenFilePath)
+          setNeedToIndexEditorContent(false)
+        }
+      }
+      const targetUri = filePath.startsWith('graph://') ? 'graph://global' : filePath
+      const tabTitle = VIRTUAL_URI_TITLES[targetUri] || '工作区标签'
+      const tabId = targetUri.replace(/[^a-zA-Z0-9-]/g, '-')
+      setCurrentlyOpenFilePath(targetUri)
+      setSaveState('saved')
+      setOpenTabs((prev) => {
+        if (prev.some((tab) => tab.filePath === targetUri || tab.id === tabId)) {
+          return prev
+        }
+        return [...prev, { id: tabId, filePath: targetUri, title: tabTitle }]
+      })
+      return
+    }
     const absolutePath = await createFileIfNotExists(filePath, optionalContentToWriteOnCreate)
     await loadFileIntoEditor(absolutePath)
   }
@@ -211,7 +268,7 @@ export const FileProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     const persistEditorState = async () => {
-      if (!editor || !currentlyOpenFilePath || !editorDirtyRef.current) return
+      if (!editor || !currentlyOpenFilePath || isVirtualWorkspaceUri(currentlyOpenFilePath) || !editorDirtyRef.current) return
 
       for (let attempt = 0; attempt < 3; attempt += 1) {
         const versionAtStart = editorVersionRef.current
@@ -219,7 +276,7 @@ export const FileProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (versionAtStart === editorVersionRef.current) break
       }
 
-      if (needToIndexEditorContent && currentlyOpenFilePath) {
+      if (needToIndexEditorContent && currentlyOpenFilePath && !isVirtualWorkspaceUri(currentlyOpenFilePath)) {
         await window.database.indexFileInDatabase(currentlyOpenFilePath)
         setNeedToIndexEditorContent(false)
       }
@@ -236,7 +293,7 @@ export const FileProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [debouncedEditor, currentlyOpenFilePath, editor, currentlyChangingFilePath, needToIndexEditorContent])
 
   const saveCurrentlyOpenedFile = async () => {
-    if (!editor || !currentlyOpenFilePath) return
+    if (!editor || !currentlyOpenFilePath || isVirtualWorkspaceUri(currentlyOpenFilePath)) return
 
     for (let attempt = 0; attempt < 3; attempt += 1) {
       const versionAtStart = editorVersionRef.current
@@ -244,7 +301,7 @@ export const FileProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (versionAtStart === editorVersionRef.current) break
     }
 
-    if (currentlyOpenFilePath && needToIndexEditorContent) {
+    if (currentlyOpenFilePath && !isVirtualWorkspaceUri(currentlyOpenFilePath) && needToIndexEditorContent) {
       await window.database.indexFileInDatabase(currentlyOpenFilePath)
       setNeedToIndexEditorContent(false)
     }
@@ -255,7 +312,7 @@ export const FileProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     filePath: string | null,
     versionAtStart = editorVersionRef.current,
   ): Promise<string | null> => {
-    if (filePath === null || !_editor || !editorDirtyRef.current) return null
+    if (filePath === null || isVirtualWorkspaceUri(filePath) || !_editor || !editorDirtyRef.current) return null
 
     const blocks = _editor.topLevelBlocks
     const markdownContent =
@@ -324,7 +381,6 @@ export const FileProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (!hasOpened) {
         await window.electronStore.setHasUserOpenedAppBefore()
-        openOrCreateFile('Welcome to WIKIOBS', welcomeNote)
       }
     }
 
@@ -407,6 +463,24 @@ export const FileProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     newExpandedDirectories.set(path, !isExpanded)
     setExpandedDirectories(newExpandedDirectories)
   }
+
+  const collapseAllDirectories = useCallback(() => {
+    setExpandedDirectories(new Map())
+  }, [])
+
+  const expandAllDirectories = useCallback(() => {
+    const newMap = new Map<string, boolean>()
+    const markAllDirs = (nodes: FileInfoTree) => {
+      nodes.forEach((node) => {
+        if (isFileNodeDirectory(node)) {
+          newMap.set(node.path, true)
+          if (node.children) markAllDirs(node.children)
+        }
+      })
+    }
+    markAllDirs(vaultFilesTree)
+    setExpandedDirectories(newMap)
+  }, [vaultFilesTree])
 
   useEffect(() => {
     const handleVaultSwitched = async () => {
@@ -491,6 +565,99 @@ export const FileProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     refreshFiles().catch((error) => toast.error(errorToStringRendererProcess(error)))
   }, [])
 
+  const [openTabs, setOpenTabs] = useState<TabItem[]>([])
+
+  useEffect(() => {
+    if (!currentlyOpenFilePath) return
+    setOpenTabs((prev) => {
+      if (
+        prev.some(
+          (tab) =>
+            tab.filePath === currentlyOpenFilePath ||
+            (isVirtualWorkspaceUri(currentlyOpenFilePath) && tab.filePath === currentlyOpenFilePath),
+        )
+      ) {
+        return prev
+      }
+      if (isVirtualWorkspaceUri(currentlyOpenFilePath)) {
+        const title = VIRTUAL_URI_TITLES[currentlyOpenFilePath] || '工作区标签'
+        const tabId = currentlyOpenFilePath.replace(/[^a-zA-Z0-9-]/g, '-')
+        return [...prev, { id: tabId, filePath: currentlyOpenFilePath, title }]
+      }
+      const rawName = currentlyOpenFilePath.split(/[/\\]/).pop() || 'Untitled'
+      const title = removeFileExtension(rawName)
+      return [...prev, { id: currentlyOpenFilePath, filePath: currentlyOpenFilePath, title }]
+    })
+  }, [currentlyOpenFilePath])
+
+  const selectTab = useCallback(
+    (tabId: string) => {
+      const target = openTabs.find((t) => t.id === tabId || t.filePath === tabId)
+      if (target && target.filePath !== currentlyOpenFilePath) {
+        openOrCreateFile(target.filePath)
+      }
+    },
+    [openTabs, currentlyOpenFilePath, openOrCreateFile],
+  )
+
+  const closeTab = useCallback(
+    (tabId: string) => {
+      setOpenTabs((prev) => {
+        const target = prev.find((t) => t.id === tabId || t.filePath === tabId)
+        const next = prev.filter((t) => t.id !== tabId && t.filePath !== tabId)
+        const isCurrentActive = target
+          ? target.filePath === currentlyOpenFilePath
+          : tabId === currentlyOpenFilePath
+        if (isCurrentActive) {
+          if (next.length > 0) {
+            const nextActive = next[next.length - 1]
+            openOrCreateFile(nextActive.filePath)
+          } else {
+            setCurrentlyOpenFilePath(null)
+          }
+        }
+        return next
+      })
+    },
+    [currentlyOpenFilePath, openOrCreateFile],
+  )
+
+  const closeOtherTabs = useCallback(
+    (tabId: string) => {
+      setOpenTabs((prev) => prev.filter((t) => t.id === tabId || t.filePath === tabId))
+      const target = openTabs.find((t) => t.id === tabId || t.filePath === tabId)
+      if (target && target.filePath !== currentlyOpenFilePath) {
+        openOrCreateFile(target.filePath)
+      }
+    },
+    [openTabs, currentlyOpenFilePath, openOrCreateFile],
+  )
+
+  const closeAllTabs = useCallback(() => {
+    setOpenTabs([])
+    setCurrentlyOpenFilePath(null)
+  }, [])
+
+  const noteStats = useMemo(() => {
+    if (!editor || !currentlyOpenFilePath || isVirtualWorkspaceUri(currentlyOpenFilePath)) return { words: 0, characters: 0 }
+    try {
+      const blocks = editor.topLevelBlocks || []
+      let totalChars = 0
+      let totalWords = 0
+      for (const b of blocks) {
+        // @ts-ignore
+        const textContent = Array.isArray(b.content) ? b.content.map((c: any) => c.text || '').join('') : ''
+        if (textContent) {
+          totalChars += textContent.length
+          totalWords += (textContent.trim().match(/\S+/g) || []).length
+        }
+      }
+      return { words: totalWords, characters: totalChars }
+    } catch {
+      return { words: 0, characters: 0 }
+    }
+  }, [editor, currentlyOpenFilePath, saveState])
+
   const contextValues = {
     vaultFilesTree,
     vaultFilesFlattened,
@@ -499,6 +666,8 @@ export const FileProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     refreshFiles,
     expandedDirectories,
     handleDirectoryToggle,
+    collapseAllDirectories,
+    expandAllDirectories,
     currentlyOpenFilePath,
     setCurrentlyOpenFilePath,
     saveCurrentlyOpenedFile,
@@ -521,6 +690,13 @@ export const FileProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     deleteFile,
     selectedDirectory,
     setSelectedDirectory,
+    openTabs,
+    activeTabId: currentlyOpenFilePath,
+    selectTab,
+    closeTab,
+    closeOtherTabs,
+    closeAllTabs,
+    noteStats,
   }
 
   const contextValuesMemo: FileContextType = React.useMemo(

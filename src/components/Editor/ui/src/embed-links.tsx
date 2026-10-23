@@ -1,12 +1,11 @@
 import { YStack, XStack, Button, Popover, Separator, Input, Theme, SizableText } from 'tamagui'
 import React, { useState } from 'react'
-import { IconType } from 'react-icons'
 import { MediaType } from '@/components/Editor/types/media-render'
 
 interface EmbedRenderProps {
   props: {
     mediaType: string
-    icon?: IconType
+    icon?: React.ComponentType<any>
     hint?: string
     uploadOptionHint?: string
     embedPlaceholder?: string

@@ -1,33 +1,37 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
-import Select from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import Switch from '@mui/material/Switch'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import Paper from '@mui/material/Paper'
-import IconButton from '@mui/material/IconButton'
-import LinearProgress from '@mui/material/LinearProgress'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Alert from '@mui/material/Alert'
-import Chip from '@mui/material/Chip'
+import {
+  CalendarClock,
+  Play,
+  Pencil,
+  Trash2,
+  X,
+  Plus,
+  ArrowLeft,
+  Check,
+  AlertCircle,
+  Globe,
+  Brain,
+  Layers,
+  Clock,
+  Loader2,
+  Square,
+} from 'lucide-react'
 import gsap from 'gsap'
-import { Play, Pencil, Trash2, CalendarClock, X } from 'lucide-react'
+
+import ReorModal from './Modal'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { useTranslation } from '@/lib/i18n'
 import { staggerFadeInUp, fadeInScale } from '@/lib/gsap-animations'
+import { cn } from '@/lib/ui'
 
 interface ScheduledTask {
   id: string
@@ -54,13 +58,14 @@ interface ScheduledTask {
 interface ScheduledTasksModalProps {
   isOpen: boolean
   onClose: () => void
+  embedded?: boolean
 }
 
 const TASK_TYPES = [
-  { value: 'wiki-import', labelKey: 'scheduled.typeWikiImport' },
-  { value: 'ai-organize', labelKey: 'scheduled.typeAiOrganize' },
-  { value: 'incremental-index', labelKey: 'scheduled.typeIndex' },
-  { value: 'custom', labelKey: 'scheduled.typeCustom' },
+  { value: 'wiki-import', labelKey: 'scheduled.typeWikiImport', icon: Globe },
+  { value: 'ai-organize', labelKey: 'scheduled.typeAiOrganize', icon: Brain },
+  { value: 'incremental-index', labelKey: 'scheduled.typeIndex', icon: Layers },
+  { value: 'custom', labelKey: 'scheduled.typeCustom', icon: Clock },
 ] as const
 
 const PRESET_SCHEDULES = [
@@ -75,12 +80,12 @@ const isCronExpressionShapeValid = (expression: string): boolean => {
   return fields.every((field) => /^(\*|\d{1,2})([-/]((\*|\d{1,2})))?$/.test(field))
 }
 
-const ScheduledTasksModal: React.FC<ScheduledTasksModalProps> = ({ isOpen, onClose }) => {
+const ScheduledTasksModal: React.FC<ScheduledTasksModalProps> = ({ isOpen, onClose, embedded }) => {
   const { t } = useTranslation()
   const [tasks, setTasks] = useState<ScheduledTask[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [showAddDialog, setShowAddDialog] = useState(false)
+  const [showAddForm, setShowAddForm] = useState(false)
   const [editingTask, setEditingTask] = useState<ScheduledTask | null>(null)
   const [saving, setSaving] = useState(false)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
@@ -93,9 +98,8 @@ const ScheduledTasksModal: React.FC<ScheduledTasksModalProps> = ({ isOpen, onClo
   const [formEnabled, setFormEnabled] = useState(true)
 
   const contentRef = useRef<HTMLDivElement>(null)
-  const tableRef = useRef<HTMLDivElement>(null)
-  const dialogRef = useRef<HTMLDivElement>(null)
-  const successRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
+  const formRef = useRef<HTMLDivElement>(null)
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const showSuccess = (message: string) => {
@@ -107,12 +111,11 @@ const ScheduledTasksModal: React.FC<ScheduledTasksModalProps> = ({ isOpen, onClo
     }, 3000)
   }
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    return () => {
       if (successTimerRef.current) clearTimeout(successTimerRef.current)
-    },
-    [],
-  )
+    }
+  }, [])
 
   const loadTasks = useCallback(async () => {
     setLoading(true)
@@ -131,49 +134,50 @@ const ScheduledTasksModal: React.FC<ScheduledTasksModalProps> = ({ isOpen, onClo
     if (isOpen) {
       loadTasks()
     } else {
-      setShowAddDialog(false)
+      setShowAddForm(false)
       setEditingTask(null)
       setError(null)
       setSuccessMsg(null)
     }
   }, [isOpen, loadTasks])
 
-  // GSAP: table rows stagger
   useEffect(() => {
-    if (!isOpen || loading || !tableRef.current) return
-    const table = tableRef.current
+    if (!isOpen || !tasks.some((task) => task.status === 'running')) return undefined
+    const timer = setInterval(() => {
+      window.scheduledTasks
+        .getAll()
+        .then(setTasks)
+        .catch((err) => setError(`${t('error.generic')}: ${err}`))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [isOpen, tasks, t])
+
+  // GSAP: Task list entrance
+  useEffect(() => {
+    if (!isOpen || loading || showAddForm || !listRef.current) return
+    const list = listRef.current
     const ctx = gsap.context(() => {
-      const rows = table.querySelectorAll('.st-task-row')
+      const rows = list.querySelectorAll('.st-task-item')
       if (rows.length) {
-        staggerFadeInUp(rows, 0.3, 0.04, 0.1)
+        staggerFadeInUp(rows, 0.25, 0.04, 0.05)
       }
-    }, tableRef)
+    }, listRef)
     return () => ctx.revert()
-  }, [isOpen, loading, tasks])
+  }, [isOpen, loading, tasks, showAddForm])
 
-  // GSAP: add/edit dialog
+  // GSAP: Add/edit form entrance
   useEffect(() => {
-    if (showAddDialog && dialogRef.current) {
-      const dialog = dialogRef.current
+    if (showAddForm && formRef.current) {
+      const formEl = formRef.current
       const ctx = gsap.context(() => {
-        const items = dialog.querySelectorAll('.st-form-item')
+        const items = formEl.querySelectorAll('.st-form-item')
         if (items.length) {
-          staggerFadeInUp(items, 0.3, 0.06, 0.1)
+          staggerFadeInUp(items, 0.25, 0.05, 0.05)
         }
-      }, dialogRef)
+      }, formRef)
       return () => ctx.revert()
     }
-  }, [showAddDialog])
-
-  // GSAP: success message
-  useEffect(() => {
-    if (successMsg && successRef.current) {
-      const ctx = gsap.context(() => {
-        fadeInScale(successRef.current, 0.4, 0)
-      }, successRef)
-      return () => ctx.revert()
-    }
-  }, [successMsg])
+  }, [showAddForm])
 
   const resetForm = () => {
     setFormName('')
@@ -183,10 +187,10 @@ const ScheduledTasksModal: React.FC<ScheduledTasksModalProps> = ({ isOpen, onClo
     setFormEnabled(true)
   }
 
-  const handleAdd = () => {
+  const handleOpenAdd = () => {
     resetForm()
     setEditingTask(null)
-    setShowAddDialog(true)
+    setShowAddForm(true)
   }
 
   const handleEdit = (task: ScheduledTask) => {
@@ -198,7 +202,7 @@ const ScheduledTasksModal: React.FC<ScheduledTasksModalProps> = ({ isOpen, onClo
     setFormSchedule(isPresetSchedule ? cronExpression : 'custom')
     setFormCustomCron(isPresetSchedule ? '' : cronExpression)
     setFormEnabled(task.enabled)
-    setShowAddDialog(true)
+    setShowAddForm(true)
   }
 
   const customCronValid = formSchedule !== 'custom' || isCronExpressionShapeValid(formCustomCron)
@@ -223,7 +227,7 @@ const ScheduledTasksModal: React.FC<ScheduledTasksModalProps> = ({ isOpen, onClo
         : await window.scheduledTasks.add(taskData)
       if (!savedTask) throw new Error(t('error.generic'))
 
-      setShowAddDialog(false)
+      setShowAddForm(false)
       showSuccess(editingTask ? t('scheduled.updated') : t('scheduled.created'))
       await loadTasks()
     } catch (err) {
@@ -250,6 +254,18 @@ const ScheduledTasksModal: React.FC<ScheduledTasksModalProps> = ({ isOpen, onClo
       const result = await window.scheduledTasks.trigger(task.id)
       if (!result.success) throw new Error(t('error.generic'))
       showSuccess(t('scheduled.triggered'))
+      await loadTasks()
+    } catch (err) {
+      setError(`${t('error.generic')}: ${err}`)
+    }
+  }
+
+  const handleCancel = async (task: ScheduledTask) => {
+    try {
+      const result = await window.scheduledTasks.cancel(task.id)
+      if (!result.success) throw new Error(t('error.generic'))
+      showSuccess(t('scheduled.cancelling'))
+      await loadTasks()
     } catch (err) {
       setError(`${t('error.generic')}: ${err}`)
     }
@@ -266,15 +282,9 @@ const ScheduledTasksModal: React.FC<ScheduledTasksModalProps> = ({ isOpen, onClo
     }
   }
 
-  const handleClose = () => {
-    if (!saving) {
-      onClose()
-    }
-  }
-
-  const getTypeLabel = (type: string) => {
+  const getTypeInfo = (type: string) => {
     const found = TASK_TYPES.find((tt) => tt.value === type)
-    return found ? t(found.labelKey as any) : type
+    return found || { value: type, labelKey: 'scheduled.typeCustom', icon: Clock }
   }
 
   const getScheduleLabel = (cron?: string) => {
@@ -284,256 +294,287 @@ const ScheduledTasksModal: React.FC<ScheduledTasksModalProps> = ({ isOpen, onClo
   }
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} maxWidth="md" fullWidth>
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pr: 1 }}>
-        {t('scheduled.title')}
-        <IconButton onClick={handleClose} aria-label={t('button.close')} title={t('button.close')} size="small">
-          <X size={16} />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent ref={contentRef}>
+    <ReorModal isOpen={isOpen} onClose={onClose} embedded={embedded} className="max-w-[620px] p-5">
+      {/* Header */}
+      <div className="flex items-start gap-3 pb-4 border-b border-border">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-[#7b68ee]/30 bg-[#7b68ee]/15 text-[#7b68ee] dark:text-[#9d8ff5] shadow-sm shadow-[#7b68ee]/20">
+          <CalendarClock size={18} strokeWidth={2} />
+        </div>
+        <div className="min-w-0 flex-1 pr-6">
+          <h2 className="text-base font-semibold text-foreground tracking-tight">{t('scheduled.title')}</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">自动化维基导入、AI 深度整理与增量索引构建</p>
+        </div>
+      </div>
+
+      <div ref={contentRef} className="pt-4 space-y-3.5">
+        {/* Alerts */}
         {error && (
-          <Box mb={2}>
-            <Alert severity="error" onClose={() => setError(null)}>
-              {error}
-            </Alert>
-          </Box>
+          <div className="flex items-start gap-2.5 rounded-lg border border-red-500/25 bg-red-500/10 p-3 text-xs text-red-600 dark:text-red-200">
+            <AlertCircle size={15} className="mt-0.5 shrink-0 text-red-500" />
+            <div className="flex-1 break-all">{error}</div>
+            <button type="button" onClick={() => setError(null)} className="text-red-500 hover:text-red-400">
+              ×
+            </button>
+          </div>
         )}
 
         {successMsg && (
-          <Box ref={successRef} mb={2}>
-            <Alert severity="success" onClose={() => setSuccessMsg(null)}>
-              {successMsg}
-            </Alert>
-          </Box>
+          <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-700 dark:text-emerald-200">
+            <Check size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span>{successMsg}</span>
+          </div>
         )}
 
+        {/* Loading */}
         {loading && (
-          <Box py={4}>
-            <LinearProgress />
-            <Typography variant="body2" color="text.secondary" align="center" mt={2}>
-              {t('scheduled.loading')}
-            </Typography>
-          </Box>
+          <div className="py-8 flex flex-col items-center justify-center gap-2 text-muted-foreground">
+            <Loader2 size={20} className="animate-spin text-[#7b68ee]" />
+            <span className="text-xs">{t('scheduled.loading')}</span>
+          </div>
         )}
 
-        {!loading && tasks.length === 0 && !showAddDialog && (
-          <Box py={5} px={2} textAlign="center">
-            <Box
-              sx={{
-                width: 56,
-                height: 56,
-                borderRadius: 2,
-                display: 'grid',
-                placeItems: 'center',
-                mx: 'auto',
-                mb: 1.5,
-                bgcolor: 'rgba(45, 212, 191, 0.12)',
-                color: '#2dd4bf',
-              }}
-            >
-              <CalendarClock size={28} />
-            </Box>
-            <Typography variant="body1" color="text.primary" gutterBottom fontWeight={600}>
-              {t('scheduled.noTasks')}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 360, mx: 'auto' }}>
-              {t('scheduled.emptyHint')}
-            </Typography>
-            <Button variant="contained" onClick={handleAdd} sx={{ mt: 2 }}>
-              {t('scheduled.newTask')}
-            </Button>
-          </Box>
-        )}
-
-        {!loading && tasks.length > 0 && (
-          <Box ref={tableRef} mt={1}>
-            <TableContainer component={Paper} variant="outlined">
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{t('scheduled.taskName')}</TableCell>
-                    <TableCell>{t('scheduled.taskType')}</TableCell>
-                    <TableCell>{t('scheduled.schedule')}</TableCell>
-                    <TableCell>{t('scheduled.status')}</TableCell>
-                    <TableCell align="right">{t('scheduled.actions')}</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {tasks.map((task) => (
-                    <TableRow key={task.id} className="st-task-row" hover>
-                      <TableCell>{task.name}</TableCell>
-                      <TableCell>
-                        <Chip label={getTypeLabel(task.type)} size="small" variant="outlined" />
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                          {getScheduleLabel(task.schedule.cronExpression)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={task.enabled ? t('scheduled.enabled') : t('scheduled.disabled')}
-                          color={task.enabled ? 'success' : 'default'}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell align="right">
-                        <FormControlLabel
-                          control={
-                            <Switch
-                              size="small"
-                              checked={task.enabled}
-                              onChange={() => handleToggle(task)}
-                              inputProps={{ 'aria-label': `${t('scheduled.enabled')}: ${task.name}` }}
-                            />
-                          }
-                          label=""
-                          sx={{ mr: 0.5 }}
-                        />
-                        <IconButton
-                          size="small"
-                          onClick={() => handleTrigger(task)}
-                          title={t('scheduled.trigger')}
-                          aria-label={t('scheduled.trigger')}
-                        >
-                          <Play size="15" aria-hidden="true" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleEdit(task)}
-                          title={t('scheduled.edit')}
-                          aria-label={t('scheduled.edit')}
-                        >
-                          <Pencil size="15" aria-hidden="true" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleDelete(task)}
-                          title={t('button.delete')}
-                          aria-label={t('button.delete')}
-                        >
-                          <Trash2 size="15" aria-hidden="true" />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-
-            <Box mt={2} display="flex" justifyContent="flex-end">
-              <Button variant="contained" onClick={handleAdd}>
-                {t('scheduled.newTask')}
+        {/* Add/Edit Form Mode */}
+        {!loading && showAddForm && (
+          <div ref={formRef} className="rounded-lg border border-border bg-card p-4 space-y-3.5">
+            <div className="flex items-center justify-between pb-2 border-b border-border">
+              <span className="text-xs font-semibold text-foreground">
+                {editingTask ? t('scheduled.editTask') : t('scheduled.newTask')}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowAddForm(false)}
+                className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft size={12} className="mr-1" />
+                返回列表
               </Button>
-            </Box>
-          </Box>
-        )}
+            </div>
 
-        {/* Add/Edit Dialog */}
-        <Dialog open={showAddDialog} onClose={() => !saving && setShowAddDialog(false)} maxWidth="sm" fullWidth>
-          <DialogTitle
-            ref={dialogRef}
-            sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pr: 1 }}
-          >
-            {editingTask ? t('scheduled.editTask') : t('scheduled.newTask')}
-            <IconButton
-              onClick={() => !saving && setShowAddDialog(false)}
-              aria-label={t('button.close')}
-              title={t('button.close')}
-              size="small"
-            >
-              <X size={16} />
-            </IconButton>
-          </DialogTitle>
-          <DialogContent>
-            <TextField
-              className="st-form-item"
-              fullWidth
-              margin="normal"
-              label={t('scheduled.taskName')}
-              value={formName}
-              onChange={(e) => setFormName(e.target.value)}
-              disabled={saving}
-            />
+            {/* Task Name */}
+            <div className="st-form-item space-y-1">
+              <label htmlFor="task-name-input" className="text-xs font-medium text-foreground block">
+                {t('scheduled.taskName')}
+              </label>
+              <Input
+                id="task-name-input"
+                placeholder="例如：每日维基同步更新"
+                value={formName}
+                onChange={(e) => setFormName(e.target.value)}
+                disabled={saving}
+                className="h-8 bg-background border-border text-foreground text-xs"
+              />
+            </div>
 
-            <FormControl fullWidth margin="normal" className="st-form-item">
-              <InputLabel>{t('scheduled.taskType')}</InputLabel>
+            {/* Task Type */}
+            <div className="st-form-item space-y-1">
+              <label className="text-xs font-medium text-foreground block">{t('scheduled.taskType')}</label>
               <Select
                 value={formType}
-                label={t('scheduled.taskType')}
-                onChange={(e) => setFormType(e.target.value as ScheduledTask['type'])}
+                onValueChange={(val) => setFormType(val as ScheduledTask['type'])}
                 disabled={saving}
               >
-                {TASK_TYPES.map((tt) => (
-                  <MenuItem key={tt.value} value={tt.value}>
-                    {t(tt.labelKey as any)}
-                  </MenuItem>
-                ))}
+                <SelectTrigger className="h-8 bg-background border-border text-foreground text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="border-border bg-popover text-popover-foreground">
+                  {TASK_TYPES.map((tt) => {
+                    const TypeIcon = tt.icon
+                    return (
+                      <SelectItem key={tt.value} value={tt.value} className="text-xs">
+                        <div className="flex items-center gap-2">
+                          <TypeIcon size={13} className="text-muted-foreground" />
+                          <span>{t(tt.labelKey as any)}</span>
+                        </div>
+                      </SelectItem>
+                    )
+                  })}
+                </SelectContent>
               </Select>
-            </FormControl>
+            </div>
 
-            <FormControl fullWidth margin="normal" className="st-form-item">
-              <InputLabel>{t('scheduled.schedule')}</InputLabel>
-              <Select
-                value={formSchedule}
-                label={t('scheduled.schedule')}
-                onChange={(e) => setFormSchedule(e.target.value)}
-                disabled={saving}
-              >
-                {PRESET_SCHEDULES.map((ps) => (
-                  <MenuItem key={ps.value} value={ps.value}>
-                    {t(ps.labelKey as any)}
-                  </MenuItem>
-                ))}
-                <MenuItem value="custom">{t('scheduled.customCron')}</MenuItem>
+            {/* Schedule Preset */}
+            <div className="st-form-item space-y-1">
+              <label className="text-xs font-medium text-foreground block">{t('scheduled.schedule')}</label>
+              <Select value={formSchedule} onValueChange={setFormSchedule} disabled={saving}>
+                <SelectTrigger className="h-8 bg-background border-border text-foreground text-xs font-mono">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="border-border bg-popover text-popover-foreground">
+                  {PRESET_SCHEDULES.map((ps) => (
+                    <SelectItem key={ps.value} value={ps.value} className="text-xs font-mono">
+                      {t(ps.labelKey as any)} ({ps.value})
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="custom" className="text-xs">
+                    {t('scheduled.customCron')}
+                  </SelectItem>
+                </SelectContent>
               </Select>
-            </FormControl>
+            </div>
 
+            {/* Custom Cron Expression */}
             {formSchedule === 'custom' && (
-              <TextField
-                className="st-form-item"
-                fullWidth
-                margin="normal"
-                label={t('scheduled.cronExpression')}
-                placeholder="0 9 * * *"
-                inputProps={{ 'aria-label': t('scheduled.cronExpression') }}
-                value={formCustomCron}
-                onChange={(e) => setFormCustomCron(e.target.value)}
-                disabled={saving}
-                error={formCustomCron.length > 0 && !customCronValid}
-                helperText={
-                  formCustomCron.length > 0 && !customCronValid
-                    ? 'Use five cron fields, for example 0 9 * * *'
-                    : undefined
-                }
-              />
+              <div className="st-form-item space-y-1">
+                <label htmlFor="task-custom-cron" className="text-xs font-medium text-foreground block">
+                  {t('scheduled.cronExpression')}
+                </label>
+                <Input
+                  id="task-custom-cron"
+                  placeholder="0 9 * * *"
+                  value={formCustomCron}
+                  onChange={(e) => setFormCustomCron(e.target.value)}
+                  disabled={saving}
+                  className="h-8 bg-background border-border text-foreground text-xs font-mono"
+                />
+                {!customCronValid && formCustomCron.length > 0 && (
+                  <p className="text-[11px] text-red-400">请输入合法的 5 段 Cron 表达式 (分 时 日 月 周)</p>
+                )}
+              </div>
             )}
 
-            <FormControlLabel
-              className="st-form-item"
-              control={
-                <Switch checked={formEnabled} onChange={(e) => setFormEnabled(e.target.checked)} disabled={saving} />
-              }
-              label={t('scheduled.enabled')}
-              sx={{ mt: 1 }}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setShowAddDialog(false)} disabled={saving}>
-              {t('button.cancel')}
-            </Button>
-            <Button onClick={handleSave} variant="contained" disabled={saving || !isFormValid}>
-              {saving ? t('scheduled.saving') : t('button.save')}
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </DialogContent>
+            {/* Enable switch */}
+            <div className="st-form-item flex items-center justify-between pt-1">
+              <span className="text-xs text-foreground">{t('scheduled.enabled')}</span>
+              <Switch checked={formEnabled} onCheckedChange={setFormEnabled} disabled={saving} />
+            </div>
 
-      <DialogActions>
-        <Button onClick={handleClose}>{t('button.close')}</Button>
-      </DialogActions>
-    </Dialog>
+            {/* Form Actions */}
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
+              <Button variant="secondary" size="sm" onClick={() => setShowAddForm(false)} disabled={saving}>
+                {t('button.cancel')}
+              </Button>
+              <Button
+                variant="accent"
+                size="sm"
+                onClick={handleSave}
+                disabled={saving || !isFormValid}
+                className="gap-1.5"
+              >
+                {saving && <Loader2 size={12} className="animate-spin" />}
+                <span>{saving ? t('scheduled.saving') : t('button.save')}</span>
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Task List Mode */}
+        {!loading && !showAddForm && tasks.length === 0 && (
+          <div className="py-8 px-4 text-center rounded-lg border border-border bg-card">
+            <div className="size-11 rounded-xl bg-muted/40 border border-border flex items-center justify-center mx-auto mb-2 text-muted-foreground">
+              <CalendarClock size={22} />
+            </div>
+            <h3 className="text-xs font-semibold text-foreground">{t('scheduled.noTasks')}</h3>
+            <p className="text-[11px] text-muted-foreground mt-1 max-w-xs mx-auto leading-relaxed">
+              {t('scheduled.emptyHint')}
+            </p>
+            <Button variant="accent" size="sm" onClick={handleOpenAdd} className="mt-3 gap-1.5 text-xs">
+              <Plus size={13} />
+              <span>{t('scheduled.newTask')}</span>
+            </Button>
+          </div>
+        )}
+
+        {!loading && !showAddForm && tasks.length > 0 && (
+          <div ref={listRef} className="space-y-2">
+            <div className="flex items-center justify-between px-1 text-xs">
+              <span className="text-muted-foreground font-medium">任务列表 ({tasks.length})</span>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleOpenAdd}
+                className="h-7 px-2.5 text-xs gap-1 border-border bg-secondary hover:bg-secondary/80 text-foreground"
+              >
+                <Plus size={12} />
+                <span>{t('scheduled.newTask')}</span>
+              </Button>
+            </div>
+
+            <div className="max-h-72 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
+              {tasks.map((task) => {
+                const typeInfo = getTypeInfo(task.type)
+                const TypeIcon = typeInfo.icon
+                return (
+                  <div
+                    key={task.id}
+                    className="st-task-item flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-2.5 text-xs transition-colors hover:border-border/80"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                      <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted/40 border border-border text-muted-foreground">
+                        <TypeIcon size={14} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-foreground truncate">{task.name}</span>
+                          <span
+                            className={cn(
+                              'px-1.5 py-0.2 rounded text-[10px] font-mono',
+                              task.enabled
+                                ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border border-emerald-500/20'
+                                : 'bg-muted/40 text-muted-foreground border border-border',
+                            )}
+                          >
+                            {task.enabled ? t('scheduled.enabled') : t('scheduled.disabled')}
+                          </span>
+                          {task.status === 'running' && (
+                            <span className="text-[10px] text-amber-600 dark:text-amber-300">{t('scheduled.running')}</span>
+                          )}
+                        </div>
+                        <div className="truncate whitespace-nowrap text-[11px] text-muted-foreground font-mono mt-0.5">
+                          {getScheduleLabel(task.schedule.cronExpression)}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <Switch
+                        checked={task.enabled}
+                        onCheckedChange={() => handleToggle(task)}
+                        title={task.enabled ? t('scheduled.disabled') : t('scheduled.enabled')}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => (task.status === 'running' ? handleCancel(task) : handleTrigger(task))}
+                        className="size-7 p-0 text-muted-foreground hover:text-foreground"
+                        title={t(task.status === 'running' ? 'scheduled.cancelRun' : 'scheduled.trigger')}
+                      >
+                        {task.status === 'running' ? <Square size={12} /> : <Play size={13} />}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(task)}
+                        className="size-7 p-0 text-muted-foreground hover:text-foreground"
+                        title={t('scheduled.edit')}
+                      >
+                        <Pencil size={13} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(task)}
+                        className="size-7 p-0 text-muted-foreground hover:text-destructive"
+                        title={t('button.delete')}
+                      >
+                        <Trash2 size={13} />
+                      </Button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="flex items-center justify-end gap-2.5 pt-4 mt-2 border-t border-border">
+        <Button variant="secondary" size="sm" onClick={onClose} className="text-xs">
+          {t('button.close')}
+        </Button>
+      </div>
+    </ReorModal>
   )
 }
 

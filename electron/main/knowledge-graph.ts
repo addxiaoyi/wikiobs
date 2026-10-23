@@ -50,7 +50,7 @@ export interface KnowledgeGraph {
 }
 
 // 全局图谱实例
-const globalGraphState: { current: KnowledgeGraph | null } = { current: null }
+const globalGraphs = new Map<string, KnowledgeGraph>()
 const store = new Store()
 
 // 解析 [[双向链接]]
@@ -64,8 +64,8 @@ function parseWikiLinksInternal(content: string, sourceFile: string): WikiLink[]
     const fullMatch = match[0]
     const inner = match[1]
     const parts = inner.split('|')
-    const targetTitle = parts[0].trim()
-    const displayText = parts[1]?.trim() || targetTitle
+    const targetPath = parts[0].trim()
+    const displayText = parts[1]?.trim() || targetPath
 
     // 提取上下文（链接前后各50个字符）
     const start = Math.max(0, match.index - 50)
@@ -73,15 +73,15 @@ function parseWikiLinksInternal(content: string, sourceFile: string): WikiLink[]
     const context = content.substring(start, end)
 
     // 判断链接类型
-    const isExternal = targetTitle.startsWith('http://') || targetTitle.startsWith('https://')
-    const isBroken = !isExternal && !targetTitle.includes('.md') && !targetTitle.includes('/')
+    const isExternal = targetPath.startsWith('http://') || targetPath.startsWith('https://')
+    const isBroken = !isExternal && !targetPath.toLowerCase().endsWith('.md')
     let linkType: WikiLink['linkType'] = 'internal'
     if (isExternal) linkType = 'external'
     else if (isBroken) linkType = 'broken'
 
     links.push({
       sourceFile,
-      targetFile: isExternal ? targetTitle : targetTitle,
+      targetFile: targetPath,
       targetTitle: displayText,
       linkType,
       context,
@@ -94,11 +94,12 @@ function parseWikiLinksInternal(content: string, sourceFile: string): WikiLink[]
 
 // 解析 #标签
 function parseTags(content: string): string[] {
+  const text = content.replace(/!?\[\[[^\]]+\]\]/g, '')
   const tagRegex = /#([a-zA-Z一-龥][\w一-龥-]*)/g
   const tags: string[] = []
   let match
 
-  while ((match = tagRegex.exec(content)) !== null) {
+  while ((match = tagRegex.exec(text)) !== null) {
     const tag = match[1].toLowerCase()
     if (!tags.includes(tag)) {
       tags.push(tag)
@@ -279,20 +280,54 @@ async function buildGraph(options?: {
 
   scanDir(vaultPath)
 
-  // Obsidian links commonly omit the .md suffix. Resolve those links against
-  // scanned notes before creating relations, while keeping standalone parsing
-  // conservative for callers that do not have a vault index.
+  // Resolve Obsidian paths and heading/block links against the scanned vault.
+  const normalizedPaths = new Map(
+    Array.from(fileContents.keys(), (file) => [file.replace(/\\/g, '/').toLocaleLowerCase(), file]),
+  )
+  const filesByName = new Map<string, string[]>()
+  for (const file of fileContents.keys()) {
+    const name = path.basename(file, path.extname(file)).toLocaleLowerCase()
+    filesByName.set(name, [...(filesByName.get(name) || []), file])
+  }
+
   for (const link of links) {
-    if (link.linkType === 'broken') {
-      const target = link.targetFile.replace(/\.md$/i, '')
-      const resolved = Array.from(fileContents.keys()).find((file) => {
-        const stem = file.replace(/\.md$/i, '')
-        return stem === target || path.basename(stem) === target
-      })
-      if (resolved) {
-        link.targetFile = resolved
-        link.linkType = 'internal'
-      }
+    if (link.linkType === 'external') continue
+
+    const rawTarget = link.targetFile
+      .split('#', 1)[0]
+      .replace(/\^[\w-]+$/, '')
+      .trim()
+    if (!rawTarget) continue
+    let decodedTarget = rawTarget
+    try {
+      decodedTarget = decodeURIComponent(rawTarget)
+    } catch {
+      // Keep the literal path when a vault contains a malformed escape.
+    }
+
+    const targetWithExtension = /\.md$/i.test(decodedTarget) ? decodedTarget : `${decodedTarget}.md`
+    const sourceDirectory = path.posix.dirname(link.sourceFile.replace(/\\/g, '/'))
+    const candidates = [
+      path.posix.normalize(path.posix.join(sourceDirectory, targetWithExtension)),
+      path.posix.normalize(targetWithExtension),
+    ]
+    const resolved = candidates
+      .map((candidate) => normalizedPaths.get(candidate.replace(/\\/g, '/').toLocaleLowerCase()))
+      .find((candidate): candidate is string => candidate !== undefined)
+
+    if (resolved) {
+      link.targetFile = resolved
+      link.linkType = 'internal'
+      continue
+    }
+
+    const basename = path.posix.basename(decodedTarget).replace(/\.md$/i, '').toLocaleLowerCase()
+    const sameName = filesByName.get(basename) || []
+    if (sameName.length === 1) {
+      link.targetFile = sameName[0]
+      link.linkType = 'internal'
+    } else if (link.linkType === 'internal') {
+      link.linkType = 'broken'
     }
   }
 
@@ -360,15 +395,7 @@ async function buildGraph(options?: {
     },
   }
 
-  globalGraphState.current = graph
-  // Keep the lightweight link index available to hybrid search without
-  // introducing an IPC round-trip between main-process modules.
-  globalThis.graphLinks = links.map((link) => ({
-    sourceFile: link.sourceFile,
-    targetFile: link.targetFile,
-    targetTitle: link.targetTitle,
-    context: link.context,
-  }))
+  globalGraphs.set(path.resolve(vaultPath), graph)
   return graph
 }
 
@@ -471,12 +498,11 @@ export const parseWikiLinks = parseLinks
 export const findRelatedEntities = findRelated
 
 // 供 hybrid-search 使用
-export function getGlobalGraph() {
-  return globalGraphState.current
+export function getGlobalGraph(vaultPath?: string) {
+  return vaultPath ? globalGraphs.get(path.resolve(vaultPath)) || null : null
 }
 
-export function setGlobalLinks(links: WikiLink[]) {
-  if (globalGraphState.current) {
-    globalGraphState.current.links = links
-  }
+export function setGlobalLinks(vaultPath: string, links: WikiLink[]): void {
+  const graph = globalGraphs.get(path.resolve(vaultPath))
+  if (graph) graph.links = links
 }

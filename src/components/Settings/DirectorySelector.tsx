@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
-
-import { Button } from '@material-tailwind/react'
-import { SizableText } from 'tamagui'
+import { Folder } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { truncateName } from '../Chat/MessageComponents/ChatSources'
 import { useTranslation } from '@/lib/i18n'
 import errorToStringRendererProcess from '@/lib/error'
@@ -58,18 +57,22 @@ const DirectorySelector: React.FC<DirectorySelectorProps> = ({ setErrorMsg }) =>
     persistDirectory()
   }, [userDirectory, setErrorMsg, t])
   return (
-    <div className="flex w-full max-w-60 flex-col items-end">
+    <div className="flex w-full max-w-xs flex-col items-end">
       <Button
-        className="h-10 w-[140px] cursor-pointer border-none bg-blue-500 px-2 py-0 text-center hover:bg-blue-600"
+        variant="secondary"
         onClick={handleDirectorySelection}
-        placeholder=""
+        className="flex items-center gap-1.5"
       >
-        {t('settings.selectDirectory')}
+        <Folder size={13} className="text-[#7b68ee]" />
+        <span>{t('settings.selectDirectory')}</span>
       </Button>
       {userDirectory && (
-        <SizableText fontSize={12} width="100%" textAlign="left" marginTop={1} fontWeight={300}>
-          <strong>{truncateName(userDirectory, 60)}</strong>
-        </SizableText>
+        <div className="mt-1.5 flex max-w-full items-center gap-1.5 rounded-md border border-border bg-secondary/50 px-2 py-1 font-mono text-[11px] text-muted-foreground">
+          <Folder size={12} className="shrink-0 text-muted-foreground" />
+          <span className="truncate" title={userDirectory}>
+            {truncateName(userDirectory, 40)}
+          </span>
+        </div>
       )}
     </div>
   )

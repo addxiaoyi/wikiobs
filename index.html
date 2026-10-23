@@ -1,8 +1,11 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN" class="dark" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/icon.png" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="/wikiobs-logo.svg" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/icon.png" />
+    <link rel="apple-touch-icon" href="/icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Updated Content-Security-Policy -->
     <meta
@@ -18,9 +21,45 @@
     />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
 
-    <title>WIKIOBS · Local knowledge workspace</title>
+    <title>WIKIOBS by Helstera · Local Knowledge Workspace</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --background: 240 10% 4%;
+        --foreground: 0 0% 98%;
+        --bg-000: 240 10% 4%;
+        --gen-100: 0 0% 98%;
+      }
+      .light {
+        color-scheme: light;
+        --background: 0 0% 100%;
+        --foreground: 222.2 84% 4.9%;
+        --bg-000: 0 0% 100%;
+        --gen-100: 222.2 84% 4.9%;
+      }
+      html, body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        height: 100%;
+        width: 100%;
+      }
+      html.dark, body.dark {
+        background-color: #0e1015;
+        color: #f8fafc;
+      }
+      html.light, body.light {
+        background-color: #ffffff;
+        color: #1e2025;
+      }
+      #root {
+        min-height: 100%;
+        height: 100%;
+        width: 100%;
+      }
+    </style>
   </head>
-  <body>
+  <body class="bg-background text-foreground">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

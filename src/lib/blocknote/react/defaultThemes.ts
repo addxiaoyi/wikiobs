@@ -93,28 +93,28 @@ export const darkDefaultTheme: Theme = {
       background: 'transparent',
     },
     menu: {
-      text: defaultColorScheme[2],
-      background: defaultColorScheme[6],
+      text: '#f1f5f9',
+      background: '#12151e',
     },
     tooltip: {
-      text: defaultColorScheme[2],
-      background: defaultColorScheme[7],
+      text: '#f8fafc',
+      background: '#1a1e2a',
     },
     hovered: {
-      text: defaultColorScheme[2],
-      background: defaultColorScheme[7],
+      text: '#ffffff',
+      background: 'rgba(255, 255, 255, 0.08)',
     },
     selected: {
-      text: defaultColorScheme[2],
-      background: defaultColorScheme[8],
+      text: '#ffffff',
+      background: 'rgba(255, 255, 255, 0.16)',
     },
     disabled: {
-      text: defaultColorScheme[5],
-      background: defaultColorScheme[7],
+      text: '#64748b',
+      background: '#12151e',
     },
-    shadow: defaultColorScheme[8],
-    border: defaultColorScheme[7],
-    sideMenu: defaultColorScheme[4],
+    shadow: 'rgba(0, 0, 0, 0.5)',
+    border: 'rgba(255, 255, 255, 0.1)',
+    sideMenu: '#94a3b8',
     highlightColors: {
       gray: {
         text: '#bebdb8',

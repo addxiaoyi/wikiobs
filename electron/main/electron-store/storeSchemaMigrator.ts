@@ -7,7 +7,7 @@ import {
   openAIDefaultLLMs,
 } from '../../../shared/defaultLLMs'
 import { generateChatName } from '../../../shared/utils'
-import { StoreKeys, StoreSchema } from './storeConfig'
+import { StoreKeys, StoreSchema, LLMAPIConfig } from './storeConfig'
 import { defaultEmbeddingModelRepos } from '../vector-database/embeddings'
 import { defaultOllamaAPI } from '../llm/models/ollama'
 import { addOrUpdateLLMInStore } from '../llm/llmConfig'
@@ -44,14 +44,28 @@ const setupDefaultEmbeddingModels = (store: Store<StoreSchema>) => {
 }
 
 const setupDefaultLLMAPIs = (store: Store<StoreSchema>) => {
-  const llmAPIs = store.get(StoreKeys.LLMAPIs)
+  const llmAPIs = store.get(StoreKeys.LLMAPIs) || []
 
-  const existingOllamaAPI = llmAPIs?.find((api) => api.name === defaultOllamaAPI.name)
-  if (!existingOllamaAPI) {
-    store.set(StoreKeys.LLMAPIs, [defaultOllamaAPI])
-  } else if (existingOllamaAPI.apiInterface !== defaultOllamaAPI.name) {
-    const updatedLLMAPIs = llmAPIs.filter((api) => api.name !== defaultOllamaAPI.name)
-    store.set(StoreKeys.LLMAPIs, [...updatedLLMAPIs, defaultOllamaAPI])
+  const existingOllamaIndex = llmAPIs.findIndex((api) => api.name === defaultOllamaAPI.name)
+  if (existingOllamaIndex === -1) {
+    store.set(StoreKeys.LLMAPIs, [...llmAPIs, defaultOllamaAPI])
+  } else {
+    const existing = llmAPIs[existingOllamaIndex]
+    if (
+      existing.apiInterface !== defaultOllamaAPI.apiInterface ||
+      !existing.apiURL ||
+      existing.apiURL.includes('/v1') ||
+      !existing.apiURL.endsWith('/api')
+    ) {
+      const fixed: LLMAPIConfig = {
+        ...existing,
+        apiURL: 'http://localhost:11434/api',
+        apiInterface: defaultOllamaAPI.apiInterface,
+      }
+      const updated = [...llmAPIs]
+      updated[existingOllamaIndex] = fixed
+      store.set(StoreKeys.LLMAPIs, updated)
+    }
   }
 
   const existingOpenAIAPI = llmAPIs?.find((api) => api.name === openAIDefaultAPIName)

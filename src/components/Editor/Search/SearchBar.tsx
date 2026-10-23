@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { Editor } from '@tiptap/core' // Adjust import based on your setup}
-import { Button } from '@material-tailwind/react'
-import { XStack, YStack, Separator } from 'tamagui'
-import { ChevronDown, ChevronUp, X, Replace } from '@tamagui/lucide-icons'
+import { Editor } from '@tiptap/core'
+import { Button } from '@/components/ui/button'
+import { XStack, YStack } from 'tamagui'
+import { ChevronDown, ChevronUp, X, Replace } from 'lucide-react'
 import { StyledIconButton } from '@/components/Editor/ui/src/button'
 import { useTranslation } from '@/lib/i18n'
 
@@ -137,10 +137,9 @@ const SearchBar: React.FC<SearchBarProps> = ({ editor }) => {
   return (
     <div
       ref={searchBarRef}
-      className="editor-search-popover fixed right-4 top-11 max-w-[calc(100vw-32px)] rounded-xl border border-white/10 bg-[#0f1117]/90 text-neutral-100 shadow-2xl backdrop-blur-xl"
+      className="editor-search-popover fixed right-4 top-11 max-w-[calc(100vw-32px)] rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl backdrop-blur-xl"
       style={{
         zIndex: 1000,
-        boxShadow: '0 20px 48px -10px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.06)',
       }}
     >
       <XStack
@@ -167,7 +166,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ editor }) => {
           </div>
         </div>
 
-        <div className="mx-2 h-5 w-px bg-white/10" />
+        <div className="mx-2 h-5 w-px bg-border" />
 
         <XStack alignItems="center" gap={6}>
           <StyledIconButton
@@ -177,7 +176,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ editor }) => {
               goToSelection()
             }}
           >
-            <ChevronUp size={16} color="white" />
+            <ChevronUp size={15} className="text-foreground" />
           </StyledIconButton>
           <StyledIconButton
             aria-label={t('search.nextResult')}
@@ -186,20 +185,20 @@ const SearchBar: React.FC<SearchBarProps> = ({ editor }) => {
               goToSelection()
             }}
           >
-            <ChevronDown size={16} color="white" />
+            <ChevronDown size={15} className="text-foreground" />
           </StyledIconButton>
           {(showReplace || searchLocation.resultsExist) && (
             <StyledIconButton aria-label={t('search.toggleReplace')} onPress={toggleReplace}>
-              <Replace size={15} color="white" />
+              <Replace size={14} className="text-foreground" />
             </StyledIconButton>
           )}
           <StyledIconButton aria-label={t('search.close')} onPress={toggleSearch}>
-            <X size={16} color="white" />
+            <X size={15} className="text-foreground" />
           </StyledIconButton>
         </XStack>
       </XStack>
       {showReplace && (
-        <YStack className="border-t border-white/10">
+        <YStack className="border-t border-border">
           <YStack alignItems="center" gap={3} className="rounded-b-[10px] bg-transparent p-2">
             <input
               value={replaceTerm}
@@ -212,7 +211,9 @@ const SearchBar: React.FC<SearchBarProps> = ({ editor }) => {
             />
             <div className="flex w-full justify-end gap-1.5 pt-1">
               <Button
-                className="h-7 min-w-0 flex-1 cursor-pointer rounded-md border border-white/10 bg-white/[0.06] px-2 py-0 text-center text-xs font-normal text-neutral-300 transition-all duration-75 hover:bg-white/[0.12] hover:text-white"
+                variant="secondary"
+                size="sm"
+                className="h-7 min-w-0 flex-1 cursor-pointer px-2 py-0 text-center text-xs font-normal"
                 onClick={() => {
                   if (!editor) return
                   editor.commands.replaceAll()
@@ -223,7 +224,9 @@ const SearchBar: React.FC<SearchBarProps> = ({ editor }) => {
               </Button>
 
               <Button
-                className="h-7 min-w-0 flex-1 cursor-pointer rounded-md border-0 bg-white px-2 py-0 text-center text-xs font-semibold text-neutral-950 transition-all duration-75 hover:bg-neutral-200 active:scale-[0.98]"
+                variant="accent"
+                size="sm"
+                className="h-7 min-w-0 flex-1 cursor-pointer px-2 py-0 text-center text-xs font-medium"
                 onClick={() => {
                   if (!editor) return
                   editor.commands.replace()

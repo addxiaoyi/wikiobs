@@ -19,6 +19,7 @@ jest.mock('electron-store', () => {
 })
 
 import {
+  importObsidianVault,
   migrateLinks,
   parseObsidianNote,
   type ObsidianNote,
@@ -159,5 +160,37 @@ Some text here [[Wiki Link]] and ![[Embed]]
     const note = parseObsidianNote(filePath, content)
     expect(note.links).toEqual([])
     expect(note.embeds).toEqual([])
+  })
+})
+
+describe('importObsidianVault conflict handling', () => {
+  let rootPath: string
+
+  beforeEach(() => {
+    rootPath = createTempDir()
+  })
+
+  afterEach(() => {
+    removeTempDir(rootPath)
+  })
+
+  it('preserves an existing target note and reports it as skipped', async () => {
+    const sourcePath = path.join(rootPath, 'source')
+    const targetPath = path.join(rootPath, 'target')
+    const sourceNotePath = path.join(sourcePath, 'same-name.md')
+    const targetNotePath = path.join(targetPath, 'same-name.md')
+    const originalTarget = 'Locally edited note that must remain untouched.'
+
+    fs.mkdirSync(sourcePath, { recursive: true })
+    fs.mkdirSync(targetPath, { recursive: true })
+    fs.writeFileSync(sourceNotePath, '# Imported version', 'utf8')
+    fs.writeFileSync(targetNotePath, originalTarget, 'utf8')
+
+    const result = await importObsidianVault(sourcePath, targetPath)
+
+    expect(result.success).toBe(true)
+    expect(result.imported).toBe(0)
+    expect(result.skipped).toBe(1)
+    expect(fs.readFileSync(targetNotePath, 'utf8')).toBe(originalTarget)
   })
 })

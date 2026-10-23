@@ -185,8 +185,16 @@ const ChatComponent: React.FC = () => {
           }
         }
         setLoadingState('idle')
-        // Keep provider errors inside the chat surface so Retry remains clickable.
-        setErrorMessage(errorToStringRendererProcess(error))
+        // Format user-friendly error guidance while keeping retry functional
+        let displayError = errorToStringRendererProcess(error)
+        if (error instanceof Error && error.name === 'AI_APICallError') {
+          if (error.message.includes('Not Found') || (error as any).statusCode === 404) {
+            displayError = `AI 模型调用失败 (404 Not Found)：未找到模型 "${llmName}" 或 Ollama 接口路径不正确。请确认本地 Ollama 已下载该模型（终端执行: ollama pull ${llmName}），或在设置中检查配置。`
+          } else if (error.message.includes('Failed to fetch') || error.message.includes('fetch failed')) {
+            displayError = '无法连接到本地 Ollama 服务：请确保 Ollama 正在后台运行（默认服务端口 11434）。'
+          }
+        }
+        setErrorMessage(displayError)
       } finally {
         abortControllerRef.current = null
       }

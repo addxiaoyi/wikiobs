@@ -126,6 +126,40 @@ describe('enablePlugin / disablePlugin', () => {
     const result = enablePlugin('nonexistent-plugin')
     expect(result).toBe(false)
   })
+
+  it('rejects plugin IDs that attempt path traversal', () => {
+    expect(() => enablePlugin('../outside')).toThrow('Invalid plugin ID')
+    expect(() => enablePlugin('..\\outside')).toThrow('Invalid plugin ID')
+  })
+})
+
+describe('plugin manifest boundaries', () => {
+  let tmpDir: string
+
+  beforeEach(() => {
+    tmpDir = createTempDir()
+    const { app: mockApp } = require('electron')
+    mockApp.getPath.mockReturnValue(tmpDir)
+  })
+
+  afterEach(() => {
+    for (const plugin of getLoadedPlugins()) unloadPlugin(plugin.id)
+    removeTempDir(tmpDir)
+  })
+
+  it('does not load a manifest entry outside the plugin directory', async () => {
+    const pluginsDir = path.join(tmpDir, 'plugins', 'unsafe-plugin')
+    fs.mkdirSync(pluginsDir, { recursive: true })
+    fs.writeFileSync(
+      path.join(pluginsDir, 'manifest.json'),
+      JSON.stringify({ name: 'unsafe-plugin', version: '1.0.0', main: '../outside.js', permissions: [] }),
+      'utf8',
+    )
+    fs.writeFileSync(path.join(tmpDir, 'outside.js'), 'exports.activate = () => {}', 'utf8')
+
+    const loaded = await loadPlugins()
+    expect(loaded.some((plugin) => plugin.id === 'unsafe-plugin' && !plugin.error)).toBe(false)
+  })
 })
 
 describe('loadPlugins / getLoadedPlugins / getAllPlugins', () => {

@@ -9,8 +9,8 @@ interface ChatContextType {
   setCurrentChat: React.Dispatch<React.SetStateAction<Chat | undefined>>
   sidebarShowing: SidebarAbleToShow | null
   setSidebarShowing: (option: SidebarAbleToShow | null) => void
-  activePanel: 'chat' | 'similarFiles' | null
-  setActivePanel: React.Dispatch<React.SetStateAction<'chat' | 'similarFiles' | null>>
+  activePanel: 'chat' | 'similarFiles' | 'localGraph' | null
+  setActivePanel: React.Dispatch<React.SetStateAction<'chat' | 'similarFiles' | 'localGraph' | null>>
   allChatsMetadata: ChatMetadata[]
   deleteChat: (chatID: string | undefined) => Promise<void>
   saveChat: (updatedChat: Chat) => Promise<void>
@@ -22,7 +22,7 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined)
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentChat, setCurrentChat] = useState<Chat | undefined>(undefined)
   const [sidebarShowing, setSidebarShowing] = useState<SidebarAbleToShow | null>('files')
-  const [activePanel, setActivePanel] = useState<'chat' | 'similarFiles' | null>(null)
+  const [activePanel, setActivePanel] = useState<'chat' | 'similarFiles' | 'localGraph' | null>(null)
   const [allChatsMetadata, setAllChatsMetadata] = useState<ChatMetadata[]>([])
 
   useEffect(() => {

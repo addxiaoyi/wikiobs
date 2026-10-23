@@ -448,14 +448,14 @@ const GraphView: React.FC<GraphViewProps> = ({
   }
 
   return (
-    <div className="relative size-full overflow-hidden rounded-lg bg-gray-50">
+    <div className="relative size-full overflow-hidden rounded-lg bg-background">
       <svg ref={svgRef} width={width} height={height} className="size-full" />
 
       {showControls && (
         <div className="absolute right-4 top-4 flex flex-col gap-2">
           <button
             onClick={() => handleZoom(1.3)}
-            className="rounded-lg bg-white p-2 shadow-md hover:bg-gray-100"
+            className="rounded-lg border border-border bg-card/90 p-2 text-foreground shadow-md backdrop-blur-md transition-colors hover:bg-accent"
             title={t('graph.zoomIn')}
             aria-label={t('graph.zoomIn')}
           >
@@ -463,7 +463,7 @@ const GraphView: React.FC<GraphViewProps> = ({
           </button>
           <button
             onClick={() => handleZoom(0.7)}
-            className="rounded-lg bg-white p-2 shadow-md hover:bg-gray-100"
+            className="rounded-lg border border-border bg-card/90 p-2 text-foreground shadow-md backdrop-blur-md transition-colors hover:bg-accent"
             title={t('graph.zoomOut')}
             aria-label={t('graph.zoomOut')}
           >
@@ -471,7 +471,7 @@ const GraphView: React.FC<GraphViewProps> = ({
           </button>
           <button
             onClick={handleReset}
-            className="rounded-lg bg-white p-2 shadow-md hover:bg-gray-100"
+            className="rounded-lg border border-border bg-card/90 p-2 text-foreground shadow-md backdrop-blur-md transition-colors hover:bg-accent"
             title={t('graph.resetView')}
             aria-label={t('graph.resetView')}
           >
@@ -479,7 +479,9 @@ const GraphView: React.FC<GraphViewProps> = ({
           </button>
           <button
             onClick={() => setShowClusters(!showClusters)}
-            className={`rounded-lg p-2 shadow-md transition-colors ${showClusters ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+            className={`rounded-lg border border-border p-2 shadow-md backdrop-blur-md transition-colors ${
+              showClusters ? 'bg-[#7b68ee] text-white shadow-sm shadow-[#7b68ee]/30 font-medium' : 'bg-card/90 text-foreground hover:bg-accent'
+            }`}
             title={t('graph.toggleClusters')}
             aria-label={t('graph.toggleClusters')}
           >
@@ -490,26 +492,26 @@ const GraphView: React.FC<GraphViewProps> = ({
 
       <div className="absolute left-4 top-4">
         <div className="relative">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             placeholder="搜索节点..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-48 rounded-lg bg-white py-2 pl-9 pr-4 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-48 rounded-lg border border-border bg-card/90 py-2 pl-9 pr-4 text-foreground placeholder:text-muted-foreground shadow-md backdrop-blur-md focus:border-[#7b68ee] focus:outline-none focus:ring-1 focus:ring-[#7b68ee]"
           />
         </div>
       </div>
 
       {showClusters && (
         <div className="absolute left-1/2 top-16 -translate-x-1/2">
-          <div className="flex gap-1 rounded-lg bg-white/90 p-1 shadow-md backdrop-blur">
+          <div className="flex gap-1 rounded-lg border border-border bg-card/90 p-1 shadow-md backdrop-blur-md">
             {(['link', 'tag', 'type'] as ClusterAlgorithm[]).map((key) => (
               <button
                 key={key}
                 onClick={() => setClusterAlgorithm(key)}
                 className={`rounded px-3 py-1 text-xs transition-colors ${
-                  clusterAlgorithm === key ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'
+                  clusterAlgorithm === key ? 'bg-[#7b68ee] text-white font-medium shadow-sm shadow-[#7b68ee]/30' : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                 }`}
               >
                 By {key.charAt(0).toUpperCase() + key.slice(1)}
@@ -520,13 +522,13 @@ const GraphView: React.FC<GraphViewProps> = ({
       )}
 
       <div className="absolute left-1/2 top-4 -translate-x-1/2">
-        <div className="flex gap-1 rounded-lg bg-white p-1 shadow-md">
+        <div className="flex gap-1 rounded-lg border border-border bg-card/90 p-1 shadow-md backdrop-blur-md">
           {['note', 'person', 'place', 'tag'].map((type) => (
             <button
               key={type}
               onClick={() => setFilterType(filterType === type ? null : type)}
               className={`rounded px-3 py-1 text-sm capitalize transition-colors ${
-                filterType === type ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'
+                filterType === type ? 'bg-[#7b68ee] text-white font-medium shadow-sm shadow-[#7b68ee]/30' : 'text-muted-foreground hover:text-foreground hover:bg-accent'
               }`}
             >
               {type}
@@ -536,8 +538,8 @@ const GraphView: React.FC<GraphViewProps> = ({
       </div>
 
       {showLegend && (
-        <div className="absolute bottom-4 left-4 rounded-lg bg-white p-3 shadow-md">
-          <h4 className="mb-2 text-xs font-semibold text-gray-600">{t('graph.legend')}</h4>
+        <div className="absolute bottom-4 left-4 rounded-lg border border-border bg-card/90 p-3 shadow-md backdrop-blur-md text-card-foreground">
+          <h4 className="mb-2 text-xs font-semibold text-muted-foreground">{t('graph.legend')}</h4>
           <div className="space-y-1">
             {Object.entries(colors)
               .filter(([key]) => key !== 'edge' && key !== 'selected')
@@ -552,39 +554,41 @@ const GraphView: React.FC<GraphViewProps> = ({
       )}
 
       {selectedNode && (
-        <div className="absolute bottom-4 right-4 min-w-48 rounded-lg bg-white p-4 shadow-md">
+        <div className="absolute bottom-4 right-4 min-w-48 rounded-lg border border-border bg-card/95 p-4 text-card-foreground shadow-2xl backdrop-blur-xl">
           <div className="mb-2 flex items-start justify-between">
-            <h4 className="font-semibold">{selectedNode.label}</h4>
+            <h4 className="font-semibold text-foreground">{selectedNode.label}</h4>
             <button
               type="button"
               onClick={() => setSelectedNode(null)}
-              className="rounded p-1 hover:bg-gray-100"
+              className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
               aria-label={t('button.close')}
             >
               <X size={14} />
             </button>
           </div>
-          <div className="space-y-1 text-xs text-gray-500">
+          <div className="space-y-1 text-xs text-muted-foreground">
             <p>
-              Type: <span className="capitalize">{selectedNode.type}</span>
+              Type: <span className="capitalize text-foreground">{selectedNode.type}</span>
             </p>
             <p>
-              {t('graph.links')}: {selectedNode.linkCount || 0}
+              {t('graph.links')}: <span className="text-foreground">{selectedNode.linkCount || 0}</span>
             </p>
             {selectedNode.tags && selectedNode.tags.length > 0 && (
               <p>
                 Tags:{' '}
-                {selectedNode.tags
-                  .slice(0, 3)
-                  .map((tag) => `#${tag}`)
-                  .join(', ')}
+                <span className="text-foreground">
+                  {selectedNode.tags
+                    .slice(0, 3)
+                    .map((tag) => `#${tag}`)
+                    .join(', ')}
+                </span>
               </p>
             )}
           </div>
         </div>
       )}
 
-      <div className="absolute bottom-4 right-48 rounded-lg bg-white/80 p-2 text-xs text-gray-500 shadow-md">
+      <div className="absolute bottom-4 right-48 rounded-lg border border-border bg-card/80 p-2 text-xs text-muted-foreground shadow-md backdrop-blur-md">
         {displayNodes.length} nodes, {displayEdges.length} edges
       </div>
     </div>

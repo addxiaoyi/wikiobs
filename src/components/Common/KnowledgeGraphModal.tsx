@@ -1,18 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import Button from '@mui/material/Button'
-import IconButton from '@mui/material/IconButton'
-import { X } from 'lucide-react'
-import Alert from '@mui/material/Alert'
-import LinearProgress from '@mui/material/LinearProgress'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
+import { Share2, AlertCircle, Loader2, Network } from 'lucide-react'
+
+import ReorModal from './Modal'
+import { Button } from '@/components/ui/button'
 import EnhancedGraphView from './EnhancedGraphView'
 import { useTranslation } from '@/lib/i18n'
 import { useContentContext } from '@/contexts/ContentContext'
+import { useFileContext } from '@/contexts/FileContext'
 
 interface GraphEntity {
   id: string
@@ -39,6 +33,7 @@ const getEdgeType = (type: string): 'related' | 'link' | 'mention' => {
   if (type === 'mentions') return 'mention'
   return 'related'
 }
+
 interface KnowledgeGraphModalProps {
   isOpen: boolean
   onClose: () => void
@@ -47,7 +42,13 @@ interface KnowledgeGraphModalProps {
 const KnowledgeGraphModal: React.FC<KnowledgeGraphModalProps> = ({ isOpen, onClose }) => {
   const { t } = useTranslation()
   const { openContent } = useContentContext()
+  const { openOrCreateFile } = useFileContext()
   const [graph, setGraph] = useState<KnowledgeGraph | null>(null)
+
+  const handleOpenInTab = () => {
+    openOrCreateFile('graph://global')
+    onClose()
+  }
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [graphWidth, setGraphWidth] = useState(960)
@@ -83,13 +84,10 @@ const KnowledgeGraphModal: React.FC<KnowledgeGraphModalProps> = ({ isOpen, onClo
     if (!container || !isOpen) return undefined
 
     const updateWidth = () => {
-      const availableWidth =
-        window.innerWidth <= 960
-          ? window.innerWidth - 80
-          : container.parentElement?.clientWidth || window.innerWidth - 80
-      setGraphWidth(Math.max(280, Math.min(960, availableWidth)))
+      const availableWidth = container.clientWidth || window.innerWidth - 80
+      setGraphWidth(Math.max(280, availableWidth))
       const compactViewport = window.innerWidth <= 640
-      setGraphHeight(Math.max(320, Math.min(600, window.innerHeight - (compactViewport ? 330 : 220))))
+      setGraphHeight(Math.max(320, window.innerHeight - (compactViewport ? 260 : 200)))
     }
     updateWidth()
     const observer = new ResizeObserver(updateWidth)
@@ -118,7 +116,7 @@ const KnowledgeGraphModal: React.FC<KnowledgeGraphModalProps> = ({ isOpen, onClo
     try {
       const vaultDirectory = await window.electronStore.getVaultDirectoryForWindow()
       const filePath = /^[A-Za-z]:[\\/]/.test(node.filePath)
-        ? node.filePath
+      ? node.filePath
         : await window.path.join(vaultDirectory, node.filePath)
       onClose()
       openContent(filePath)
@@ -128,41 +126,53 @@ const KnowledgeGraphModal: React.FC<KnowledgeGraphModalProps> = ({ isOpen, onClo
   }
 
   return (
-    <Dialog open={isOpen} onClose={onClose} maxWidth="xl" fullWidth>
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pr: 1 }}>
-        {t('graph.title')}
-        <IconButton onClick={onClose} aria-label={t('button.close')} title={t('button.close')} size="small">
-          <X size={16} />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent sx={{ minHeight: { xs: 320, sm: 420, md: 560 }, overflowX: 'hidden', px: { xs: 1.5, sm: 3 } }}>
+    <ReorModal
+      isOpen={isOpen}
+      onClose={onClose}
+      className="max-w-6xl w-[94vw] h-[86vh] max-h-[86vh] p-4 flex flex-col"
+    >
+      {/* Header */}
+      <div className="flex items-start gap-3 pb-3 border-b border-border shrink-0">
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-[#7b68ee]/30 bg-[#7b68ee]/15 text-[#7b68ee] dark:text-[#9d8ff5] shadow-sm shadow-[#7b68ee]/20">
+          <Share2 size={16} strokeWidth={2} />
+        </div>
+        <div className="min-w-0 flex-1 pr-6">
+          <h2 className="text-sm font-semibold text-foreground tracking-tight">{t('graph.title')}</h2>
+          <p className="mt-0.5 text-[11px] text-muted-foreground">
+            双向链接拓扑关系与知识网络探索 ({nodes.length} 节点 · {edges.length} 连线)
+          </p>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="flex-1 min-h-0 relative flex flex-col pt-2 overflow-hidden">
         {loading && (
-          <Box py={4}>
-            <LinearProgress />
-            <Typography variant="body2" color="text.secondary" align="center" mt={2}>
-              {t('scheduled.loading')}
-            </Typography>
-          </Box>
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-background/80 backdrop-blur-sm text-muted-foreground">
+            <Loader2 size={24} className="animate-spin text-[#7b68ee]" />
+            <span className="text-xs">{t('scheduled.loading')}</span>
+          </div>
         )}
-        {error && <Alert severity="error">{error}</Alert>}
+
+        {error && (
+          <div className="flex items-start gap-2.5 rounded-lg border border-red-500/25 bg-red-500/10 p-3 text-xs text-red-600 dark:text-red-200 m-2">
+            <AlertCircle size={15} className="mt-0.5 shrink-0 text-red-500" />
+            <div className="flex-1">{error}</div>
+          </div>
+        )}
+
         {!loading && !error && nodes.length === 0 && (
-          <Box
-            sx={{
-              minHeight: { xs: 280, sm: 520 },
-              display: 'grid',
-              placeItems: 'center',
-              py: { xs: 4, sm: 8 },
-            }}
-          >
-            <Alert severity="info" sx={{ width: '100%', maxWidth: 560 }}>
-              {t('graph.empty')}
-            </Alert>
-          </Box>
+          <div className="flex-1 flex flex-col items-center justify-center text-center p-6 text-muted-foreground">
+            <div className="size-12 rounded-xl bg-muted/40 border border-border flex items-center justify-center mx-auto mb-2 text-muted-foreground">
+              <Share2 size={24} />
+            </div>
+            <p className="text-xs">{t('graph.empty')}</p>
+          </div>
         )}
+
         {!loading && !error && nodes.length > 0 && (
-          <Box
+          <div
             ref={graphContainerRef}
-            sx={{ width: '100%', minWidth: 0, maxWidth: '100%', minHeight: graphHeight, overflow: 'hidden' }}
+            className="flex-1 w-full min-w-0 min-h-0 overflow-hidden rounded-lg border border-border bg-card/40"
           >
             <EnhancedGraphView
               nodes={nodes}
@@ -171,13 +181,27 @@ const KnowledgeGraphModal: React.FC<KnowledgeGraphModalProps> = ({ isOpen, onClo
               height={graphHeight}
               onNodeClick={handleNodeClick}
             />
-          </Box>
+          </div>
         )}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>{t('button.close')}</Button>
-      </DialogActions>
-    </Dialog>
+      </div>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between gap-2.5 pt-3 mt-2 border-t border-border shrink-0">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleOpenInTab}
+          title="在工作区标签页中打开"
+          className="text-xs gap-1.5 border-[#7b68ee]/40 text-[#7b68ee] hover:bg-[#7b68ee]/10 hover:text-[#7b68ee]"
+        >
+          <Network size={13} />
+          <span>在工作区标签页中打开</span>
+        </Button>
+        <Button variant="secondary" size="sm" onClick={onClose} className="text-xs">
+          {t('button.close')}
+        </Button>
+      </div>
+    </ReorModal>
   )
 }
 

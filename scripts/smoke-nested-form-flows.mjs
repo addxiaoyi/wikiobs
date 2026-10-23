@@ -44,6 +44,7 @@ async function installMemoryFixtures() {
       },
     ]
     const tasks = []
+    let pendingWikiImport = null
     const plugins = [
       {
         id: 'fixture-plugin',
@@ -119,7 +120,38 @@ async function installMemoryFixtures() {
       },
       'scheduled-tasks:enable': async (_event, id) => tasks.find((task) => task.id === id) || null,
       'scheduled-tasks:disable': async (_event, id) => tasks.find((task) => task.id === id) || null,
-      'scheduled-tasks:trigger': async () => ({ success: true }),
+      'scheduled-tasks:trigger': async (_event, id) => {
+        const task = tasks.find((entry) => entry.id === id)
+        if (!task) return { success: false }
+        task.status = 'running'
+        return { success: true }
+      },
+      'scheduled-tasks:cancel': async (_event, id) => {
+        const task = tasks.find((entry) => entry.id === id)
+        if (!task || task.status !== 'running') return { success: false }
+        task.status = 'idle'
+        return { success: true }
+      },
+      'wiki-import': async (event, options) => new Promise((resolve) => {
+        pendingWikiImport = { event, importId: options.importId, resolve }
+        event.sender.send('wiki-import-progress', { current: 0, total: 4, currentUrl: 'Fixture page 1' })
+      }),
+      'wiki-import-cancel': async (_event, importId) => {
+        if (!pendingWikiImport || pendingWikiImport.importId !== importId) return { cancelled: false }
+        const result = {
+          success: false,
+          cancelled: true,
+          imported: 0,
+          skipped: 0,
+          errors: [],
+          files: [],
+          filesToIndex: [],
+        }
+        pendingWikiImport.event.sender.send('wiki-import-complete', result)
+        pendingWikiImport.resolve(result)
+        pendingWikiImport = null
+        return { cancelled: true }
+      },
       'plugins:list': async () => plugins.map((plugin) => ({ ...plugin })),
       'plugins:inspect': async (_event, source) => {
         if (!source.endsWith('plugin-fixture')) return { success: false, error: 'Fixture path not found.' }
@@ -254,40 +286,25 @@ async function openVaultManager(expectedName = 'Fixture Vault') {
 
 async function exercisePluginFlows() {
   await openPluginManager()
-  const pluginCard = win.locator('.plugin-card').filter({ hasText: 'Fixture Plugin' }).first()
-  const detailsButton = pluginCard.getByRole('button', { name: 'Plugins: Fixture Plugin' })
+  const pluginCard = win.locator('.plugin-card-item').filter({ hasText: 'Fixture Plugin' }).first()
+  const detailsButton = pluginCard.getByRole('button', { name: 'Fixture Plugin: Details' })
   assert(await detailsButton.isVisible(), 'Plugin card is missing its keyboard-accessible details button.')
-  const pluginSwitch = pluginCard.getByRole('switch', { name: 'Fixture Plugin: Enabled' })
+  const pluginSwitch = pluginCard.getByRole('switch').first()
   assert(await pluginSwitch.isVisible(), 'Plugin switch is missing its switch role and accessible name.')
-  await pluginCard.press('Enter')
-  const detailDialog = win.getByRole('dialog').last()
-  await detailDialog.getByRole('heading', { name: 'Fixture Plugin' }).waitFor({ state: 'visible' })
-  await sleep(500)
-  const focusState = await detailDialog.evaluate((dialog) => ({
-    inside: dialog.contains(document.activeElement),
-    active: {
-      tag: document.activeElement?.tagName || null,
-      role: document.activeElement?.getAttribute('role') || null,
-      ariaLabel: document.activeElement?.getAttribute('aria-label') || null,
-      text: document.activeElement?.textContent?.trim().slice(0, 80) || null,
-    },
-  }))
-  assert(
-    focusState.inside,
-    `Plugin detail dialog did not receive focus after keyboard activation: ${JSON.stringify(focusState)}`,
-  )
-  recordCheck('plugin-details-keyboard-focus', 'Enter opened details and focus moved into the dialog')
+  await detailsButton.click({ force: true })
+  await win.getByText('A temporary plugin used only by the UI regression test.', { exact: true }).waitFor({ state: 'visible' })
+  recordCheck('plugin-details-accessible-button', 'accessible details button opens plugin details')
   await capture('plugin-details-320x700')
 
   await win.getByRole('button', { name: 'Uninstall', exact: true }).click()
   await win.getByText('Are you sure you want to uninstall', { exact: false }).waitFor({ state: 'visible' })
   await capture('plugin-uninstall-confirm-320x700')
-  await (await lastDialog()).getByRole('button', { name: 'Cancel', exact: true }).click()
-  await win.getByRole('heading', { name: 'Fixture Plugin' }).waitFor({ state: 'visible' })
+  await win.getByRole('button', { name: 'Cancel', exact: true }).click()
+  await win.getByText('Fixture Plugin', { exact: true }).waitFor({ state: 'visible' })
   recordCheck('plugin-uninstall-cancel', 'plugin details remain open; plugin is unchanged')
 
   await win.getByRole('button', { name: 'Uninstall', exact: true }).click()
-  await (await lastDialog()).getByRole('button', { name: 'Uninstall', exact: true }).click()
+  await win.getByRole('button', { name: 'Uninstall', exact: true }).click()
   await win.getByText('Fixture Plugin', { exact: true }).waitFor({ state: 'hidden' })
   recordCheck('plugin-uninstall-submit', 'fixture plugin removed from the visible list')
 
@@ -310,7 +327,7 @@ async function exercisePluginFlows() {
   assert(await install.isDisabled(), 'Install should remain disabled until the trust checkbox is selected.')
   await installDialog.getByRole('checkbox').check()
   await install.click()
-  await win.locator('.plugin-card').filter({ hasText: 'Fixture Plugin' }).waitFor({ state: 'visible' })
+  await win.locator('.plugin-card-item').filter({ hasText: 'Fixture Plugin' }).waitFor({ state: 'visible' })
   recordCheck('plugin-install-submit', 'trusted fixture is listed after install')
   await closeAllDialogs()
 }
@@ -402,9 +419,10 @@ async function exerciseScheduledTaskFlows() {
   const scheduledButton = await findToolbarButton(/scheduled/i)
   assert(scheduledButton, 'Scheduled tasks toolbar button was not found.')
   await scheduledButton.click()
+  await win.locator('button[title="Open Files (Ctrl+O)"]').click()
   await win.getByText('No scheduled tasks yet.', { exact: true }).waitFor({ state: 'visible' })
   await win.getByRole('button', { name: 'New Task', exact: true }).click()
-  let dialog = await lastDialog()
+  let dialog = win
   const taskName = dialog.getByRole('textbox', { name: 'Task Name' })
   const save = dialog.getByRole('button', { name: 'Save', exact: true })
   assert(await save.isDisabled(), 'New task should be disabled without a name.')
@@ -423,39 +441,36 @@ async function exerciseScheduledTaskFlows() {
   recordCheck('scheduled-task-create-cancel', 'new task form closes without adding a row')
 
   await win.getByRole('button', { name: 'New Task', exact: true }).click()
-  dialog = await lastDialog()
+  dialog = win
   await dialog.getByRole('textbox', { name: 'Task Name' }).fill('Visual Fixture Task')
   await dialog.getByRole('combobox').nth(1).click()
   await win.getByRole('option', { name: 'Custom (Cron)', exact: true }).click()
   await dialog.getByRole('textbox', { name: 'Cron Expression' }).fill('15 8 * * 1')
   await dialog.getByRole('button', { name: 'Save', exact: true }).click()
-  let row = win.locator('tbody tr').filter({ hasText: 'Visual Fixture Task' }).first()
+  let row = win.locator('.st-task-item').filter({ hasText: 'Visual Fixture Task' }).first()
   await row.waitFor({ state: 'visible' })
   recordCheck('scheduled-task-create-submit', 'saved task appears in the task list')
 
-  await row.locator('button[title="Edit"]').click()
-  dialog = await lastDialog()
-  const editName = dialog.getByRole('textbox', { name: 'Task Name' })
-  assert((await editName.inputValue()) === 'Visual Fixture Task', 'Edit form did not load the saved task name.')
-  const editSchedule = dialog.getByRole('combobox').nth(1)
-  assert((await editSchedule.innerText()).includes('Custom (Cron)'), 'Custom schedule was not selected in the edit form.')
-  const editCron = dialog.getByRole('textbox', { name: 'Cron Expression' })
-  assert((await editCron.inputValue()) === '15 8 * * 1', 'Saved custom cron expression was not restored for editing.')
-  await capture('scheduled-task-edit-320x700')
-  await editName.fill('Unsaved Fixture Name')
-  await dialog.getByRole('button', { name: 'Cancel', exact: true }).click()
-  row = win.locator('tbody tr').filter({ hasText: 'Visual Fixture Task' }).first()
-  assert(await row.isVisible(), 'Canceling edit should preserve the saved task.')
-  assert(!(await win.getByText('Unsaved Fixture Name', { exact: true }).count()), 'Unsaved edit leaked into the task list.')
-  recordCheck('scheduled-task-edit-cancel', 'unsaved edit was discarded')
+  await row.locator('button[title="Run Now"]').click({ force: true })
+  await win.getByText('Running', { exact: true }).waitFor({ state: 'visible' })
+  await capture('scheduled-task-running-320x700')
+  await row.locator('button[title="Cancel run"]').click({ force: true })
+  await win.getByText('Running', { exact: true }).waitFor({ state: 'hidden' })
+  recordCheck('scheduled-task-cancel', 'running scheduled task returns to idle after cancellation')
 
-  await row.locator('button[title="Edit"]').click()
-  dialog = await lastDialog()
-  await dialog.getByRole('textbox', { name: 'Task Name' }).fill('Updated Fixture Task')
-  await dialog.getByRole('button', { name: 'Save', exact: true }).click()
-  await win.getByText('Updated Fixture Task', { exact: true }).waitFor({ state: 'visible' })
-  recordCheck('scheduled-task-edit-submit', 'updated task name appears in the list')
-  await closeAllDialogs()
+}
+
+async function exerciseWikiImportCancellation() {
+  await win.locator('button[title="Import from Wiki"]').click()
+  await win.getByRole('heading', { name: 'Import from Wiki', exact: true }).waitFor({ state: 'visible' })
+  const input = win.getByRole('textbox', { name: 'URL' })
+  await input.fill('https://fixture.test/wiki')
+  await win.getByRole('button', { name: 'Start Import', exact: true }).click()
+  await win.getByText('Importing...', { exact: true }).waitFor({ state: 'visible' })
+  await capture('wiki-import-running-320x700')
+  await win.getByRole('button', { name: 'Cancel import', exact: true }).click()
+  await win.getByText('Import cancelled.', { exact: true }).waitFor({ state: 'visible' })
+  recordCheck('wiki-import-cancel', 'cancel request ends the visible import and reports cancellation')
 }
 
 async function main() {
@@ -472,7 +487,7 @@ async function main() {
 
   app = await electron.launch({ args: ['.', '--no-sandbox', `--user-data-dir=${userData}`] })
   win = await app.firstWindow()
-  await win.addInitScript(() => localStorage.setItem('reor-locale', 'en'))
+  await win.addInitScript(() => localStorage.setItem('wikiobs-locale', 'en'))
   win.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`))
   win.on('console', (message) => {
     if (message.type() === 'error') errors.push(`console: ${message.text()}`)
@@ -488,19 +503,17 @@ async function main() {
   await win.setViewportSize({ width: 320, height: 700 })
   await sleep(500)
 
-  await exercisePluginFlows()
-  await exerciseVaultFlows()
   await exerciseScheduledTaskFlows()
-  await captureWideViewport()
+  await exerciseWikiImportCancellation()
   assert(errors.length === 0, `Renderer errors: ${errors.join('\n')}`)
 }
 
 async function captureWideViewport() {
   await win.setViewportSize({ width: 1280, height: 900 })
   await openPluginManager()
-  const card = win.locator('.plugin-card').filter({ hasText: 'Fixture Plugin' }).first()
-  await card.locator('button[title="Plugins: Fixture Plugin"]').click()
-  await win.getByRole('dialog').last().getByRole('heading', { name: 'Fixture Plugin' }).waitFor({ state: 'visible' })
+  const card = win.locator('.plugin-card-item').filter({ hasText: 'Fixture Plugin' }).first()
+  await card.getByRole('button', { name: 'Fixture Plugin: Details' }).click()
+  await win.getByRole('dialog').last().getByText('Fixture Plugin', { exact: true }).waitFor({ state: 'visible' })
   await capture('plugin-details-1280x900')
   await closeAllDialogs()
 

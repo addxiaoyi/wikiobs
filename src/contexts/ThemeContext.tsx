@@ -4,8 +4,9 @@ import type { TamaguiThemeTypes } from 'electron/main/electron-store/storeConfig
 import { TamaguiProvider, useTheme } from 'tamagui'
 import config from '../../tamagui.config'
 import errorToStringRendererProcess from '@/lib/error'
+import { WikiObsLogo } from '@/components/Common/WikiObsLogo'
 
-interface ThemeActions {
+export interface ThemeActions {
   toggle: () => void
   set: (theme: TamaguiThemeTypes) => void
   syncWithSystem: () => void
@@ -16,7 +17,42 @@ export interface ThemeContextValue {
   actions: ThemeActions
 }
 
-// Basic colors for manual Mantine Component
+/**
+ * Apply the theme class and attributes to the root HTML element
+ */
+export const applyThemeToDOM = (theme: TamaguiThemeTypes) => {
+  if (typeof document === 'undefined') return
+  const root = document.documentElement
+  const body = document.body
+  if (theme === 'dark') {
+    root.classList.add('dark')
+    root.classList.remove('light')
+    root.setAttribute('data-theme', 'dark')
+    root.style.colorScheme = 'dark'
+    if (body) {
+      body.classList.add('dark')
+      body.classList.remove('light')
+      body.setAttribute('data-theme', 'dark')
+    }
+  } else {
+    root.classList.add('light')
+    root.classList.remove('dark')
+    root.setAttribute('data-theme', 'light')
+    root.style.colorScheme = 'light'
+    if (body) {
+      body.classList.add('light')
+      body.classList.remove('dark')
+      body.setAttribute('data-theme', 'light')
+    }
+  }
+}
+
+// Apply default dark theme immediately upon script evaluation
+if (typeof document !== 'undefined') {
+  applyThemeToDOM('dark')
+}
+
+// Basic colors for manual component mapping
 const styles = {
   '#f9f9f9': {
     mainColor: 'rgba(255, 255, 255, 1)',
@@ -46,14 +82,9 @@ const styles = {
   },
 }
 
-/**
- * Some mantine components look / act better then tamagui. This converts
- * tamagui styles to mantine styles.
- */
 export const MantineStyleProps = () => {
   const theme = useTheme()
-
-  const colors = styles[theme.background.val as keyof typeof styles]
+  const colors = styles[theme?.background?.val as keyof typeof styles] || styles['#151515']
 
   return {
     input: {
@@ -85,13 +116,17 @@ export class ThemeManager {
   constructor(initialTheme: TamaguiThemeTypes, setState: (theme: TamaguiThemeTypes) => void) {
     this.state = initialTheme
     this.setState = setState
+    applyThemeToDOM(initialTheme)
   }
 
   private async updateTheme(newTheme: TamaguiThemeTypes) {
     try {
-      await window.electronStore.setTamaguiTheme(newTheme)
+      applyThemeToDOM(newTheme)
       this.state = newTheme
       this.setState(newTheme)
+      if (window.electronStore?.setTamaguiTheme) {
+        await window.electronStore.setTamaguiTheme(newTheme)
+      }
     } catch (error) {
       toast.error(errorToStringRendererProcess(error))
     }
@@ -118,22 +153,29 @@ export class ThemeManager {
 }
 
 /**
- * Stores, gets, and updates the theme
+ * Stores, gets, and updates the theme across the whole application
  */
 export const ThemeProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [theme, setTheme] = useState<TamaguiThemeTypes>('light')
+  const [theme, setTheme] = useState<TamaguiThemeTypes>('dark')
   const [manager, setManager] = useState<ThemeManager | null>(null)
 
   useEffect(() => {
     const initTheme = async () => {
       try {
-        const savedTheme = await window.electronStore.getTamaguiTheme()
-        setTheme(savedTheme || 'light')
-        setManager(new ThemeManager(savedTheme || 'light', setTheme))
+        let initialTheme: TamaguiThemeTypes = 'dark'
+        if (window.electronStore?.getTamaguiTheme) {
+          const savedTheme = await window.electronStore.getTamaguiTheme()
+          if (savedTheme === 'light' || savedTheme === 'dark') {
+            initialTheme = savedTheme
+          }
+        }
+        applyThemeToDOM(initialTheme)
+        setTheme(initialTheme)
+        setManager(new ThemeManager(initialTheme, setTheme))
       } catch (error) {
-        toast.error(errorToStringRendererProcess(error))
-        setTheme('light')
-        setManager(new ThemeManager('light', setTheme))
+        applyThemeToDOM('dark')
+        setTheme('dark')
+        setManager(new ThemeManager('dark', setTheme))
       }
     }
 
@@ -143,14 +185,18 @@ export const ThemeProvider: FC<PropsWithChildren> = ({ children }) => {
   if (!manager) {
     return (
       <div
-        className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground"
+        className="flex min-h-screen items-center justify-center bg-[#0e1015] text-sm text-muted-foreground select-none font-sans"
         role="status"
         aria-live="polite"
       >
-        Loading theme…
+        <div className="flex flex-col items-center gap-3">
+          <WikiObsLogo size={32} className="animate-pulse drop-shadow-[0_0_12px_rgba(123,104,238,0.5)]" />
+          <span className="text-xs font-medium text-muted-foreground tracking-wider">正在初始化工作区主题…</span>
+        </div>
       </div>
     )
   }
+
   return (
     <ThemeContext.Provider value={manager.getContextValue()}>
       <TamaguiProvider config={config} defaultTheme={theme}>

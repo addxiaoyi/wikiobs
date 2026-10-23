@@ -27,4 +27,12 @@ describe('pathGuard', () => {
     expect(() => resolveExistingVaultPath(root, path.join(root, 'linked', 'secret.md'))).toThrow('current vault')
     fs.rmSync(outside, { recursive: true, force: true })
   })
+
+  it('rejects writes through an escaping ancestor before the target exists', () => {
+    const outside = fs.mkdtempSync(path.join(process.env.TEMP ?? process.cwd(), 'wikiobs-outside-write-'))
+    fs.symlinkSync(outside, path.join(root, 'linked'), 'junction')
+
+    expect(() => resolveExistingVaultPath(root, path.join(root, 'linked', 'new-note.md'))).toThrow('current vault')
+    fs.rmSync(outside, { recursive: true, force: true })
+  })
 })

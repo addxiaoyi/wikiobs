@@ -1,6 +1,6 @@
 import path from 'path'
 
-import { ipcMain } from 'electron'
+import { ipcMain, BrowserWindow } from 'electron'
 import Store from 'electron-store'
 import {
   EmbeddingModelConfig,
@@ -222,6 +222,18 @@ export const registerStoreHandlers = (store: Store<StoreSchema>, windowsManager:
   ipcMain.handle('set-tamagui-theme', (event, theme: TamaguiThemeTypes) => {
     store.set(StoreKeys.TamaguiTheme, theme)
     event.sender.send('tamagui-theme-changed', theme)
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (win && !win.isDestroyed() && process.platform === 'win32') {
+      try {
+        if (theme === 'light') {
+          win.setTitleBarOverlay?.({ color: '#f8f9fa', symbolColor: '#1e2025' })
+        } else {
+          win.setTitleBarOverlay?.({ color: '#0e1015', symbolColor: '#ffffff' })
+        }
+      } catch {
+        // ignore if not supported
+      }
+    }
   })
 
   ipcMain.handle('get-tamagui-theme', () => {

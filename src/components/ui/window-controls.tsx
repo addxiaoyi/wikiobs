@@ -13,36 +13,36 @@ const WindowControls = ({ onClose, onMaximize, onNewChat }: WindowControlsProps)
   const { t } = useTranslation()
 
   return (
-    <div className="group absolute right-2.5 top-2.5 z-10 transition-opacity duration-75 hover:opacity-100">
-      <div className="flex items-center gap-0.5 rounded-lg border border-white/5 bg-black/20 p-0.5 backdrop-blur-md">
+    <div className="group absolute right-2.5 top-2.5 z-10 opacity-0 transition-opacity duration-200 hover:opacity-100 focus-within:opacity-100">
+      <div className="flex items-center gap-0.5 rounded-lg border border-white/10 bg-[#12141c]/85 p-0.5 shadow-xl backdrop-blur-xl">
         {onNewChat && (
           <button
             type="button"
             onClick={onNewChat}
-            className="cursor-pointer rounded-md bg-transparent p-1.5 transition-all duration-75 hover:bg-white/10 hover:text-white focus-visible:bg-white/10 focus-visible:ring-1 focus-visible:ring-white/40"
+            className="cursor-pointer rounded-md bg-transparent p-1.5 transition-all duration-75 hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:ring-1 focus-visible:ring-ring"
             title={t('chat.newChat')}
             aria-label={t('chat.newChat')}
           >
-            <Plus className="size-3 text-muted-foreground hover:text-white" />
+            <Plus className="size-3 text-muted-foreground hover:text-foreground" />
           </button>
         )}
         <button
           type="button"
           onClick={onMaximize}
-          className="cursor-pointer rounded-md bg-transparent p-1.5 transition-all duration-75 hover:bg-white/10 hover:text-white focus-visible:bg-white/10 focus-visible:ring-1 focus-visible:ring-white/40"
+          className="cursor-pointer rounded-md bg-transparent p-1.5 transition-all duration-75 hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:ring-1 focus-visible:ring-ring"
           title={t('button.maximize')}
           aria-label={t('button.maximize')}
         >
-          <Maximize2 className="size-3 text-muted-foreground hover:text-white" />
+          <Maximize2 className="size-3 text-muted-foreground hover:text-foreground" />
         </button>
         <button
           type="button"
           onClick={onClose}
-          className="cursor-pointer rounded-md bg-transparent p-1.5 transition-all duration-75 hover:bg-red-500/80 hover:text-white focus-visible:bg-red-500/80 focus-visible:ring-1 focus-visible:ring-red-400"
+          className="cursor-pointer rounded-md bg-transparent p-1.5 transition-all duration-75 hover:bg-destructive hover:text-destructive-foreground focus-visible:bg-destructive focus-visible:ring-1 focus-visible:ring-destructive"
           title={t('button.close')}
           aria-label={t('button.close')}
         >
-          <X className="size-3 text-muted-foreground hover:text-white" />
+          <X className="size-3 text-muted-foreground hover:text-destructive-foreground" />
         </button>
       </div>
     </div>

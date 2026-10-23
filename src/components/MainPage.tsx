@@ -3,7 +3,6 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable no-nested-ternary */
 import React from 'react'
-import { YStack } from 'tamagui'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
 
 import '../styles/global.css'
@@ -22,14 +21,19 @@ import CommonModals from './Common/CommonModals'
 import useAppShortcuts from '../lib/shortcuts/use-shortcut'
 import WindowControls from './ui/window-controls'
 import SimilarFilesSidebarComponent from '@/components/Sidebars/SimilarFilesSidebar'
+import EditorTabsBar from './Editor/EditorTabsBar'
+import StatusBar from './StatusBar/StatusBar'
+import GlobalGraphView from './Graph/GlobalGraphView'
+import LocalGraphPanel from './Graph/LocalGraphPanel'
+import EmbeddedWorkspaceView from './Workspace/EmbeddedWorkspaceView'
 
 interface MainContentProps {
-  togglePanel: (panel: 'chat' | 'similarFiles' | null) => void
+  togglePanel: (panel: 'chat' | 'similarFiles' | 'localGraph' | null) => void
 }
 
 // Moved MainContent outside as a separate component
 const MainContent: React.FC<MainContentProps> = ({ togglePanel }) => {
-  const { currentlyOpenFilePath, saveCurrentlyOpenedFile } = useFileContext()
+  const { currentlyOpenFilePath, saveCurrentlyOpenedFile, openTabs, closeTab } = useFileContext()
   const { showEditor, setShowEditor } = useContentContext()
 
   const closeEditor = async () => {
@@ -37,17 +41,37 @@ const MainContent: React.FC<MainContentProps> = ({ togglePanel }) => {
     setShowEditor(false)
   }
 
+  const isGlobalGraph = currentlyOpenFilePath === 'graph://global'
+  const isVirtualWorkspace = currentlyOpenFilePath?.startsWith('wikiobs://')
+
   return (
-    <div className="relative flex size-full overflow-hidden">
+    <div className="relative flex size-full flex-col overflow-hidden">
       {currentlyOpenFilePath && showEditor && (
-        <div className="size-full overflow-hidden">
-          <WindowControls
-            onClose={closeEditor}
-            onMaximize={() => {
-              togglePanel('chat')
-            }}
-          />
-          <EditorManager />
+        <div className="flex size-full flex-col overflow-hidden">
+          <EditorTabsBar />
+          <div className="relative flex-1 overflow-hidden">
+            {isGlobalGraph ? (
+              <GlobalGraphView />
+            ) : isVirtualWorkspace ? (
+              <EmbeddedWorkspaceView
+                uri={currentlyOpenFilePath}
+                onClose={() => {
+                  const currentTab = openTabs.find((t) => t.filePath === currentlyOpenFilePath)
+                  if (currentTab) closeTab(currentTab.id)
+                }}
+              />
+            ) : (
+              <>
+                <WindowControls
+                  onClose={closeEditor}
+                  onMaximize={() => {
+                    togglePanel('chat')
+                  }}
+                />
+                <EditorManager />
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>
@@ -59,7 +83,7 @@ const MainPageContent: React.FC = () => {
   const { getShortcutDescription } = useAppShortcuts()
   const { activePanel, setActivePanel, openNewChat, sidebarShowing } = useChatContext()
 
-  const togglePanel = (panel: 'chat' | 'similarFiles' | null) => {
+  const togglePanel = (panel: 'chat' | 'similarFiles' | 'localGraph' | null) => {
     setActivePanel((prev) => (prev === panel ? null : panel))
   }
 
@@ -70,26 +94,30 @@ const MainPageContent: React.FC = () => {
   }
 
   return (
-    <YStack className="relative flex h-screen flex-col overflow-hidden">
+    <div className="relative flex h-screen flex-col overflow-hidden">
       <TitleBar activePanel={activePanel} togglePanel={togglePanel} />
       <div className="flex min-h-0 flex-1">
-        <div className="border-y-0 border-l-0 border-r border-solid border-border">
+        <div className="w-10 min-w-10 max-w-10 shrink-0">
           <IconsSidebar getShortcutDescription={getShortcutDescription} />
         </div>
 
         <ResizablePanelGroup direction="horizontal" className="flex-1">
-          <ResizablePanel
-            className={`sidebar-panel ${sidebarShowing ? '' : 'sidebar-panel-hidden'}`}
-            defaultSize={20}
-            minSize={15}
-            maxSize={40}
-          >
-            <div className="size-full border-y-0 border-l-0 border-r border-solid border-border">
-              <SidebarManager />
-            </div>
-          </ResizablePanel>
+          {sidebarShowing && (
+            <>
+              <ResizablePanel
+                className="sidebar-panel"
+                defaultSize={20}
+                minSize={15}
+                maxSize={40}
+              >
+                <div className="size-full border-y-0 border-l-0 border-r border-solid border-border">
+                  <SidebarManager />
+                </div>
+              </ResizablePanel>
 
-          <ResizableHandle />
+              <ResizableHandle />
+            </>
+          )}
 
           <ResizablePanel>
             <div className="size-full">
@@ -99,11 +127,17 @@ const MainPageContent: React.FC = () => {
                     <>
                       <ResizablePanel
                         className={`main-editor-panel ${activePanel ? 'is-background-panel' : ''}`}
-                        defaultSize={panelSizes.mainContent}
+                        defaultSize={
+                          activePanel === 'chat'
+                            ? panelSizes.mainContent
+                            : activePanel === 'similarFiles' || activePanel === 'localGraph'
+                              ? 70
+                              : 100
+                        }
                       >
                         <MainContent togglePanel={togglePanel} />
                       </ResizablePanel>
-                      <ResizableHandle />
+                      {activePanel && <ResizableHandle />}
                     </>
                   )}
                   {activePanel === 'chat' && (
@@ -123,6 +157,11 @@ const MainPageContent: React.FC = () => {
                       <SimilarFilesSidebarComponent />
                     </ResizablePanel>
                   )}
+                  {activePanel === 'localGraph' && (
+                    <ResizablePanel className="local-graph-panel" defaultSize={30} minSize={15} maxSize={50}>
+                      <LocalGraphPanel />
+                    </ResizablePanel>
+                  )}
                 </ResizablePanelGroup>
               ) : (
                 <EmptyPage />
@@ -133,7 +172,8 @@ const MainPageContent: React.FC = () => {
 
         <CommonModals />
       </div>
-    </YStack>
+      <StatusBar />
+    </div>
   )
 }
 

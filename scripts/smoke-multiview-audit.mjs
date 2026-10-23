@@ -15,16 +15,17 @@ const viewports = [
 ]
 const pages = [
   { name: 'main', title: null },
+  { name: 'workspace-wiki', title: 'Import from Wiki', expected: 'Import from Wiki', uri: 'wikiobs://wiki-importer' },
+  { name: 'workspace-ai', title: 'AI Organization', expected: 'AI Organization', uri: 'wikiobs://ai-org' },
+  { name: 'workspace-vaults', title: 'Manage vaults', expected: 'Manage Vaults', uri: 'wikiobs://vaults' },
+  { name: 'workspace-graph', title: 'Knowledge Graph', expected: 'Knowledge Graph', uri: 'graph://global' },
+  { name: 'workspace-tasks', title: 'Scheduled Tasks', expected: 'Scheduled Tasks', uri: 'wikiobs://tasks' },
+  { name: 'workspace-export', title: 'Export', expected: 'Export', uri: 'wikiobs://export' },
+  { name: 'workspace-plugins', title: 'Plugins', expected: 'Plugins', uri: 'wikiobs://plugins' },
+  { name: 'workspace-settings', title: 'Settings (Ctrl+,)', expected: 'Settings', uri: 'wikiobs://settings' },
   { name: 'files', title: 'Open Files (Ctrl+O)', expected: 'Files' },
   { name: 'chat', title: null, triggerTokens: ['Chat history', '对话历史', 'Open Chatbot'], expected: 'Chat' },
   { name: 'search', title: 'Semantic Search (Ctrl+P)', expected: 'Search' },
-  { name: 'wiki', title: null, triggerToken: 'Wiki', expected: 'Wiki' },
-  { name: 'ai', title: 'AI \u6574\u7406', expected: 'AI' },
-  { name: 'vault', title: '\u521b\u5efa\u65b0\u77e5\u8bc6\u5e93', expected: '\u77e5\u8bc6\u5e93' },
-  { name: 'graph', title: '\u77e5\u8bc6\u56fe\u8c31', expected: '\u77e5\u8bc6\u56fe\u8c31' },
-  { name: 'scheduled', title: '\u5b9a\u65f6\u4efb\u52a1', expected: '\u5b9a\u65f6\u4efb\u52a1' },
-  { name: 'export', title: '\u5bfc\u51fa', expected: '\u5bfc\u51fa' },
-  { name: 'plugin', title: '\u63d2\u4ef6', expected: '\u63d2\u4ef6' },
   { name: 'settings', title: 'Settings (Ctrl+,)', expected: 'Settings' },
 ]
 
@@ -85,14 +86,15 @@ async function measurePage(win, viewport, pageName) {
       const ownerText = roleOwner && roleOwner !== el ? roleOwner.innerText?.trim() : ''
       return ownerText || el.textContent?.trim() || ''
     }
-    const unlabeled = [
+    const unlabeledControls = [
       ...document.querySelectorAll(
         'button, input, textarea, select, [role="button"], [role="slider"], [role="checkbox"], [role="combobox"]',
       ),
     ]
       .filter(visible)
       .filter((el) => el.getAttribute('aria-hidden') !== 'true')
-      .filter((el) => !getAccessibleName(el)).length
+      .filter((el) => !getAccessibleName(el))
+      .map((el) => ({ tag: el.tagName, role: el.getAttribute('role'), text: el.textContent?.trim().slice(0, 50) || '' }))
     const focusables = [
       ...document.querySelectorAll('button, input, textarea, select, a[href], [tabindex]:not([tabindex="-1"])'),
     ]
@@ -105,7 +107,8 @@ async function measurePage(win, viewport, pageName) {
       documentScrollWidth: doc.scrollWidth,
       horizontalOverflow: Math.max(body.scrollWidth, doc.scrollWidth) > window.innerWidth + 1,
       dialogs: dialogMetrics,
-      unlabeled,
+      unlabeled: unlabeledControls.length,
+      unlabeledControls,
       focusables,
       bodyText: `${body.innerText.slice(0, 5000)} ${body.innerText.slice(-5000)}`,
       surfaceText: [
@@ -117,6 +120,11 @@ async function measurePage(win, viewport, pageName) {
         .map((el) => el.getAttribute('aria-label') || el.getAttribute('placeholder') || el.innerText || '')
         .join(' '),
       sidebarVisible: [...document.querySelectorAll('.sidebar-panel')].some(visible),
+      workspaceVisible: (() => {
+        const activeTab = document.querySelector('[role="tab"][aria-selected="true"][data-testid="editor-tab"]')
+        const tabPath = activeTab?.getAttribute('title') || ''
+        return tabPath.endsWith(`\n${window.__WIKIOBS_EXPECTED_WORKSPACE_URI__ || ''}`)
+      })(),
       modalVisible: [
         ...document.querySelectorAll('[role="dialog"], .MuiModal-root, .MuiPopover-root, [data-radix-dialog-content]'),
       ].some(visible),
@@ -145,7 +153,7 @@ async function measurePage(win, viewport, pageName) {
         `dialog#${index + 1} right=${dialog.clippedRight} bottom=${dialog.clippedBottom}`,
       )
   })
-  if (metrics.unlabeled > 0) recordFinding(viewport, pageName, 'unlabeled-controls', String(metrics.unlabeled))
+  if (metrics.unlabeled > 0) recordFinding(viewport, pageName, 'unlabeled-controls', JSON.stringify(metrics.unlabeledControls))
   return metrics
 }
 
@@ -165,7 +173,20 @@ async function findTrigger(win, page) {
     const fallback = win.locator('button').filter({ hasText: token }).first()
     if (await fallback.count()) return fallback
   }
-  return win.locator('button').first()
+  return win.locator('[data-trigger-not-found="true"]')
+}
+
+async function closeWorkspaceTab(win, uri) {
+  const tabs = win.locator('[role="tab"][data-testid="editor-tab"]')
+  for (let index = 0; index < await tabs.count(); index += 1) {
+    const tab = tabs.nth(index)
+    const tabTitle = (await tab.getAttribute('title')) || ''
+    if (tabTitle.endsWith(`\n${uri}`)) {
+      await tab.getByRole('button', { name: /Close/i }).click({ force: true })
+      await sleep(180)
+      return
+    }
+  }
 }
 
 async function openPage(win, page) {
@@ -206,6 +227,15 @@ async function closeOpenSurface(win) {
     if (await close.count()) await close.click().catch(() => {})
     await sleep(150)
   }
+
+  const activeWorkspaceTab = win.locator('[role="tab"][aria-selected="true"][data-testid="editor-tab"]')
+  if (await activeWorkspaceTab.count()) {
+    const tabPath = (await activeWorkspaceTab.getAttribute('title')) || ''
+    if (tabPath.includes('\nwikiobs://') || tabPath.includes('\ngraph://')) {
+      await activeWorkspaceTab.getByRole('button', { name: /Close/i }).click({ force: true })
+      await sleep(200)
+    }
+  }
 }
 
 try {
@@ -219,10 +249,12 @@ try {
     if (message.type() === 'error') errors.push(`console: ${message.text()}`)
   })
   await win.waitForLoadState('domcontentloaded')
+  await win.context().addInitScript(() => localStorage.setItem('wikiobs-locale', 'en'))
   await win.evaluate(async (selectedVault) => {
     await window.electronStore.setVaultDirectoryForWindow(selectedVault)
     await window.electronStore.setDefaultEmbeddingModel('Xenova/bge-small-en-v1.5')
   }, vault)
+  await win.evaluate((selectedVault) => { window.__WIKIOBS_AUDIT_VAULT__ = selectedVault }, vault)
   await win.reload()
   await win.locator('button[title="Settings (Ctrl+,)"]').waitFor({ state: 'visible', timeout: 120000 })
 
@@ -230,8 +262,19 @@ try {
     await win.setViewportSize({ width: viewport.width, height: viewport.height })
     await sleep(300)
     for (const page of pages) {
-      await closeOpenSurface(win)
-      if (page.title || page.triggerToken || page.triggerTokens) {
+      try {
+      if (page.uri) await closeWorkspaceTab(win, page.uri)
+      else await closeOpenSurface(win)
+      if (page.name === 'vault') {
+        await win.locator('#vault-switcher-button').click({ force: true })
+        await win.getByRole('menuitem', { name: 'Manage vaults' }).click({ force: true })
+      }
+      if (page.name === 'workspace-vaults') {
+        await win.locator('#vault-switcher-button').click({ force: true })
+        await win.getByRole('menuitem', { name: 'Manage vaults' }).click({ force: true })
+        await win.evaluate((uri) => { window.__WIKIOBS_EXPECTED_WORKSPACE_URI__ = uri }, page.uri)
+        await sleep(400)
+      } else if (page.title || page.triggerToken || page.triggerTokens) {
         const trigger = await findTrigger(win, page)
         if (!(await trigger.count())) {
           recordFinding(
@@ -246,12 +289,16 @@ try {
         if (isSidebarPage) {
           const active = await trigger.evaluate((el) => el.classList.contains('is-active')).catch(() => false)
           if (!active) {
-            await trigger.click()
+            await trigger.click({ force: true })
             await sleep(500)
           }
         } else {
-          await trigger.click()
+          await trigger.click({ force: true })
           await sleep(500)
+          if (page.uri) {
+            await win.evaluate((uri) => { window.__WIKIOBS_EXPECTED_WORKSPACE_URI__ = uri }, page.uri)
+            await win.locator(`[role="tab"][data-testid="editor-tab"][title$="${page.uri}"]`).waitFor({ state: 'visible' })
+          }
         }
       }
       const metrics = await measurePage(win, viewport.name, page.name)
@@ -260,17 +307,22 @@ try {
       screenshots.push(shotPath)
       const surfaceMissing = ['files', 'search', 'chat'].includes(page.name)
         ? !metrics.sidebarVisible
-        : page.name !== 'main' && !metrics.modalVisible
+        : page.name !== 'main' && !metrics.workspaceVisible
       if (surfaceMissing) recordFinding(viewport.name, page.name, 'missing-surface', page.expected || page.name)
-      await closeOpenSurface(win)
+      if (page.uri) await closeWorkspaceTab(win, page.uri)
+      else await closeOpenSurface(win)
+      } catch (error) {
+        recordFinding(viewport.name, page.name, 'probe-error', error instanceof Error ? error.message : String(error))
+        await closeOpenSurface(win)
+      }
     }
 
-    await win.locator('button[title="Settings (Ctrl+,)"]').click()
+    await win.locator('button[title="Settings (Ctrl+,)"]').click({ force: true })
     await sleep(350)
     const tabs = win.locator('[role="tab"]')
     const tabCount = await tabs.count()
     for (let i = 0; i < tabCount; i += 1) {
-      await tabs.nth(i).click()
+      await tabs.nth(i).click({ force: true })
       await sleep(250)
       await measurePage(win, viewport.name, `settings-tab-${i + 1}`)
       const shotPath = path.join(outDir, `${viewport.name}-settings-tab-${i + 1}.png`)

@@ -10,7 +10,7 @@ interface I18nContextType {
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined)
 
-const STORAGE_KEY = 'reor-locale'
+const STORAGE_KEY = 'wikiobs-locale'
 
 interface I18nProviderProps {
   children: ReactNode
@@ -21,12 +21,12 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({ children }) => {
   const [isInitialized, setIsInitialized] = useState(false)
 
   useEffect(() => {
-    const savedLocale = localStorage.getItem(STORAGE_KEY) as Locale | null
+    const explicitLocale = localStorage.getItem(STORAGE_KEY) as Locale | null
     const supportedLocales = Object.keys(translations[Object.keys(translations)[0] as TranslationKey] || {})
     let nextLocale: Locale = defaultLocale
-    if (savedLocale && supportedLocales.includes(savedLocale)) {
-      nextLocale = savedLocale
-    } else if (navigator.language.toLowerCase().startsWith('zh')) {
+    if (explicitLocale && supportedLocales.includes(explicitLocale)) {
+      nextLocale = explicitLocale
+    } else {
       nextLocale = 'zh-CN'
     }
 

@@ -1,4 +1,15 @@
-import { extractHighlights, rrfFusion } from './hybrid-search'
+import * as fs from 'fs'
+import * as os from 'os'
+import * as path from 'path'
+
+jest.mock('electron', () => ({
+  ipcMain: { handle: jest.fn() },
+  app: { getPath: jest.fn(() => '/tmp') },
+}))
+
+jest.mock('electron-store', () => jest.fn().mockImplementation(() => ({ get: jest.fn(), set: jest.fn() })))
+
+import { extractHighlights, hybridSearch, invalidateBM25Index, rrfFusion } from './hybrid-search'
 
 // tokenize is not exported, so we test it indirectly through other functions
 // calculateBM25 is also not exported
@@ -94,5 +105,41 @@ describe('rrfFusion', () => {
     const results = [new Map(), new Map()]
     const fused = rrfFusion(results)
     expect(fused).toEqual([])
+  })
+})
+
+describe('hybridSearch vault isolation', () => {
+  it('keeps concurrent vector and BM25 results inside their calling vault', async () => {
+    const rootPath = fs.mkdtempSync(path.join(os.tmpdir(), 'hybrid-search-vaults-'))
+    const firstVault = path.join(rootPath, 'first')
+    const secondVault = path.join(rootPath, 'second')
+    fs.mkdirSync(firstVault)
+    fs.mkdirSync(secondVault)
+    const firstNote = path.join(firstVault, 'note.md')
+    const secondNote = path.join(secondVault, 'note.md')
+    fs.writeFileSync(firstNote, 'amberneedle appears only in the first vault', 'utf8')
+    fs.writeFileSync(secondNote, 'amberneedle appears only in the second vault', 'utf8')
+
+    const firstTable = { search: jest.fn(async () => [{ notepath: firstNote, content: 'first vault' }]) }
+    const secondTable = { search: jest.fn(async () => [{ notepath: secondNote, content: 'second vault' }]) }
+    invalidateBM25Index()
+
+    try {
+      const [firstResults, secondResults] = await Promise.all([
+        hybridSearch('amberneedle', 10, undefined, firstVault, firstTable as never),
+        hybridSearch('amberneedle', 10, undefined, secondVault, secondTable as never),
+      ])
+
+      expect(firstResults.length).toBeGreaterThan(0)
+      expect(secondResults.length).toBeGreaterThan(0)
+      expect(firstResults.every((result) => result.filePath.startsWith(firstVault))).toBe(true)
+      expect(secondResults.every((result) => result.filePath.startsWith(secondVault))).toBe(true)
+      expect(firstTable.search).toHaveBeenCalledTimes(1)
+      expect(secondTable.search).toHaveBeenCalledTimes(1)
+    } finally {
+      invalidateBM25Index(firstVault)
+      invalidateBM25Index(secondVault)
+      fs.rmSync(rootPath, { recursive: true, force: true })
+    }
   })
 })

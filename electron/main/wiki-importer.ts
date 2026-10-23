@@ -107,30 +107,58 @@ function extractTitle(html: string, url: string): string {
 }
 
 // HTTP 请求
-async function fetchUrl(url: string): Promise<string> {
-  const response = await fetch(url, {
-    headers: {
-      'User-Agent': 'Reor-Wiki-Importer/1.0',
-      Accept: 'text/html,application/xhtml+xml',
-    },
-  })
+const FETCH_RETRY_LIMIT = 3
+const FETCH_RETRY_DELAY_MS = 250
+const INVALID_FILENAME_CHARACTERS = new Set(['<', '>', ':', '"', '/', '\\', '|', '?', '*', '[', ']'])
 
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+async function fetchWithRetry(url: string, init?: RequestInit, signal?: AbortSignal): Promise<Response> {
+  for (let attempt = 1; attempt <= FETCH_RETRY_LIMIT; attempt++) {
+    throwIfImportCancelled(signal)
+    let response: Response
+    try {
+      response = await fetch(url, { ...init, signal })
+    } catch (error) {
+      if (signal?.aborted) throw new Error('Wiki import cancelled.')
+      if (attempt === FETCH_RETRY_LIMIT) throw error
+      await waitBeforeRetry(FETCH_RETRY_DELAY_MS * attempt, signal)
+      continue
+    }
+
+    const shouldRetry = [408, 425, 429].includes(response.status) || response.status >= 500
+    if (response.ok || !shouldRetry || attempt === FETCH_RETRY_LIMIT) return response
+
+    await waitBeforeRetry(FETCH_RETRY_DELAY_MS * attempt, signal)
   }
+
+  throw new Error(`Failed to fetch ${url} after ${FETCH_RETRY_LIMIT} attempts`)
+}
+
+async function fetchUrl(url: string, signal?: AbortSignal): Promise<string> {
+  const response = await fetchWithRetry(
+    url,
+    {
+      headers: {
+        'User-Agent': 'Reor-Wiki-Importer/1.0',
+        Accept: 'text/html,application/xhtml+xml',
+      },
+    },
+    signal,
+  )
+
+  if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`)
 
   return response.text()
 }
 
 // 解析 Sitemap
-async function fetchSitemap(url: string): Promise<string[]> {
+async function fetchSitemap(url: string, signal?: AbortSignal): Promise<string[]> {
   const sitemapUrl = url.endsWith('/') ? `${url}sitemap.xml` : `${url}/sitemap.xml`
 
   try {
-    const response = await fetch(sitemapUrl)
+    const response = await fetchWithRetry(sitemapUrl, undefined, signal)
     if (!response.ok) {
       const altUrl = `${new URL(url).origin}/sitemap.xml`
-      const altResponse = await fetch(altUrl)
+      const altResponse = await fetchWithRetry(altUrl, undefined, signal)
       if (!altResponse.ok) throw new Error('Sitemap not found')
       return parseSitemapXml(await altResponse.text())
     }
@@ -159,12 +187,16 @@ interface MediaWikiResponse {
   }
 }
 
-async function fetchFromMediaWikiApi(apiUrl: string, titles: string[]): Promise<Map<string, string>> {
+async function fetchFromMediaWikiApi(
+  apiUrl: string,
+  titles: string[],
+  signal?: AbortSignal,
+): Promise<Map<string, string>> {
   const results = new Map<string, string>()
   const titlesParam = titles.join('|')
   const url = `${apiUrl}?action=query&titles=${encodeURIComponent(titlesParam)}&prop=extracts|revisions&exintro=true&explaintext=true&rvslots=main&format=json`
 
-  const response = await fetch(url, { headers: { 'User-Agent': 'Reor-Wiki-Importer/1.0' } })
+  const response = await fetchWithRetry(url, { headers: { 'User-Agent': 'Reor-Wiki-Importer/1.0' } }, signal)
   if (!response.ok) throw new Error(`MediaWiki API error: ${response.status}`)
 
   const data: MediaWikiResponse = await response.json()
@@ -231,27 +263,57 @@ export interface ImportResult {
   skipped: number
   errors: string[]
   files: string[]
+  filesToIndex: string[]
+  cancelled?: boolean
 }
 
 export interface WikiImporterOptions {
   sourceType: 'url' | 'sitemap' | 'mediawiki-api' | 'xml-dump' | 'crawl4ai'
   source: string
+  importId?: string
   outputDir?: string
   onProgress?: (current: number, total: number, currentUrl: string) => void
+  signal?: AbortSignal
+}
+
+function throwIfImportCancelled(signal?: AbortSignal): void {
+  if (!signal?.aborted) return
+  const error = new Error('Wiki import cancelled.')
+  error.name = 'AbortError'
+  throw error
+}
+
+function waitBeforeRetry(delayMs: number, signal?: AbortSignal): Promise<void> {
+  if (!signal) return new Promise((resolve) => setTimeout(resolve, delayMs))
+  throwIfImportCancelled(signal)
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      signal.removeEventListener('abort', cancel)
+      resolve()
+    }, delayMs)
+    const cancel = () => {
+      clearTimeout(timer)
+      signal.removeEventListener('abort', cancel)
+      throwIfImportCancelled(signal)
+      reject(new Error('Wiki import cancelled.'))
+    }
+    signal.addEventListener('abort', cancel, { once: true })
+  })
 }
 
 // 主导入函数
 export async function importFromWiki(options: WikiImporterOptions): Promise<ImportResult> {
-  const { sourceType, source, outputDir = '.', onProgress } = options
-  const result: ImportResult = { success: true, imported: 0, skipped: 0, errors: [], files: [] }
+  const { sourceType, source, outputDir = '.', onProgress, signal } = options
+  const result: ImportResult = { success: true, imported: 0, skipped: 0, errors: [], files: [], filesToIndex: [] }
   const seenHashes = new Set<string>()
 
   try {
+    throwIfImportCancelled(signal)
     let itemsToProcess: Array<{ title: string; content: string; sourceUrl: string }> = []
 
     switch (sourceType) {
       case 'url': {
-        const html = await fetchUrl(source)
+        const html = await fetchUrl(source, signal)
         itemsToProcess = [
           { title: extractTitle(html, source), content: htmlToMarkdown(html, source), sourceUrl: source },
         ]
@@ -259,14 +321,16 @@ export async function importFromWiki(options: WikiImporterOptions): Promise<Impo
       }
 
       case 'sitemap': {
-        const urls = await fetchSitemap(source)
+        const urls = await fetchSitemap(source, signal)
         for (let i = 0; i < urls.length; i++) {
+          throwIfImportCancelled(signal)
           const url = urls[i]
           onProgress?.(i + 1, urls.length, url)
           try {
-            const html = await fetchUrl(url)
+            const html = await fetchUrl(url, signal)
             itemsToProcess.push({ title: extractTitle(html, url), content: htmlToMarkdown(html, url), sourceUrl: url })
           } catch (error) {
+            if (signal?.aborted) throw new Error('Wiki import cancelled.')
             result.errors.push(`Failed to fetch ${url}: ${error}`)
           }
         }
@@ -277,7 +341,12 @@ export async function importFromWiki(options: WikiImporterOptions): Promise<Impo
         const apiUrl = source.endsWith('/') ? source : `${source}/`
         const categoryUrl = `${apiUrl}api.php?action=query&list=categorymembers&cmtitle=Category:Main&cmlimit=500&format=json`
         try {
-          const response = await fetch(categoryUrl, { headers: { 'User-Agent': 'Reor-Wiki-Importer/1.0' } })
+          const response = await fetchWithRetry(
+            categoryUrl,
+            { headers: { 'User-Agent': 'Reor-Wiki-Importer/1.0' } },
+            signal,
+          )
+          if (!response.ok) throw new Error(`MediaWiki API error: ${response.status}`)
           const data = await response.json()
           if (data.query?.categorymembers) {
             const titles = data.query.categorymembers
@@ -285,15 +354,17 @@ export async function importFromWiki(options: WikiImporterOptions): Promise<Impo
               .map((m: { title: string }) => m.title)
             const batchSize = 50
             for (let i = 0; i < titles.length; i += batchSize) {
+              throwIfImportCancelled(signal)
               const batch = titles.slice(i, i + batchSize)
               onProgress?.(i + batchSize, titles.length, `Batch ${Math.floor(i / batchSize) + 1}`)
-              const pageContents = await fetchFromMediaWikiApi(apiUrl, batch)
+              const pageContents = await fetchFromMediaWikiApi(apiUrl, batch, signal)
               for (const [title, content] of pageContents) {
                 itemsToProcess.push({ title, content, sourceUrl: `${apiUrl}wiki/${encodeURIComponent(title)}` })
               }
             }
           }
         } catch (error) {
+          if (signal?.aborted) throw new Error('Wiki import cancelled.')
           result.errors.push(`MediaWiki API error: ${error}`)
         }
         break
@@ -304,6 +375,7 @@ export async function importFromWiki(options: WikiImporterOptions): Promise<Impo
         const xml = fs.readFileSync(source, 'utf-8')
         const parsed = parseXmlDump(xml)
         for (let i = 0; i < parsed.length; i++) {
+          throwIfImportCancelled(signal)
           onProgress?.(i + 1, parsed.length, parsed[i].title)
           itemsToProcess.push({ title: parsed[i].title, content: parsed[i].content, sourceUrl: source })
         }
@@ -334,7 +406,7 @@ asyncio.run(main())
         try {
           const output = await new Promise<string>((resolve, reject) => {
             const chunks: string[] = []
-            const proc = spawnProcess('python', [scriptPath, validatedUrl], { timeout: 45000 })
+            const proc = spawnProcess('python', [scriptPath, validatedUrl], { timeout: 45000, signal })
             proc.stdout.on('data', (data) => chunks.push(data.toString()))
             proc.on('close', () => resolve(chunks.join('')))
             proc.on('error', reject)
@@ -347,8 +419,9 @@ asyncio.run(main())
           const title = titleParts.join('').trim() || extractTitle(markdown, source)
           itemsToProcess.push({ title, content: markdown.trim(), sourceUrl: source })
         } catch {
+          if (signal?.aborted) throw new Error('Wiki import cancelled.')
           result.errors.push(`Crawl4AI failed for ${source}, falling back to basic fetch`)
-          const html = await fetchUrl(source)
+          const html = await fetchUrl(source, signal)
           itemsToProcess.push({
             title: extractTitle(html, source),
             content: htmlToMarkdown(html, source),
@@ -368,9 +441,38 @@ asyncio.run(main())
         throw new Error(`Unsupported source type: ${sourceType}`)
     }
 
+    throwIfImportCancelled(signal)
     if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true })
 
+    const importedSources = new Map<string, string>()
+    const filesByContentHash = new Map<string, string>()
+    for (const fileName of fs.readdirSync(outputDir)) {
+      if (!fileName.toLowerCase().endsWith('.md')) continue
+      const existing = fs.readFileSync(path.join(outputDir, fileName), 'utf-8')
+      const existingBody = existing.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n\r?\n?([\s\S]*)$/)?.[1]
+      if (existingBody !== undefined) {
+        filesByContentHash.set(computeContentHash(existingBody), path.join(outputDir, fileName))
+      }
+      const marker = existing.match(/^sourceId: ([a-f0-9]{64})$/m)?.[1]
+      const legacyFrontmatter = existing.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n\r?\n?([\s\S]*)$/)
+      const quotedSource = legacyFrontmatter?.[1].match(/^source: (".*")$/m)?.[1]
+      const quotedTitle = legacyFrontmatter?.[1].match(/^title: (".*")$/m)?.[1]
+      let sourceId = marker
+      if (!sourceId && quotedSource && quotedTitle) {
+        try {
+          const sourceUrl = JSON.parse(quotedSource) as string
+          const title = JSON.parse(quotedTitle) as string
+          const contentHash = computeContentHash(legacyFrontmatter?.[2] || '')
+          sourceId = computeContentHash(`${sourceUrl}\n${title}\n${contentHash}`)
+        } catch {
+          // Legacy frontmatter with malformed quoting cannot be matched reliably.
+        }
+      }
+      if (sourceId) importedSources.set(sourceId, path.join(outputDir, fileName))
+    }
+
     for (let i = 0; i < itemsToProcess.length; i++) {
+      throwIfImportCancelled(signal)
       const item = itemsToProcess[i]
       onProgress?.(i + 1, itemsToProcess.length, item.title)
 
@@ -378,11 +480,25 @@ asyncio.run(main())
         const contentHash = computeContentHash(item.content)
         if (seenHashes.has(contentHash)) {
           result.skipped++
+          const duplicateFile = filesByContentHash.get(contentHash)
+          if (duplicateFile) result.filesToIndex.push(duplicateFile)
           continue
         }
         seenHashes.add(contentHash)
 
-        const safeTitle = item.title.replace(/[<>:"/\\|?*[]]/g, '_').substring(0, 100)
+        const sourceId = computeContentHash(`${item.sourceUrl}\n${item.title}\n${contentHash}`)
+        const existingFile = importedSources.get(sourceId)
+        if (existingFile) {
+          result.skipped++
+          result.filesToIndex.push(existingFile)
+          continue
+        }
+
+        const safeTitle = Array.from(item.title, (character) =>
+          INVALID_FILENAME_CHARACTERS.has(character) ? '_' : character,
+        )
+          .join('')
+          .substring(0, 100)
         let filePath = path.join(outputDir, `${safeTitle}.md`)
         let counter = 1
         while (fs.existsSync(filePath)) {
@@ -390,54 +506,100 @@ asyncio.run(main())
           counter++
         }
 
-        const frontmatter = `---\ntitle: "${item.title.replace(/"/g, '\\"')}"\nsource: "${item.sourceUrl}"\nimported: "${new Date().toISOString()}"\ntags: []\n---\n\n`
+        const frontmatter = `---\ntitle: "${item.title.replace(/"/g, '\\"')}"\nsource: "${item.sourceUrl}"\nsourceId: ${sourceId}\nimported: "${new Date().toISOString()}"\ntags: []\n---\n\n`
+        throwIfImportCancelled(signal)
         fs.writeFileSync(filePath, frontmatter + item.content, 'utf-8')
+        importedSources.set(sourceId, filePath)
+        filesByContentHash.set(contentHash, filePath)
         result.files.push(filePath)
+        result.filesToIndex.push(filePath)
         result.imported++
       } catch (error) {
+        if (signal?.aborted) throw new Error('Wiki import cancelled.')
         result.errors.push(`Failed to save ${item.title}: ${error}`)
       }
     }
   } catch (error) {
     result.success = false
-    result.errors.push(`Import failed: ${error}`)
+    if (signal?.aborted) result.cancelled = true
+    else result.errors.push(`Import failed: ${error}`)
   }
+
+  if (!result.cancelled && result.errors.length > 0) result.success = false
 
   return result
 }
 
 // 注册 IPC 处理器
 export function registerWikiImporterHandlers(_store: Store<StoreSchema>, windowsManager: WindowsManager) {
+  const activeImports = new Map<string, { ownerId: number; controller: AbortController }>()
+
   ipcMain.handle('wiki-import', async (event, options: WikiImporterOptions): Promise<ImportResult> => {
     const windowInfo = windowsManager.getWindowInfoForContents(event.sender)
     if (!windowInfo) {
-      return { success: false, imported: 0, skipped: 0, errors: ['No vault directory set'], files: [] }
+      return {
+        success: false,
+        imported: 0,
+        skipped: 0,
+        errors: ['No vault directory set'],
+        files: [],
+        filesToIndex: [],
+      }
     }
 
-    const outputDir = path.join(windowInfo.vaultDirectoryForWindow, 'WikiImports')
-    const result = await importFromWiki({
-      ...options,
-      outputDir,
-      onProgress: (current, total, currentUrl) => {
-        event.sender.send('wiki-import-progress', { current, total, currentUrl })
-      },
-    })
+    const importId = options.importId || crypto.randomUUID()
+    const importKey = `${event.sender.id}:${importId}`
+    if (activeImports.has(importKey)) {
+      return {
+        success: false,
+        imported: 0,
+        skipped: 0,
+        errors: ['An import with this ID is already running.'],
+        files: [],
+        filesToIndex: [],
+      }
+    }
+    const controller = new AbortController()
+    activeImports.set(importKey, { ownerId: event.sender.id, controller })
 
-    if (result.success && result.files.length > 0) {
-      for (const filePath of result.files) {
+    const outputDir = path.join(windowInfo.vaultDirectoryForWindow, 'WikiImports')
+    try {
+      const result = await importFromWiki({
+        ...options,
+        outputDir,
+        signal: controller.signal,
+        onProgress: (current, total, currentUrl) => {
+          if (!event.sender.isDestroyed()) event.sender.send('wiki-import-progress', { current, total, currentUrl })
+        },
+      })
+
+      for (const filePath of result.filesToIndex) {
+        if (controller.signal.aborted) break
         try {
           await updateFileInTable(windowInfo.dbTableClient, filePath)
         } catch (error) {
           result.errors.push(`Failed to index ${filePath}: ${error}`)
         }
       }
-    }
 
-    event.sender.send('wiki-import-complete', result)
-    return result
+      if (controller.signal.aborted) {
+        result.cancelled = true
+        result.success = false
+      }
+      if (result.errors.length > 0) result.success = false
+      if (!event.sender.isDestroyed()) event.sender.send('wiki-import-complete', result)
+      return result
+    } finally {
+      activeImports.delete(importKey)
+    }
   })
 
-  ipcMain.handle('wiki-import-cancel', async () => ({ cancelled: true }))
+  ipcMain.handle('wiki-import-cancel', async (event, importId: string) => {
+    const activeImport = activeImports.get(`${event.sender.id}:${importId}`)
+    if (!activeImport || activeImport.ownerId !== event.sender.id) return { cancelled: false }
+    activeImport.controller.abort()
+    return { cancelled: true }
+  })
 
   // 检查 Crawl4AI 是否可用
   ipcMain.handle('crawl4ai-check', async () => {

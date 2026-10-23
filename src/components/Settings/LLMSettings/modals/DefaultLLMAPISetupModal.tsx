@@ -7,21 +7,12 @@ import {
   openAIDefaultAPIName,
   openAIDefaultLLMs,
 } from '@shared/defaultLLMs'
-import { Input } from 'tamagui'
-import { NativeSyntheticEvent, TextInputKeyPressEventData } from 'react-native'
+import { KeyRound, Loader2, Lock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import ReorModal from '@/components/Common/Modal'
 import errorToStringRendererProcess from '@/lib/error'
 import { useTranslation } from '@/lib/i18n'
-import {
-  Dialog,
-  DialogPortal,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogOverlay,
-} from '@/components/ui/dialog'
 
 export interface CloudLLMSetupModalProps {
   isOpen: boolean
@@ -45,19 +36,19 @@ const DefaultLLMAPISetupModal: React.FC<CloudLLMSetupModalProps> = ({ isOpen, on
   }
 
   const handleSave = async () => {
-    if (!apiKey) return
+    if (!apiKey.trim() || isSaving) return
     setIsSaving(true)
     try {
       if (apiInterface === 'openai') {
         await window.llm.addOrUpdateLLMAPIConfig({
-          apiKey,
+          apiKey: apiKey.trim(),
           apiInterface: 'openai',
           name: openAIDefaultAPIName,
         })
         await Promise.all(openAIDefaultLLMs.map((model) => window.llm.addOrUpdateLLMConfig(model)))
       } else {
         await window.llm.addOrUpdateLLMAPIConfig({
-          apiKey,
+          apiKey: apiKey.trim(),
           apiInterface: 'anthropic',
           name: anthropicDefaultAPIName,
         })
@@ -71,48 +62,68 @@ const DefaultLLMAPISetupModal: React.FC<CloudLLMSetupModalProps> = ({ isOpen, on
       setIsSaving(false)
     }
   }
-  const handleKeyPress = (e: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
-    if (e.nativeEvent.key === 'Enter') {
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
       handleSave()
+    } else if (e.key === 'Escape') {
+      handleClose()
     }
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogPortal>
-        <DialogOverlay>
-          <DialogContent
-            className="flex max-h-[calc(100dvh-16px)] flex-col overflow-hidden p-4 sm:max-w-[425px]"
-            style={{ overflow: 'hidden' }}
+    <ReorModal isOpen={isOpen} onClose={handleClose} className="max-w-[440px] p-5">
+      {/* Header */}
+      <div className="flex items-start gap-3 pb-3 border-b border-border">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-[#7b68ee]/30 bg-[#7b68ee]/15 text-[#7b68ee] shadow-sm shadow-[#7b68ee]/20">
+          <KeyRound size={18} strokeWidth={2} />
+        </div>
+        <div className="min-w-0 flex-1 pr-6">
+          <h2 className="text-sm font-semibold text-foreground tracking-tight">
+            {t('llm.providerSetupTitle', { name: LLMDisplayName })}
+          </h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {t('llm.apiKeyPrompt', { name: LLMDisplayName })}
+          </p>
+        </div>
+      </div>
+
+      <div className="pt-3.5 space-y-3">
+        <div className="space-y-1.5">
+          <Input
+            value={apiKey}
+            onChange={(e) => setAPIKey(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={t('llm.providerApiKeyPlaceholder', { name: LLMDisplayName })}
+            type="password"
+            autoFocus
+            disabled={isSaving}
+            className="h-8 text-xs font-mono"
+          />
+          <p className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+            <Lock size={12} className="text-muted-foreground shrink-0" />
+            <span>{t('llm.apiKeySavedHint', { name: LLMDisplayName })}</span>
+          </p>
+        </div>
+
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
+          <Button variant="secondary" size="sm" onClick={handleClose} disabled={isSaving} className="text-xs">
+            {t('button.cancel')}
+          </Button>
+          <Button
+            variant="accent"
+            size="sm"
+            onClick={handleSave}
+            disabled={isSaving || !apiKey.trim()}
+            className="text-xs shadow-md shadow-[#7b68ee]/25 gap-1.5"
           >
-            <DialogHeader className="shrink-0">
-              <DialogTitle>{t('llm.providerSetupTitle', { name: LLMDisplayName })}</DialogTitle>
-              <DialogDescription>{t('llm.apiKeyPrompt', { name: LLMDisplayName })}</DialogDescription>
-            </DialogHeader>
-            <div className="min-h-0 flex-1 overflow-y-auto pt-4">
-              <Input
-                value={apiKey}
-                onChangeText={setAPIKey}
-                onKeyPress={handleKeyPress}
-                placeholder={t('llm.providerApiKeyPlaceholder', { name: LLMDisplayName })}
-                size="$1"
-                py="$3"
-                px="$2"
-                secureTextEntry
-              />
-              <p className="mt-0 text-xs text-muted-foreground">
-                <i>{t('llm.apiKeySavedHint', { name: LLMDisplayName })}</i>
-              </p>
-            </div>
-            <DialogFooter className="shrink-0 border-t border-border pt-3">
-              <Button variant="secondary" onClick={handleSave} disabled={isSaving || !apiKey}>
-                {t('llm.save')}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </DialogOverlay>
-      </DialogPortal>
-    </Dialog>
+            {isSaving && <Loader2 size={12} className="animate-spin" />}
+            <span>{t('llm.save')}</span>
+          </Button>
+        </div>
+      </div>
+    </ReorModal>
   )
 }
 

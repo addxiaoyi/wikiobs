@@ -27,6 +27,7 @@ export default defineConfig(({ command }) => {
       alias: {
         '@': path.join(__dirname, './src'),
         '@shared': path.join(__dirname, './shared'),
+        'posthog-js': path.join(__dirname, './src/lib/telemetry.ts'),
       },
       extensions: ['.ts', '.tsx', '.js', '.jsx', '.json', '.mjs'],
     },

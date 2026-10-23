@@ -2,12 +2,12 @@ import { ReorChatMessage } from '../../lib/llm/types'
 
 function getClassNames(message: ReorChatMessage | undefined): string {
   if (!message) {
-    return 'bg-blue-100 text-blue-800'
+    return 'bg-secondary text-foreground'
   }
   if (message.role === 'assistant') {
-    return 'bg-neutral-200 text-black'
+    return 'bg-card text-card-foreground border border-border'
   }
-  return 'bg-blue-100 text-blue-800'
+  return 'bg-secondary text-secondary-foreground border border-border'
 }
 
 export const generatePromptString = (

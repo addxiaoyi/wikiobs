@@ -12,10 +12,20 @@ type ThemedMenuItemProps<C extends React.ElementType = 'button'> = {
 } & React.ComponentPropsWithoutRef<C>
 
 const ThemedMenu: React.FC<ThemedMenuProps & MenuProps> = ({ children, ...restProps }) => {
-  const theme = useTheme()
-
   return (
-    <Menu {...restProps} styles={{ dropdown: { backgroundColor: theme.background.val } }}>
+    <Menu
+      {...restProps}
+      styles={{
+        dropdown: {
+          backgroundColor: '#0e1015',
+          borderColor: 'rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(16px)',
+          boxShadow: '0 20px 48px -10px rgba(0,0,0,0.7)',
+          borderRadius: '8px',
+          padding: '4px',
+        },
+      }}
+    >
       {children}
     </Menu>
   )
@@ -25,23 +35,21 @@ export const ThemedMenuItem: React.FC<ThemedMenuItemProps> = <C extends React.El
   style,
   ...props
 }: ThemedMenuItemProps<C>) => {
-  const theme = useTheme()
-
   return (
     <Menu.Item
       {...props}
       style={{
-        backgroundColor: theme.background.val,
-        color: theme.color.val,
+        backgroundColor: 'transparent',
+        color: '#f8fafc',
+        borderRadius: '6px',
+        fontSize: '12px',
         ...style,
       }}
       onMouseEnter={(e: React.MouseEvent<HTMLElement>) => {
-        // TODO: Temporary fix for hover background color. Original is too light.
-        e.currentTarget.style.backgroundColor =
-          theme.background.val === '#f9f9f9' ? 'hsl(0, 0%, 93.3%)' : theme.backgroundHover.val
+        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)'
       }}
       onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
-        e.currentTarget.style.backgroundColor = theme.background.val
+        e.currentTarget.style.backgroundColor = 'transparent'
       }}
     />
   )

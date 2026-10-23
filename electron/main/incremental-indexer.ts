@@ -83,7 +83,9 @@ export async function incrementalIndex(
   dbTableClient: LanceDBTableWrapper | null,
   userDataPath: string,
   onProgress?: (current: number, total: number, status: string) => void,
+  signal?: AbortSignal,
 ): Promise<{ added: number; updated: number; deleted: number }> {
+  if (!dbTableClient) throw new Error('Database table is unavailable.')
   const state = loadIndexerState(userDataPath, vaultDir)
   const currentFiles = scanMarkdownFiles(vaultDir)
   const currentFileSet = new Set(currentFiles)
@@ -95,6 +97,7 @@ export async function incrementalIndex(
   // 1. 检测删除的文件
   const knownFiles = Object.keys(state.fileStates)
   for (const filePath of knownFiles) {
+    if (signal?.aborted) throw new Error('Indexing cancelled.')
     if (!currentFileSet.has(filePath) && !fs.existsSync(filePath)) {
       // 文件已被删除
       try {
@@ -102,6 +105,7 @@ export async function incrementalIndex(
         delete state.fileStates[filePath]
         deleted++
       } catch (error) {
+        if (signal?.aborted) throw new Error('Indexing cancelled.')
         logger.error('IncrementalIndex', `Failed to delete index for ${filePath}`, error)
       }
     }
@@ -110,32 +114,33 @@ export async function incrementalIndex(
   // 2. 检测新增和修改的文件
   const total = currentFiles.length
   for (let i = 0; i < currentFiles.length; i++) {
+    if (signal?.aborted) throw new Error('Indexing cancelled.')
     const filePath = currentFiles[i]
     onProgress?.(i + 1, total, path.basename(filePath))
 
     try {
       const currentState = getFileState(filePath)
-      if (!currentState) continue
+      if (!currentState) throw new Error(`Could not read index state for ${filePath}`)
 
       const previousState = state.fileStates[filePath]
 
       if (!previousState) {
         // 新文件
-        if (dbTableClient) {
-          await updateFileInTable(dbTableClient, filePath)
-        }
+        if (!dbTableClient) throw new Error('Database table is unavailable.')
+        await updateFileInTable(dbTableClient, filePath)
         state.fileStates[filePath] = currentState
         added++
       } else if (currentState.mtime !== previousState.mtime || currentState.hash !== previousState.hash) {
         // 已修改的文件
-        if (dbTableClient) {
-          await updateFileInTable(dbTableClient, filePath)
-        }
+        if (!dbTableClient) throw new Error('Database table is unavailable.')
+        await updateFileInTable(dbTableClient, filePath)
         state.fileStates[filePath] = currentState
         updated++
       }
     } catch (error) {
+      if (signal?.aborted) throw new Error('Indexing cancelled.')
       logger.error('IncrementalIndex', `Failed to index ${filePath}`, error)
+      throw new Error(`Failed to index ${filePath}: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 

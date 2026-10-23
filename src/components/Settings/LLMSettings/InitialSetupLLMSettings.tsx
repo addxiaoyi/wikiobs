@@ -1,7 +1,7 @@
 import React from 'react'
 import { toast } from 'react-toastify'
 import { CheckCircleIcon, CogIcon } from '@heroicons/react/24/solid'
-import { Button } from '@material-tailwind/react'
+import { Button } from '@/components/ui/button'
 import { SizableText, XStack, ScrollView } from 'tamagui'
 import useLLMConfigs from '../../../lib/hooks/use-llm-configs'
 import LLMSettingsContent from './LLMSettingsContent'
@@ -34,12 +34,11 @@ const InitialSetupLLMSettings: React.FC<InitialSetupLLMSettingsProps> = () => {
       <Dialog open={isSetupModalOpen} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>
           <Button
-            className={`flex cursor-pointer items-center justify-between rounded-md border border-none border-gray-300 px-3 py-2 ${
+            className={`flex cursor-pointer items-center justify-between rounded-md border border-none px-3 py-2 ${
               isSetupComplete
-                ? 'bg-green-700 text-white hover:bg-green-800'
-                : 'bg-dark-gray-c-eight hover:bg-dark-gray-c-ten'
+                ? 'bg-emerald-600/80 text-white hover:bg-emerald-600'
+                : 'bg-secondary hover:bg-secondary/80 text-foreground'
             } font-normal transition-colors duration-200`}
-            placeholder=""
           >
             {isSetupComplete ? (
               <>

@@ -1,10 +1,13 @@
 /* eslint-disable class-methods-use-this */
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 import chokidar from 'chokidar'
 import { BrowserWindow, WebContents, screen, shell } from 'electron'
 import Store from 'electron-store'
 
 import { StoreSchema, StoreKeys } from '../electron-store/storeConfig'
 import LanceDBTableWrapper from '../vector-database/lanceTableWrapper'
+import { logger } from './logger'
 
 type WindowInfo = {
   windowID: number
@@ -28,23 +31,74 @@ class WindowsManager {
   async createWindow(store: Store<StoreSchema>, preload: string, url: string | undefined, indexHtml: string) {
     const { x, y } = this.getNextWindowPosition()
     const { width, height } = this.getWindowSize()
+    const currentTheme = (store.get(StoreKeys.TamaguiTheme, 'dark') as string) || 'dark'
+    const overlayColor = currentTheme === 'light' ? '#f8f9fa' : '#0e1015'
+    const symbolColor = currentTheme === 'light' ? '#1e2025' : '#ffffff'
+
+    let appIcon: string | undefined = undefined
+    const candidateIcons = [
+      process.env.VITE_PUBLIC ? join(process.env.VITE_PUBLIC, 'favicon.ico') : '',
+      process.env.VITE_PUBLIC ? join(process.env.VITE_PUBLIC, 'icon.png') : '',
+      join(__dirname, '../../build/icon.ico'),
+      join(__dirname, '../../build/icon.png'),
+      join(__dirname, '../../public/icon.png'),
+    ]
+    for (const p of candidateIcons) {
+      if (p && existsSync(p)) {
+        appIcon = p
+        break
+      }
+    }
 
     const win = new BrowserWindow({
-      title: 'Reor',
+      title: 'WIKIOBS',
+      icon: appIcon,
       x,
       y,
+      backgroundColor: overlayColor,
       webPreferences: {
         preload,
       },
       frame: false,
       titleBarStyle: 'hidden',
       titleBarOverlay: {
-        color: '#303030',
-        symbolColor: '#fff',
+        color: overlayColor,
+        symbolColor: symbolColor,
         height: 36,
       },
       width,
       height,
+      show: true,
+    })
+
+    if (appIcon) {
+      try {
+        win.setIcon(appIcon)
+      } catch {
+        // ignore on unsupported platforms
+      }
+    }
+
+    let hasActivated = false
+    const bringWindowToFront = () => {
+      if (hasActivated || win.isDestroyed()) return
+      hasActivated = true
+      win.show()
+      win.focus()
+      try {
+        win.setAlwaysOnTop(true)
+        win.setAlwaysOnTop(false)
+      } catch {
+        // ignore
+      }
+      win.moveTop()
+    }
+
+    win.once('ready-to-show', bringWindowToFront)
+    const fallbackTimer = setTimeout(bringWindowToFront, 1200)
+    win.once('show', () => {
+      clearTimeout(fallbackTimer)
+      bringWindowToFront()
     })
 
     if (url) {
@@ -62,7 +116,12 @@ class WindowsManager {
       return { action: 'deny' }
     })
 
+    win.webContents.on('render-process-gone', (event, details) => {
+      logger.error('Window', `Renderer process gone: ${details.reason}, exitCode: ${details.exitCode}`)
+    })
+
     win.on('close', (event) => {
+      logger.info('Window', `Window close event triggered for window ID ${win.id}`)
       if (this.windowsPreparingToClose.has(win.id)) return
 
       event.preventDefault()

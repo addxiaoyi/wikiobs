@@ -13,13 +13,13 @@ export const locales: Record<Locale, LocaleConfig> = {
   'zh-CN': { name: 'Chinese (Simplified)', nativeName: '简体中文' },
 }
 
-export const defaultLocale: Locale = 'en'
+export const defaultLocale: Locale = 'zh-CN'
 
 export const translations = {
   // ============ App / General ============
   'common.loadingWorkspace': { en: 'Loading workspace…', 'zh-CN': '正在加载工作区…' },
   'app.name': { en: 'WIKIOBS', 'zh-CN': 'WIKIOBS' },
-  'app.tagline': { en: 'Your AI-powered second brain', 'zh-CN': '你的 AI 第二大脑' },
+  'app.tagline': { en: 'Local Knowledge Workspace', 'zh-CN': '本地知识库工作区' },
 
   // ============ TitleBar & Navigation (extra) ============
   'titlebar.syncing': { en: 'Syncing…', 'zh-CN': '正在同步…' },
@@ -33,13 +33,14 @@ export const translations = {
   'file.directory': { en: 'directory', 'zh-CN': '目录' },
   'file.file': { en: 'file', 'zh-CN': '文件' },
   'files.emptyFolder': { en: '(Empty folder)', 'zh-CN': '（空文件夹）' },
+  'commandPalette.searchPlaceholder': { en: 'Search or type a command...', 'zh-CN': '搜索或输入指令...' },
 
   // ============ Settings / Settings Labels ============
   'settings.title': { en: 'Settings', 'zh-CN': '设置' },
   'settings.editor': { en: 'Editor', 'zh-CN': '编辑器' },
   'settings.llm': { en: 'LLM', 'zh-CN': '语言模型' },
   'settings.embeddingModel': { en: 'Embedding Model', 'zh-CN': '嵌入模型' },
-  'settings.analytics': { en: 'Analytics', 'zh-CN': '数据分析' },
+  'settings.analytics': { en: 'Vault Stats & Privacy', 'zh-CN': '存储统计与隐私' },
   'settings.language': { en: 'Language', 'zh-CN': '语言' },
   'settings.theme': { en: 'Theme', 'zh-CN': '主题' },
   'settings.vaultDirectory': { en: 'Vault Directory', 'zh-CN': '知识库目录' },
@@ -415,6 +416,7 @@ export const translations = {
   'llm.apiUrlPlaceholder': { en: 'API URL', 'zh-CN': 'API 地址' },
   'llm.apiNamePlaceholder': { en: 'API name', 'zh-CN': 'API 名称' },
   'llm.apiKeyPlaceholder': { en: 'API key', 'zh-CN': 'API 密钥' },
+  'llm.apiKeyLabel': { en: 'API Key', 'zh-CN': 'API 密钥' },
   'llm.modelNames': { en: 'Model Names', 'zh-CN': '模型名称' },
   'llm.addModel': { en: 'Add', 'zh-CN': '添加' },
   'llm.download': { en: 'Download', 'zh-CN': '下载' },
@@ -527,8 +529,8 @@ export const translations = {
   'graph.openNote': { en: 'Open note', 'zh-CN': '打开笔记' },
   // ============ Analytics Settings ============
   'analytics.desc': {
-    en: 'WIKIOBS tracks anonymous usage data to help us understand how the app is used and which features are popular. You can disable this at any time:',
-    'zh-CN': 'WIKIOBS 会收集匿名使用数据，以帮助我们了解应用的使用情况与热门功能。你可以随时关闭：',
+    en: 'WIKIOBS operates 100% offline. Zero telemetry, zero external tracking, and all embeddings remain locally on your machine.',
+    'zh-CN': 'WIKIOBS 实行 100% 离线纯净运行。零第三方遥测、零数据上传，所有笔记与向量索引均完整保留于本地设备。',
   },
 
   // ============ Embedding Settings ============
@@ -585,6 +587,10 @@ export const translations = {
   'wikiImporter.importedFiles': { en: 'Imported notes', 'zh-CN': '已导入笔记' },
   'wikiImporter.import': { en: 'Import', 'zh-CN': '导入' },
   'wikiImporter.importing': { en: 'Importing...', 'zh-CN': '导入中...' },
+  'wikiImporter.cancelImport': { en: 'Cancel import', 'zh-CN': '取消导入' },
+  'wikiImporter.cancelling': { en: 'Cancelling...', 'zh-CN': '正在取消...' },
+  'wikiImporter.cancelled': { en: 'Import cancelled.', 'zh-CN': '导入已取消。' },
+  'wikiImporter.cancelFailed': { en: 'Could not cancel import', 'zh-CN': '取消导入失败' },
   'wikiImporter.startImport': { en: 'Start Import', 'zh-CN': '开始导入' },
   'wikiImporter.complete': { en: 'Import Complete', 'zh-CN': '导入完成' },
   'wikiImporter.failed': { en: 'Import failed', 'zh-CN': '导入失败' },
@@ -646,6 +652,9 @@ export const translations = {
   'scheduled.updated': { en: 'Task updated successfully', 'zh-CN': '任务更新成功' },
   'scheduled.created': { en: 'Task created successfully', 'zh-CN': '任务创建成功' },
   'scheduled.triggered': { en: 'Task triggered successfully', 'zh-CN': '任务已触发' },
+  'scheduled.running': { en: 'Running', 'zh-CN': '运行中' },
+  'scheduled.cancelRun': { en: 'Cancel run', 'zh-CN': '取消运行' },
+  'scheduled.cancelling': { en: 'Cancellation requested', 'zh-CN': '已请求取消' },
   'scheduled.deleted': { en: 'Task deleted successfully', 'zh-CN': '任务删除成功' },
 
   // ============ Multi-Vault ============

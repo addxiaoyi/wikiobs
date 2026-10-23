@@ -10,10 +10,16 @@ export interface Shortcut {
 
 export const shortcuts: Shortcut[] = [
   {
-    key: 'mod+O',
-    action: 'open-files',
-    description: 'Open Files',
-    displayValue: { mac: 'Cmd+O', other: 'Ctrl+O' },
+    key: 'mod+K',
+    action: 'open-command-palette',
+    description: 'Command Palette',
+    displayValue: { mac: 'Cmd+K', other: 'Ctrl+K' },
+  },
+  {
+    key: 'mod+P',
+    action: 'open-command-palette',
+    description: 'Quick Switcher',
+    displayValue: { mac: 'Cmd+P', other: 'Ctrl+P' },
   },
   {
     key: 'mod+N',
@@ -22,10 +28,10 @@ export const shortcuts: Shortcut[] = [
     displayValue: { mac: 'Cmd+N', other: 'Ctrl+N' },
   },
   {
-    key: 'mod+P',
-    action: 'open-search',
-    description: 'Semantic Search',
-    displayValue: { mac: 'Cmd+P', other: 'Ctrl+P' },
+    key: 'mod+O',
+    action: 'open-files',
+    description: 'Open Files',
+    displayValue: { mac: 'Cmd+O', other: 'Ctrl+O' },
   },
   {
     key: 'mod+T',
@@ -44,5 +50,11 @@ export const shortcuts: Shortcut[] = [
     action: 'open-settings-modal',
     description: 'Settings',
     displayValue: { mac: 'Cmd+,', other: 'Ctrl+,' },
+  },
+  {
+    key: 'mod+G',
+    action: 'open-graph-view',
+    description: 'Graph View',
+    displayValue: { mac: 'Cmd+G', other: 'Ctrl+G' },
   },
 ]

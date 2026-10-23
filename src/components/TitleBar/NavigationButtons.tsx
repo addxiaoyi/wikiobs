@@ -1,18 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react'
-
-import posthog from 'posthog-js'
-import { IoMdArrowRoundBack, IoMdArrowRoundForward } from 'react-icons/io'
-import { YStack, XStack, View, Text } from 'tamagui'
+import { ArrowLeft, ArrowRight, FileText } from 'lucide-react'
 import { removeFileExtension } from '@/lib/file'
 import '../../styles/history.scss'
 import { useFileContext } from '@/contexts/FileContext'
 import { useContentContext } from '@/contexts/ContentContext'
-import { useThemeManager } from '@/contexts/ThemeContext'
 import { useTranslation } from '@/lib/i18n'
 
 const NavigationButtons: React.FC = () => {
   const [showMenu, setShowMenu] = useState<string>('')
-  const { state } = useThemeManager()
   const { t } = useTranslation()
 
   const longPressTimer = useRef<NodeJS.Timeout | null>(null)
@@ -30,10 +25,8 @@ const NavigationButtons: React.FC = () => {
         setShowMenu('')
       }
     }
-    // Bind the event listener
     document.addEventListener('mousedown', handleClickOutside)
     return () => {
-      // Unbind the event listener
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [])
@@ -50,7 +43,6 @@ const NavigationButtons: React.FC = () => {
     if (canGoBack && showMenu === '') {
       const newIndex = indexOfCurrentOpenFileOrChat - 1
       openContent(navigationHistory[newIndex], undefined, true)
-      posthog.capture('file_history_navigator_back')
     }
   }
 
@@ -58,14 +50,12 @@ const NavigationButtons: React.FC = () => {
     if (canGoForward && showMenu === '') {
       const newIndex = indexOfCurrentOpenFileOrChat + 1
       openContent(navigationHistory[newIndex], undefined, true)
-      posthog.capture('file_history_navigator_forward')
     }
   }
 
   const goSelected = (pathOrChatID: string): void => {
     if (pathOrChatID) {
       openContent(pathOrChatID, undefined, true)
-      posthog.capture('file_history_navigator_go_to_selected_file')
     }
     setShowMenu('')
   }
@@ -96,35 +86,37 @@ const NavigationButtons: React.FC = () => {
     return (
       showMenu !== '' &&
       menuChild.length > 0 && (
-        <View ref={ref} tabIndex={0} position="absolute" left={offsetLeft} top={offsetTop + offsetHeight}>
-          <YStack>
+        <div
+          ref={ref}
+          tabIndex={0}
+          className="absolute z-50 min-w-[190px] overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--surface-1)]/95 p-1.5 text-foreground shadow-2xl backdrop-blur-xl animate-in fade-in-0 zoom-in-95"
+          style={{ left: offsetLeft, top: offsetTop + offsetHeight + 4 }}
+        >
+          <div className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--ink-muted)]">
+            {currentRef.current?.id === 'back' ? '后退历史' : '前进历史'}
+          </div>
+          <div className="flex flex-col gap-0.5">
             {menuChild.map((pathOrChatID) => (
-              <XStack
+              <button
                 key={pathOrChatID}
-                padding="$3"
-                cursor="pointer"
-                hoverStyle={{ backgroundColor: '$backgroundHover' }}
-                onPress={() => goSelected(pathOrChatID)}
+                type="button"
+                className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs text-foreground transition-all duration-100 hover:bg-[var(--accent-soft)] hover:text-[#7b68ee]"
+                onClick={() => goSelected(pathOrChatID)}
               >
-                <Text>{removeFileExtension(pathOrChatID.replace(/\\/g, '/').split('/').pop() || '')}</Text>
-              </XStack>
+                <FileText size={12} className="text-[#7b68ee] shrink-0" />
+                <span className="truncate">
+                  {removeFileExtension(pathOrChatID.replace(/\\/g, '/').split('/').pop() || '')}
+                </span>
+              </button>
             ))}
-          </YStack>
-        </View>
+          </div>
+        </div>
       )
     )
   }
 
-  const navigationColor = (canNavigate: boolean) => {
-    if (state === 'light') {
-      return canNavigate ? 'black' : '#e0e0e0' // Slightly less white when disabled
-    }
-    return canNavigate ? '#dedede' : '#727272' // Dark mode colors
-  }
-
   return (
-    // eslint-disable-next-line tailwindcss/no-custom-classname
-    <div className="history-container flex items-center gap-1">
+    <div className="history-container flex items-center gap-1 relative">
       <button
         id="back"
         ref={buttonRefBack}
@@ -134,16 +126,12 @@ const NavigationButtons: React.FC = () => {
         onClick={goBack}
         disabled={!canGoBack}
         aria-disabled={!canGoBack}
-        style={{
-          color: navigationColor(canGoBack),
-          cursor: !canGoBack ? 'default' : 'pointer',
-        }}
         title={t('titlebar.goBack') || t('navigation.back')}
         type="button"
         aria-label={t('navigation.back')}
-        className="rounded-md p-1 transition-all duration-75 hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/40 disabled:opacity-30 disabled:hover:bg-transparent"
+        className="rounded-md p-1 text-muted-foreground transition-all duration-75 hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-30 disabled:hover:bg-transparent"
       >
-        <IoMdArrowRoundBack title={t('navigation.back')} />
+        <ArrowLeft size={14} strokeWidth={1.8} />
       </button>
       <button
         id="forward"
@@ -154,16 +142,12 @@ const NavigationButtons: React.FC = () => {
         onClick={goForward}
         disabled={!canGoForward}
         aria-disabled={!canGoForward}
-        style={{
-          color: navigationColor(canGoForward),
-          cursor: !canGoForward ? 'default' : 'pointer',
-        }}
         title={t('titlebar.goForward') || t('navigation.forward')}
         type="button"
         aria-label={t('navigation.forward')}
-        className="rounded-md p-1 transition-all duration-75 hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/40 disabled:opacity-30 disabled:hover:bg-transparent"
+        className="rounded-md p-1 text-muted-foreground transition-all duration-75 hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-30 disabled:hover:bg-transparent"
       >
-        <IoMdArrowRoundForward title={t('navigation.forward')} />
+        <ArrowRight size={14} strokeWidth={1.8} />
       </button>
       {handleHistoryContext(showMenu === 'back' ? buttonRefBack : buttonRefForward)}
     </div>

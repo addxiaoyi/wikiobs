@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { toast } from 'react-toastify'
 import '../../styles/chat.css'
-import { Spinner, YStack } from 'tamagui'
+import { Loader2, Sparkles } from 'lucide-react'
+import { WikiObsLogo } from '../Common/WikiObsLogo'
 import { Chat, AgentConfig, LoadingState, ReorChatMessage } from '../../lib/llm/types'
 import ChatInput from './ChatInput'
 import UserMessage from './MessageComponents/UserMessage'
@@ -123,43 +124,82 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
     return () => observer.disconnect()
   }, [shouldAutoScroll, scrollToBottom])
 
+  const hasMessages = currentChat && currentChat.messages && currentChat.messages.length > 0
+
   return (
-    <YStack flex={1} backgroundColor={activePanel && showEditor ? '$gray3' : '$background'}>
+    <div className="flex h-full flex-1 flex-col bg-background">
       <div className="grow overflow-auto" ref={chatContainerRef} onScroll={handleScroll}>
-        <div className="flex flex-col items-center gap-3 p-4">
-          <div className="w-full max-w-3xl">
-            {currentChat &&
-              currentChat.messages &&
-              currentChat.messages.length > 0 &&
-              currentChat.messages.map((message, index) => (
+        <div className="flex flex-col items-center gap-3 p-4 min-h-full">
+          {/* Empty Conversation Welcome Hero */}
+          {!hasMessages && (
+            <div className="my-auto flex max-w-md flex-col items-center justify-center py-12 text-center select-none">
+              <div className="mb-3 flex size-12 items-center justify-center rounded-2xl border border-[#7b68ee]/30 bg-[#7b68ee]/10 shadow-lg shadow-[#7b68ee]/15 backdrop-blur-md">
+                <WikiObsLogo size={24} className="drop-shadow-[0_0_8px_rgba(123,104,238,0.5)]" />
+              </div>
+              <h3 className="text-sm font-semibold tracking-tight text-foreground">
+                WIKIOBS 本地智能助理
+              </h3>
+              <p className="mt-1 text-xs text-muted-foreground leading-relaxed max-w-xs">
+                基于本地模型与知识图谱的隐私离线推理
+              </p>
+
+              <div className="mt-6 flex flex-col gap-2 w-full text-left">
+                {[
+                  '总结当前知识库的核心主题脉络',
+                  '帮我检索库中关联的关键笔记',
+                  '基于当前笔记提出后续拓展思考',
+                ].map((prompt) => (
+                  <button
+                    key={prompt}
+                    type="button"
+                    onClick={() => {
+                      setUserTextFieldInput(prompt)
+                    }}
+                    className="flex items-center gap-2 rounded-lg border border-border/60 bg-card/60 px-3 py-2 text-xs text-muted-foreground shadow-sm transition-all duration-150 hover:border-[#7b68ee]/50 hover:bg-[#7b68ee]/10 hover:text-foreground active:scale-[0.99] cursor-pointer"
+                  >
+                    <Sparkles size={12} className="text-[#7b68ee] shrink-0" />
+                    <span className="truncate">{prompt}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Active Messages List */}
+          {hasMessages && (
+            <div className="w-full max-w-3xl">
+              {currentChat.messages.map((message, index) => (
                 // eslint-disable-next-line react/no-array-index-key
                 <div key={index} ref={index === currentChat.messages.length - 1 ? lastMessageRef : null}>
                   <Message message={message} index={index} currentChat={currentChat} setCurrentChat={setCurrentChat} />
                 </div>
               ))}
-          </div>
+            </div>
+          )}
 
           {errorMessage && loadingState === 'idle' && (
-            <div className="chat-error-state" role="alert">
+            <div className="chat-error-state flex items-center justify-between gap-3 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-600 dark:text-red-300" role="alert">
               <span>{errorMessage}</span>
-              <button type="button" onClick={onRetry}>
+              <button
+                type="button"
+                onClick={onRetry}
+                className="rounded-md border border-red-500/30 bg-red-500/20 px-2.5 py-1 text-xs font-medium text-red-600 dark:text-red-200 transition-colors hover:bg-red-500/30 active:scale-95 cursor-pointer"
+              >
                 {t('chat.retry')}
               </button>
             </div>
           )}
 
           {loadingState === 'waiting-for-first-token' && (
-            <div className="mt-4 flex w-full max-w-3xl items-start gap-6 p-2">
-              <YStack padding="$3" space="$4" alignItems="center">
-                <Spinner size="small" color="$blue9" />
-                <span className="text-xs text-muted-foreground">{t('chat.thinking')}</span>
-              </YStack>
+            <div className="my-2 flex w-full max-w-3xl items-center gap-2 px-2 py-1.5 text-xs text-muted-foreground">
+              <Loader2 size={13} className="animate-spin text-[#7b68ee]" />
+              <span className="font-mono text-[11px]">{t('chat.thinking')}...</span>
             </div>
           )}
         </div>
       </div>
 
-      <YStack width="100%" padding="$4">
+      <div className="w-full p-4 pt-1">
         <ChatInput
           userTextFieldInput={userTextFieldInput ?? ''}
           setUserTextFieldInput={setUserTextFieldInput}
@@ -170,8 +210,8 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
           agentConfig={agentConfig}
           setAgentConfig={setAgentConfig}
         />
-      </YStack>
-    </YStack>
+      </div>
+    </div>
   )
 }
 

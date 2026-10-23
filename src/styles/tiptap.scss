@@ -1,60 +1,96 @@
 .tiptap {
-  color: rgb(197, 196, 196);
+  color: var(--ink, #e2e8f0);
   height: 100%;
   outline: none;
   padding: 0.5rem;
   padding-left: 1rem;
+  line-height: 1.75;
   > * + * {
-    margin-top: 0.75em;
+    margin-top: 0.85em;
   }
 
   ul,
   ol {
-    padding: 0 1rem;
+    padding: 0 1.25rem;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    line-height: 1.1;
+  h1 {
+    font-size: 1.85rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--ink, #ffffff);
+    letter-spacing: -0.025em;
+    margin-top: 1.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  h2 {
+    font-size: 1.45rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--ink, #f8fafc);
+    letter-spacing: -0.02em;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--ink, #e2e8f0);
+    letter-spacing: -0.015em;
+    margin-top: 1.25rem;
+    margin-bottom: 0.4rem;
   }
 
   code {
-    background-color: rgba(#616161, 0.1);
-    color: #616161;
+    background-color: var(--line, rgba(255, 255, 255, 0.08));
+    color: var(--ink, #f1f5f9);
+    border: 1px solid var(--line-strong, rgba(255, 255, 255, 0.1));
+    border-radius: 5px;
+    padding: 2px 6px;
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-size: 0.85em;
   }
 
   pre {
-    background: #0d0d0d;
-    color: #fff;
-    font-family: 'JetBrainsMono', monospace;
+    background: var(--surface-2, #0b0d13);
+    color: var(--ink, #f8fafc);
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
     padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
+    border-radius: 6px;
+    box-shadow: none;
 
     code {
       color: inherit;
       padding: 0;
       background: none;
-      font-size: 0.8rem;
+      border: none;
+      font-size: 0.85rem;
+      line-height: 1.65;
     }
   }
 
   img {
     max-width: 100%;
     height: auto;
+    border-radius: 0.5rem;
   }
 
   blockquote {
-    padding-left: 1rem;
-    border-left: 2px solid rgba(#0d0d0d, 0.1);
+    padding: 0.35rem 0.85rem;
+    border-left: 2px solid rgba(167, 139, 250, 0.5);
+    background: transparent;
+    border-radius: 0;
+    font-style: normal;
+    color: var(--ink-muted, #94a3b8);
   }
 
   hr {
     border: none;
-    border-top: 2px solid rgba(#0d0d0d, 0.1);
+    border-top: 1px solid var(--line, rgba(255, 255, 255, 0.08));
     margin: 2rem 0;
   }
 }

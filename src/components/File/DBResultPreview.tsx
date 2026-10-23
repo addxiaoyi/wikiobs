@@ -4,6 +4,7 @@ import { zhCN } from 'date-fns/locale'
 import { DBQueryResult } from 'electron/main/vector-database/schema'
 import { Card, Text, YStack, Stack } from 'tamagui'
 import removeMd from 'remove-markdown'
+import { FileText } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n'
 
 const cosineDistanceToPercentage = (similarity: number) => {
@@ -47,31 +48,34 @@ export const DBResultPreview: React.FC<DBResultPreviewProps> = ({ dbResult: entr
       width="100%"
       cursor="pointer"
       overflow="hidden"
-      backgroundColor="$gray3"
+      backgroundColor="$background"
       hoverStyle={{
-        backgroundColor: '$gray5',
+        backgroundColor: '$backgroundHover',
+        borderColor: '#7b68ee',
       }}
-      borderRadius="$1"
-      borderWidth={0.1}
-      borderColor="$gray7"
-      paddingHorizontal="$2"
-      paddingVertical="$1"
+      borderRadius="$2"
+      borderWidth={1}
+      borderColor="$borderColor"
+      paddingHorizontal="$3"
+      paddingVertical="$2"
       onPress={() => onSelect(entry.notepath)}
     >
       <Stack width="100%">
-        <Text fontSize="sm" color="$gray11">
+        <Text fontSize="$2" color="$foreground" lineHeight={18}>
           {getPreviewText(entry.content)}
         </Text>
       </Stack>
-      <div className="mt-2 text-xs">
-        {fileName && <span className="text-xs text-gray-400">{fileName} </span>} | {t('search.similarity')}:{' '}
-        {/* eslint-disable-next-line no-underscore-dangle */}
-        {cosineDistanceToPercentage(entry._distance)}% |{' '}
-        {modified && (
-          <span className="text-xs text-gray-400">
-            {t('search.modified')} {modified}
-          </span>
+      <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
+        {fileName && (
+          <div className="flex items-center gap-1 font-medium text-foreground">
+            <FileText size={11} className="text-[#7b68ee]" />
+            <span>{fileName}</span>
+          </div>
         )}
+        <span className="rounded bg-[#7b68ee]/20 text-[#7b68ee] font-mono px-1.5 py-0.5 text-[10px] font-medium">
+          {cosineDistanceToPercentage(entry._distance)}%
+        </span>
+        {modified && <span>· {modified}</span>}
       </div>
     </Stack>
   )
@@ -98,34 +102,35 @@ export const DBSearchPreview: React.FC<DBSearchPreviewProps> = ({ dbResult: entr
   return (
     <div role="button" tabIndex={0} aria-label={fileName || entry.notepath} onKeyDown={handleKeyDown}>
       <Card
-        marginBottom="$4"
+        marginBottom="$3"
         marginTop="$0"
         maxWidth="100%"
         cursor="pointer"
         overflow="hidden"
-        borderRadius="$4"
+        borderRadius="$2"
         borderWidth={1}
         borderColor="$borderColor"
-        padding="$2"
-        shadowColor="$gray7"
-        shadowRadius="$2"
+        backgroundColor="$background"
+        padding="$3"
         hoverStyle={{
-          shadowRadius: '$4',
+          backgroundColor: '$backgroundHover',
+          borderColor: '#7b68ee',
         }}
         onPress={activate}
       >
         <YStack minWidth={0} gap="$1">
-          <Text fontSize="$2" color="$colorLight" numberOfLines={4}>
+          <Text fontSize="$2" color="$foreground" numberOfLines={3} lineHeight={19}>
             {getPreviewText(entry.content)}
           </Text>
           {fileName && (
-            <Text fontSize="$1" color="$colorMuted" numberOfLines={1}>
-              {fileName}
-            </Text>
+            <div className="flex items-center gap-1.5 mt-1 font-medium text-foreground text-xs">
+              <FileText size={12} className="text-[#7b68ee]" />
+              <span className="truncate">{fileName}</span>
+            </div>
           )}
-          <div className="flex min-w-0 flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
-            <span>
-              {t('search.similarity')}: {cosineDistanceToPercentage(entry._distance)}%
+          <div className="mt-1 flex min-w-0 flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+            <span className="rounded bg-[#7b68ee]/20 text-[#7b68ee] font-mono px-1.5 py-0.5 text-[10px] font-medium">
+              {cosineDistanceToPercentage(entry._distance)}%
             </span>
             {modified && (
               <span>

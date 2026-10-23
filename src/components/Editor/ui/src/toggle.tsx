@@ -9,15 +9,15 @@ export const ToggleButton = styled(Button, {
   variants: {
     hybrid: {
       true: {
-        backgroundColor: '$blue9',
+        backgroundColor: '#ffffff',
         hoverStyle: {
-          backgroundColor: '$blue10',
+          backgroundColor: '#f1f5f9',
         },
       },
       false: {
-        backgroundColor: '$gray4',
+        backgroundColor: 'rgba(255, 255, 255, 0.16)',
         hoverStyle: {
-          backgroundColor: '$gray5',
+          backgroundColor: 'rgba(255, 255, 255, 0.22)',
         },
       },
     },
@@ -30,17 +30,18 @@ export const ToggleThumb = styled(Stack, {
   width: 14,
   height: 14,
   borderRadius: 1000,
-  backgroundColor: 'white',
   shadowColor: '$shadowColor',
   shadowRadius: 1,
   shadowOffset: { width: 0, height: 1 },
-  transition: 'transform 0.3s',
+  transition: 'transform 0.15s ease, background-color 0.15s ease',
   variants: {
     hybrid: {
       true: {
+        backgroundColor: '#090a0f',
         transform: [{ translateX: 18 }],
       },
       false: {
+        backgroundColor: '#ffffff',
         transform: [{ translateX: 2 }],
       },
     },

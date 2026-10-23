@@ -57,6 +57,9 @@ jobs:
       - name: Run Electron visual regression probes
         run: npm run e2e:visual
 
+      - name: Verify two-window vault isolation
+        run: npm run e2e:multivault-two-windows
+
       - name: Upload screenshots and reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -72,5 +75,6 @@ jobs:
             artifacts/sidebar-interactions/
             artifacts/progress-reflow/
             artifacts/ui-audit-100/multiview/
+            artifacts/multivault-two-windows/
           if-no-files-found: warn
           retention-days: 7

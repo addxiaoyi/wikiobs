@@ -4,10 +4,12 @@ import InEditorBacklinkSuggestionsDisplay from './BacklinkSuggestionsDisplay'
 import { useFileContext } from '@/contexts/FileContext'
 import { useTranslation } from '@/lib/i18n'
 import { BlockNoteView, FormattingToolbarPositioner, SlashMenuPositioner, SideMenuPositioner } from '@/lib/blocknote'
+import { useThemeManager } from '@/contexts/ThemeContext'
 import SearchBar from './Search/SearchBar'
 
 const EditorManager: React.FC = () => {
   const [editorFlex, setEditorFlex] = useState(true)
+  const { state: currentTheme } = useThemeManager()
 
   const {
     editor,
@@ -92,7 +94,7 @@ const EditorManager: React.FC = () => {
       >
         <YStack className={`relative size-full ${editorFlex ? 'max-w-4xl' : ''}`}>
           {editor && (
-            <BlockNoteView editor={editor}>
+            <BlockNoteView editor={editor} theme={currentTheme === 'dark' ? 'dark' : 'light'}>
               <FormattingToolbarPositioner editor={editor} />
               <SlashMenuPositioner editor={editor} />
               <SideMenuPositioner editor={editor} placement="left" />
@@ -105,41 +107,6 @@ const EditorManager: React.FC = () => {
           suggestionsState={suggestionsState}
           suggestions={vaultFilesFlattened.map((file) => file.relativePath)}
         />
-      )}
-      {editor && (
-        <div className="absolute inset-x-0 bottom-0 z-20 flex min-h-8 items-center justify-between gap-3 border-t border-border bg-background/95 px-4 py-1 text-xs text-muted-foreground backdrop-blur-sm select-none">
-          <div className="flex min-w-0 items-center gap-2">
-            <span
-              className={`min-w-0 max-w-[65%] truncate ${saveStatusClass}`}
-              role={saveState === 'error' ? 'alert' : 'status'}
-              aria-live="polite"
-            >
-              {saveState === 'dirty' && t('editor.saveDirty')}
-              {saveState === 'saving' && t('editor.saveSaving')}
-              {saveState === 'saved' && t('editor.saveSaved')}
-              {saveState === 'error' && `${t('editor.saveError')}: ${saveErrorMessage || ''}`}
-            </span>
-            {saveState === 'error' && (
-              <button
-                type="button"
-                className="shrink-0 text-primary underline underline-offset-2 hover:opacity-80"
-                onClick={handleRetrySave}
-              >
-                {t('editor.retrySave')}
-              </button>
-            )}
-          </div>
-          {showDocumentStats && (
-            <div className="flex shrink-0 items-center gap-4 text-[11px] font-medium text-muted-foreground">
-              <span>
-                {documentStats.characters} {t('editor.charCount')}
-              </span>
-              <span>
-                {documentStats.words} {t('editor.wordCount')}
-              </span>
-            </div>
-          )}
-        </div>
       )}
     </YStack>
   )

@@ -1,31 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import Button from '@mui/material/Button'
-import IconButton from '@mui/material/IconButton'
-import LinearProgress from '@mui/material/LinearProgress'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Alert from '@mui/material/Alert'
-import Chip from '@mui/material/Chip'
-import Checkbox from '@mui/material/Checkbox'
-import Divider from '@mui/material/Divider'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import Select from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
-import List from '@mui/material/List'
-import ListItem from '@mui/material/ListItem'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import ListItemText from '@mui/material/ListItemText'
-import { CheckSquare, Folder, X } from 'lucide-react'
+import {
+  Brain,
+  CheckSquare,
+  Square,
+  Folder,
+  X,
+  AlertCircle,
+  CheckCircle2,
+  RotateCcw,
+  Play,
+  Loader2,
+  FileText,
+  Clock,
+  Sparkles,
+} from 'lucide-react'
 import gsap from 'gsap'
+
+import ReorModal from './Modal'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Progress } from '@/components/ui/progress'
 import { FileInfoTree } from 'electron/main/filesystem/types'
 import { flattenFileInfoTree } from '@/lib/file'
 import { useTranslation } from '@/lib/i18n'
-import { staggerFadeInUp, fadeInScale, Easing } from '@/lib/gsap-animations'
+import { staggerFadeInUp, fadeInScale } from '@/lib/gsap-animations'
+import { cn } from '@/lib/ui'
 
 interface AIOrganizationResult {
   filePath: string
@@ -65,9 +64,10 @@ interface OrganizationResult {
 interface AIOrganizationModalProps {
   isOpen: boolean
   onClose: () => void
+  embedded?: boolean
 }
 
-const AIOrganizationModal: React.FC<AIOrganizationModalProps> = ({ isOpen, onClose }) => {
+const AIOrganizationModal: React.FC<AIOrganizationModalProps> = ({ isOpen, onClose, embedded }) => {
   const { t } = useTranslation()
   const [isRunning, setIsRunning] = useState(false)
   const [progress, setProgress] = useState<AIOrganizationProgress>({
@@ -93,8 +93,7 @@ const AIOrganizationModal: React.FC<AIOrganizationModalProps> = ({ isOpen, onClo
 
   const contentRef = useRef<HTMLDivElement>(null)
   const resultRef = useRef<HTMLDivElement>(null)
-  const progressRef = useRef<HTMLDivElement>(null)
-  const suggestionsRef = useRef<HTMLUListElement>(null)
+  const suggestionsRef = useRef<HTMLDivElement>(null)
   const cancelledRef = useRef(false)
 
   useEffect(() => {
@@ -141,7 +140,8 @@ const AIOrganizationModal: React.FC<AIOrganizationModalProps> = ({ isOpen, onClo
     }, 1000)
     return () => window.clearInterval(timer)
   }, [isRunning, runStartedAt])
-  // GSAP: 表单元素入场动画
+
+  // GSAP: Form entrance
   useEffect(() => {
     if (!isOpen || !contentRef.current) return
 
@@ -149,12 +149,25 @@ const AIOrganizationModal: React.FC<AIOrganizationModalProps> = ({ isOpen, onClo
     const ctx = gsap.context(() => {
       const formItems = container.querySelectorAll('.ai-org-form-item')
       if (formItems.length) {
-        staggerFadeInUp(formItems, 0.35, 0.08, 0.1)
+        staggerFadeInUp(formItems, 0.25, 0.05, 0.05)
       }
     }, container)
 
     return () => ctx.revert()
   }, [isOpen])
+
+  // GSAP: Suggestions entrance
+  useEffect(() => {
+    if (result?.suggestions?.length && suggestionsRef.current) {
+      const ctx = gsap.context(() => {
+        const items = suggestionsRef.current!.querySelectorAll('.ai-org-suggestion-item')
+        if (items.length) {
+          staggerFadeInUp(items, 0.25, 0.03, 0.1)
+        }
+      }, suggestionsRef)
+      return () => ctx.revert()
+    }
+  }, [result?.suggestions])
 
   const selectedCount = selectedPaths.length
   const noteCount = markdownFiles.length
@@ -179,62 +192,6 @@ const AIOrganizationModal: React.FC<AIOrganizationModalProps> = ({ isOpen, onClo
     if (seconds < 60) return `${seconds}s`
     return `${Math.floor(seconds / 60)}m ${seconds % 60}s`
   }
-
-  // GSAP: 进度条入场
-  useEffect(() => {
-    if (progressPercent > 0 && progressRef.current) {
-      const ctx = gsap.context(() => {
-        gsap.fromTo(
-          progressRef.current,
-          { autoAlpha: 0 },
-          {
-            autoAlpha: 1,
-            duration: 0.35,
-            ease: Easing.smooth,
-            clearProps: 'opacity,visibility,transform',
-            overwrite: 'auto',
-          },
-        )
-      })
-      return () => ctx.revert()
-    }
-  }, [progressPercent])
-
-  // GSAP: 结果弹入
-  useEffect(() => {
-    if (result && resultRef.current) {
-      const ctx = gsap.context(() => {
-        fadeInScale(resultRef.current, 0.4, 0)
-      })
-      return () => ctx.revert()
-    }
-  }, [result])
-
-  // GSAP: 建议列表错位入场
-  useEffect(() => {
-    if (result?.suggestions?.length && suggestionsRef.current) {
-      const ctx = gsap.context(() => {
-        const items = suggestionsRef.current!.querySelectorAll('.ai-org-suggestion-item')
-        if (items.length) {
-          staggerFadeInUp(items, 0.35, 0.05, 0.2)
-        }
-      })
-      return () => ctx.revert()
-    }
-  }, [result?.suggestions])
-
-  // GSAP: 错误提示滑入
-  useEffect(() => {
-    if (error && contentRef.current) {
-      const errorEl = contentRef.current.querySelector('.ai-org-error-alert') as HTMLElement
-      if (errorEl) {
-        const ctx = gsap.context(() => {
-          gsap.fromTo(errorEl, { autoAlpha: 0, x: -10 }, { autoAlpha: 1, x: 0, duration: 0.3, ease: Easing.smooth })
-        })
-        return () => ctx.revert()
-      }
-    }
-  }, [error])
 
   const handleRun = async () => {
     setError(null)
@@ -267,7 +224,6 @@ const AIOrganizationModal: React.FC<AIOrganizationModalProps> = ({ isOpen, onClo
 
       if (cancelledRef.current) return
 
-      // 从返回的逐文件结果派生汇总视图
       const suggestions = results.map((r) => ({
         path: r.filePath,
         suggestedCategory: (r.tags && r.tags[0]) || r.summary || '',
@@ -362,258 +318,252 @@ const AIOrganizationModal: React.FC<AIOrganizationModalProps> = ({ isOpen, onClo
     }
   }
 
-  const getConfidenceColor = (confidence: number): 'success' | 'warning' | 'default' => {
-    if (confidence >= 0.8) return 'success'
-    if (confidence >= 0.5) return 'warning'
-    return 'default'
-  }
-
-  let actionLabel = t('button.cancel')
-  if (isRunning) actionLabel = isCancelling ? t('aiOrganization.cancelling') : t('aiOrganization.cancelRun')
-  else if (result) actionLabel = t('button.close')
-
   return (
-    <Dialog open={isOpen} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pr: 1 }}>
-        {t('aiOrganization.title')}
-        <IconButton onClick={handleClose} aria-label={t('button.close')} title={t('button.close')} size="small">
-          <X size={16} />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent ref={contentRef} sx={{ overflowX: 'hidden' }}>
-        {/* Description */}
-        <Box className="ai-org-form-item" mt={2} mb={2}>
-          <Typography variant="body2" color="text.secondary">
-            {t('aiOrganization.description')}
-          </Typography>
-        </Box>
-        <Box className="ai-org-form-item" mb={2}>
-          <FormControl fullWidth size="small">
-            <InputLabel id="ai-org-scope-label">{t('aiOrganization.scope')}</InputLabel>
-            <Select labelId="ai-org-scope-label" value="vault" label={t('aiOrganization.scope')} disabled={isRunning}>
-              <MenuItem value="vault">{t('aiOrganization.currentVault')}</MenuItem>
-            </Select>
-          </FormControl>
-          <Typography variant="caption" color="text.secondary" display="block" mt={1}>
-            {t('aiOrganization.scopeHint', { count: selectedCount })}
-          </Typography>
-        </Box>
+    <ReorModal isOpen={isOpen} onClose={handleClose} embedded={embedded} className="max-w-[580px] p-5">
+      {/* Header */}
+      <div className="flex items-start gap-3 pb-4 border-b border-border">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-[#7b68ee]/30 bg-[#7b68ee]/15 text-[#7b68ee] dark:text-[#9d8ff5] shadow-sm shadow-[#7b68ee]/20">
+          <Brain size={18} strokeWidth={2} />
+        </div>
+        <div className="min-w-0 flex-1 pr-6">
+          <h2 className="text-base font-semibold text-foreground tracking-tight">{t('aiOrganization.title')}</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">{t('aiOrganization.description')}</p>
+        </div>
+      </div>
 
-        <Box
-          className="ai-org-form-item"
-          mb={2}
-          sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1.5, overflow: 'hidden' }}
-        >
-          <Box px={1.5} py={1} display="flex" alignItems="center" justifyContent="space-between" gap={1}>
-            <Box display="flex" alignItems="center" gap={1} minWidth={0}>
-              <CheckSquare size={16} aria-hidden="true" />
-              <Typography variant="subtitle2" noWrap>
-                {t('aiOrganization.selectFiles')}
-              </Typography>
-              <Chip size="small" label={`${selectedCount}/${noteCount}`} />
-            </Box>
-            <Box display="flex" gap={0.5}>
+      <div ref={contentRef} className="pt-4 space-y-3.5">
+        {/* Error Alert */}
+        {error && (
+          <div className="flex items-start gap-2.5 rounded-lg border border-red-500/25 bg-red-500/10 p-3 text-xs text-red-600 dark:text-red-200">
+            <AlertCircle size={15} className="mt-0.5 shrink-0 text-red-500" />
+            <div className="flex-1 break-all">{error}</div>
+            {Object.keys(originalContents).length > 0 && (
               <Button
-                size="small"
+                variant="secondary"
+                size="sm"
+                onClick={handleUndo}
+                disabled={isUndoing}
+                className="h-6 px-2 text-[11px] border-red-500/30 text-red-600 dark:text-red-200"
+              >
+                {isUndoing ? t('aiOrganization.undoing') : t('aiOrganization.undo')}
+              </Button>
+            )}
+            <button type="button" onClick={() => setError(null)} className="text-red-500 hover:text-red-400">
+              ×
+            </button>
+          </div>
+        )}
+
+        {/* Undo Notice */}
+        {undoNotice && (
+          <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-700 dark:text-emerald-200">
+            <CheckCircle2 size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span>{undoNotice}</span>
+          </div>
+        )}
+
+        {/* Note Selector Box */}
+        <div className="ai-org-form-item rounded-lg border border-border bg-card p-3 space-y-2">
+          <div className="flex items-center justify-between pb-2 border-b border-border text-xs">
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-foreground">{t('aiOrganization.selectFiles')}</span>
+              <span className="rounded bg-muted/40 border border-border px-1.5 py-0.2 text-[11px] font-mono text-muted-foreground">
+                {selectedCount} / {noteCount}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={selectAll}
                 disabled={isRunning || isApplying || previewReady || allSelected}
+                className="h-6 px-2 text-[11px] border-border"
               >
                 {t('aiOrganization.selectAll')}
               </Button>
               <Button
-                size="small"
+                variant="secondary"
+                size="sm"
                 onClick={clearSelection}
                 disabled={isRunning || isApplying || previewReady || selectedCount === 0}
+                className="h-6 px-2 text-[11px] border-border"
               >
                 {t('aiOrganization.clearSelection')}
               </Button>
-            </Box>
-          </Box>
-          <Divider />
-          <List
-            dense
-            disablePadding
-            sx={{ maxHeight: 210, overflowY: 'auto' }}
-            aria-label={t('aiOrganization.selectFiles')}
-          >
+            </div>
+          </div>
+
+          <div className="max-h-48 overflow-y-auto space-y-1 pr-1 custom-scrollbar">
             {markdownFiles.map((file) => {
               const checked = selectedPaths.includes(file.path)
               return (
-                <ListItem key={file.path} disablePadding>
+                <div
+                  key={file.path}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => !isRunning && !isApplying && !previewReady && togglePath(file.path)}
+                  onKeyDown={(e) => {
+                    if (e.key === ' ' || e.key === 'Enter') togglePath(file.path)
+                  }}
+                  className={cn(
+                    'flex items-center gap-2.5 rounded px-2 py-1 text-xs transition-colors cursor-pointer select-none',
+                    checked ? 'bg-[#7b68ee]/15 text-[#7b68ee] dark:text-[#a29bfe] font-medium' : 'text-foreground hover:bg-accent',
+                  )}
+                >
                   <Checkbox
+                    id={`ai-note-${file.path.replace(/[^a-zA-Z0-9_-]/g, '-')}`}
                     checked={checked}
-                    onChange={() => togglePath(file.path)}
+                    onCheckedChange={() => togglePath(file.path)}
                     disabled={isRunning || isApplying || previewReady}
-                    inputProps={{ 'aria-label': file.relativePath }}
+                    label={file.name}
+                    onClick={(e) => e.stopPropagation()}
                   />
-                  <ListItemText
-                    sx={{ minWidth: 0, overflow: 'hidden' }}
-                    primary={file.name}
-                    secondary={file.relativePath}
-                    primaryTypographyProps={{ noWrap: true, sx: { overflow: 'hidden', textOverflow: 'ellipsis' } }}
-                    secondaryTypographyProps={{
-                      noWrap: true,
-                      sx: { overflow: 'hidden', textOverflow: 'ellipsis' },
-                    }}
-                  />
-                </ListItem>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-medium truncate text-foreground">{file.name}</div>
+                    <div className="text-[10px] text-muted-foreground font-mono truncate">{file.relativePath}</div>
+                  </div>
+                </div>
               )
             })}
             {markdownFiles.length === 0 && (
-              <ListItem>
-                <ListItemText secondary={t('aiOrganization.noNotes')} />
-              </ListItem>
+              <p className="py-4 text-center text-xs text-muted-foreground">{t('aiOrganization.noNotes')}</p>
             )}
-          </List>
-        </Box>
+          </div>
+        </div>
 
-        {/* Error */}
-        {error && (
-          <div className="ai-org-error-alert">
-            <Alert
-              severity="error"
-              onClose={() => setError(null)}
-              action={
-                Object.keys(originalContents).length > 0 ? (
-                  <Button color="inherit" size="small" onClick={handleUndo} disabled={isUndoing}>
-                    {isUndoing ? t('aiOrganization.undoing') : t('aiOrganization.undo')}
-                  </Button>
-                ) : undefined
-              }
-            >
-              {error}
-            </Alert>
+        {/* Progress Bar */}
+        {isRunning && (
+          <div className="space-y-1.5 rounded-lg border border-purple-500/20 bg-purple-500/10 p-3">
+            <div className="flex items-center justify-between text-xs text-purple-200">
+              <span className="flex items-center gap-1.5 truncate max-w-[70%]">
+                <Loader2 size={13} className="animate-spin text-[#7b68ee] shrink-0" />
+                <span className="truncate">{progress.status || t('aiOrganization.analyzing')}</span>
+              </span>
+              <span className="font-mono text-[11px]">{progressPercent}%</span>
+            </div>
+            <Progress value={progressPercent} className="h-1.5 bg-purple-950/40" />
+            <div className="flex items-center justify-between text-[10px] text-purple-300/70 pt-0.5">
+              <span className="truncate">{progress.filePath}</span>
+              <span className="shrink-0 ml-2">
+                耗时: {formatDuration(elapsedSeconds)}
+                {estimatedRemainingSeconds !== null && ` · 预估剩余: ${formatDuration(estimatedRemainingSeconds)}`}
+              </span>
+            </div>
           </div>
         )}
 
-        {undoNotice && (
-          <Alert severity="success" onClose={() => setUndoNotice(null)} sx={{ mt: 2 }}>
-            {undoNotice}
-          </Alert>
-        )}
-
-        {/* Progress */}
-        {isRunning && (
-          <Box ref={progressRef} mt={2}>
-            <Box display="flex" justifyContent="space-between" mb={1}>
-              <Typography variant="body2">{progress.status || t('aiOrganization.analyzing')}</Typography>
-              <Typography variant="body2" className="tabular-nums">
-                {progress.current > 0 && progress.total > 0 ? `${progress.current}/${progress.total} · ` : ''}
-                {progressPercent}%
-              </Typography>
-            </Box>
-            <LinearProgress
-              variant={progressPercent > 0 ? 'determinate' : 'indeterminate'}
-              value={progressPercent > 0 ? progressPercent : undefined}
-            />
-            {progress.filePath && (
-              <Typography variant="caption" color="text.secondary" mt={0.5} display="block">
-                {progress.filePath}
-              </Typography>
-            )}
-            <Typography variant="caption" color="text.secondary" display="block" mt={0.5}>
-              {t('aiOrganization.elapsed')}: {formatDuration(elapsedSeconds)}
-              {estimatedRemainingSeconds !== null
-                ? ` · ${t('aiOrganization.remaining')}: ${formatDuration(estimatedRemainingSeconds)}`
-                : ''}
-            </Typography>
-          </Box>
-        )}
-
-        {/* Result */}
+        {/* Results Banner & Suggestions */}
         {result && (
-          <Box ref={resultRef} mt={2}>
-            <Alert
-              severity={previewReady ? 'info' : 'success'}
-              onClose={previewReady ? undefined : () => setResult(null)}
-              sx={{
-                overflowWrap: 'normal',
-                wordBreak: 'normal',
-                width: '100%',
-                boxSizing: 'border-box',
-                '& .MuiAlert-message': { minWidth: 0, flex: 1, overflowWrap: 'break-word' },
-                '& .MuiAlert-action': { flexShrink: 0, alignItems: 'flex-start' },
-              }}
-              action={
-                !previewReady && Object.keys(originalContents).length > 0 ? (
-                  <Button color="inherit" size="small" onClick={handleUndo} disabled={isUndoing}>
+          <div ref={resultRef} className="space-y-3">
+            <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3.5 space-y-1.5 text-xs text-emerald-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 font-medium">
+                  <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
+                  <span>{previewReady ? t('aiOrganization.previewReady') : t('aiOrganization.complete')}</span>
+                </div>
+                {!previewReady && Object.keys(originalContents).length > 0 && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={handleUndo}
+                    disabled={isUndoing}
+                    className="h-6 px-2 text-[11px] border-emerald-500/30 text-emerald-200 hover:bg-emerald-500/20"
+                  >
                     {isUndoing ? t('aiOrganization.undoing') : t('aiOrganization.undo')}
                   </Button>
-                ) : undefined
-              }
-            >
-              <Typography variant="body1">
-                {previewReady ? t('aiOrganization.previewReady') : t('aiOrganization.complete')}
-              </Typography>
-              <Typography variant="body2">
-                {result.filesOrganized} {t('aiOrganization.filesOrganized')} | {result.newFoldersCreated}{' '}
-                {t('aiOrganization.foldersCreated')}
-              </Typography>
-              {result.truncatedFiles > 0 && (
-                <Typography variant="caption" display="block" mt={0.75} color="warning.main">
-                  {t('aiOrganization.truncatedWarning', { count: result.truncatedFiles })}
-                </Typography>
-              )}
-              {lastDurationSeconds !== null && (
-                <Typography variant="caption" display="block" mt={0.5}>
-                  {t('aiOrganization.elapsed')}: {formatDuration(lastDurationSeconds)}
-                </Typography>
-              )}
-            </Alert>
+                )}
+              </div>
+              <p className="text-[11px] text-emerald-300/80">
+                整理文件: <strong className="text-foreground">{result.filesOrganized}</strong> 篇 · 新建分类:{' '}
+                <strong className="text-foreground">{result.newFoldersCreated}</strong> 个
+                {lastDurationSeconds !== null && ` · 耗时: ${formatDuration(lastDurationSeconds)}`}
+              </p>
+            </div>
 
+            {/* Suggestions list */}
             {result.suggestions.length > 0 && (
-              <Box mt={2}>
-                <Typography variant="subtitle2" gutterBottom>
+              <div ref={suggestionsRef} className="rounded-lg border border-border bg-card p-3 space-y-2">
+                <span className="text-xs font-medium text-foreground block pb-1 border-b border-border">
                   {t('aiOrganization.suggestions')} ({result.suggestions.length})
-                </Typography>
-                <List ref={suggestionsRef} dense>
+                </span>
+                <div className="max-h-44 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
                   {result.suggestions.map((suggestion) => (
-                    <ListItem key={suggestion.path} className="ai-org-suggestion-item">
-                      <ListItemIcon>
-                        <Folder size={16} />
-                      </ListItemIcon>
-                      <ListItemText
-                        sx={{ minWidth: 0, overflow: 'hidden' }}
-                        primary={suggestion.suggestedCategory}
-                        secondary={suggestion.path}
-                        primaryTypographyProps={{ noWrap: true, sx: { overflow: 'hidden', textOverflow: 'ellipsis' } }}
-                        secondaryTypographyProps={{
-                          noWrap: true,
-                          sx: { overflow: 'hidden', textOverflow: 'ellipsis' },
-                        }}
-                      />
-                      <Chip
-                        label={`${Math.round(suggestion.confidence * 100)}%`}
-                        size="small"
-                        color={getConfidenceColor(suggestion.confidence)}
-                        variant="outlined"
-                      />
-                    </ListItem>
+                    <div
+                      key={suggestion.path}
+                      className="ai-org-suggestion-item flex items-center justify-between gap-2 rounded bg-muted/40 border border-border p-2 text-xs"
+                    >
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <Folder size={14} className="text-[#7b68ee] shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <div className="font-medium text-foreground truncate">{suggestion.suggestedCategory}</div>
+                          <div className="text-[10px] text-muted-foreground font-mono truncate">{suggestion.path}</div>
+                        </div>
+                      </div>
+                      <span className="rounded bg-muted/60 border border-border px-1.5 py-0.2 text-[10px] font-mono text-muted-foreground shrink-0">
+                        {Math.round(suggestion.confidence * 100)}% 置信度
+                      </span>
+                    </div>
                   ))}
-                </List>
-              </Box>
+                </div>
+              </div>
             )}
-          </Box>
+          </div>
         )}
-      </DialogContent>
+      </div>
 
-      <DialogActions>
-        <Button onClick={isRunning ? handleCancel : handleClose} disabled={isCancelling}>
-          {actionLabel}
+      {/* Footer */}
+      <div className="flex items-center justify-end gap-2.5 pt-4 mt-2 border-t border-border">
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={isRunning ? handleCancel : handleClose}
+          disabled={isCancelling}
+          className="text-xs"
+        >
+          {isRunning
+            ? isCancelling
+              ? t('aiOrganization.cancelling')
+              : t('aiOrganization.cancelRun')
+            : result
+              ? t('button.close')
+              : t('button.cancel')}
         </Button>
         {previewReady ? (
-          <Button onClick={handleApply} variant="contained" disabled={isApplying}>
-            {isApplying ? t('aiOrganization.applying') : t('aiOrganization.applyChanges')}
+          <Button
+            variant="accent"
+            size="sm"
+            onClick={handleApply}
+            disabled={isApplying}
+            className="text-xs gap-1.5 shadow-md shadow-[#7b68ee]/25"
+          >
+            {isApplying && <Loader2 size={13} className="animate-spin" />}
+            <span>{isApplying ? t('aiOrganization.applying') : t('aiOrganization.applyChanges')}</span>
           </Button>
         ) : (
           !result && (
-            <Button onClick={handleRun} variant="contained" disabled={isRunning || selectedCount === 0}>
-              {isRunning ? t('aiOrganization.running') : t('aiOrganization.start')}
+            <Button
+              variant="accent"
+              size="sm"
+              onClick={handleRun}
+              disabled={isRunning || selectedCount === 0}
+              className="text-xs gap-1.5 shadow-md shadow-[#7b68ee]/25"
+            >
+              {isRunning ? (
+                <>
+                  <Loader2 size={13} className="animate-spin" />
+                  <span>{t('aiOrganization.running')}</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles size={13} />
+                  <span>{t('aiOrganization.start')}</span>
+                </>
+              )}
             </Button>
           )
         )}
-      </DialogActions>
-    </Dialog>
+      </div>
+    </ReorModal>
   )
 }
 

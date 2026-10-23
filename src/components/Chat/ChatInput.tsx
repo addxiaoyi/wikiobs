@@ -1,13 +1,8 @@
 import React from 'react'
-
-import { PiPaperPlaneRight } from 'react-icons/pi'
-import { TextArea } from 'tamagui'
-import { ToggleButton, ToggleThumb } from '@/components/Editor/ui/src/toggle'
+import { ArrowUp, Sparkles } from 'lucide-react'
 import { AgentConfig, LoadingState } from '../../lib/llm/types'
 import { Button } from '../ui/button'
 import LLMSelectOrButton from '../Settings/LLMSettings/LLMSelectOrButton'
-import { Label } from '@/components/ui/label'
-import { useThemeManager } from '@/contexts/ThemeContext'
 import { useTranslation } from '@/lib/i18n'
 
 interface ChatInputProps {
@@ -31,7 +26,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
   agentConfig,
   setAgentConfig,
 }) => {
-  const { state } = useThemeManager()
   const { t } = useTranslation()
   const isComposingRef = React.useRef(false)
 
@@ -54,8 +48,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
   return (
     <div className="flex w-full">
-      <div className="z-50 flex w-full flex-col overflow-hidden rounded-xl border border-white/10 bg-[#0e1017]/80 shadow-xl backdrop-blur-md transition-all duration-75 focus-within:border-white/25 focus-within:ring-1 focus-within:ring-white/20">
-        <TextArea
+      <div className="z-50 flex w-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm backdrop-blur-md transition-all duration-75 focus-within:border-foreground/30 focus-within:ring-1 focus-within:ring-foreground/10">
+        <textarea
           value={userTextFieldInput}
           onCompositionStart={() => {
             isComposingRef.current = true
@@ -63,8 +57,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
           onCompositionEnd={() => {
             isComposingRef.current = false
           }}
-          // @ts-expect-error
-          onKeyPress={(e: KeyboardEvent) => {
+          onKeyDown={(e) => {
             if (!e.shiftKey && e.key === 'Enter') {
               if (isComposingRef.current) return
               e.preventDefault()
@@ -73,44 +66,53 @@ const ChatInput: React.FC<ChatInputProps> = ({
           }}
           placeholder={t('chat.inputPlaceholder')}
           aria-label={t('chat.inputPlaceholder')}
-          onChangeText={(text: string) => setUserTextFieldInput(text)}
+          onChange={(e) => setUserTextFieldInput(e.target.value)}
           autoFocus
-          h={100}
-          w="100%"
-          resize="none"
-          bg="transparent"
-          p="$3.5"
-          color="$foreground"
-          borderWidth={0}
-          fontSize={12}
+          rows={3}
+          className="w-full resize-none border-0 bg-transparent p-3.5 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:ring-0 leading-relaxed font-sans"
         />
-        <div className="mx-auto h-px w-[96%] bg-white/[0.06]" />
-        <div className="flex h-11 flex-col items-center justify-between gap-2 px-3 py-2 md:flex-row md:gap-4">
-          <div className="flex flex-col items-center justify-between rounded-md border-0 md:flex-row">
+        <div className="mx-auto h-px w-[96%] bg-border/60" />
+        <div className="flex min-h-[40px] items-center justify-between gap-2 px-3 py-1.5">
+          <div className="flex items-center gap-2">
             <LLMSelectOrButton selectedLLM={selectedLLM} setSelectedLLM={setSelectedLLM} />
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="mr-1 flex flex-col items-center">
-              <ToggleButton
-                hybrid={!!agentConfig?.dbSearchFilters}
-                onPress={() => handleDbSearchToggle(!agentConfig?.dbSearchFilters)}
-                aria-checked={!!agentConfig?.dbSearchFilters}
-                role="switch"
-                aria-label={t('chat.searchNotes')}
+            {/* Obsidian-Style RAG Knowledge Search Pill */}
+            <button
+              type="button"
+              onClick={() => handleDbSearchToggle(!agentConfig?.dbSearchFilters)}
+              aria-pressed={!!agentConfig?.dbSearchFilters}
+              title={agentConfig?.dbSearchFilters ? '知识库参考检索: 已开启 (点击关闭)' : '知识库参考检索: 已关闭 (点击开启)'}
+              className={`flex h-7 shrink-0 whitespace-nowrap cursor-pointer items-center gap-1.5 rounded-md border px-2 text-xs font-medium transition-all duration-150 select-none ${
+                agentConfig?.dbSearchFilters
+                  ? 'border-foreground/40 bg-foreground/10 text-foreground hover:bg-foreground/15 shadow-2xs'
+                  : 'border-border/60 bg-secondary/30 text-muted-foreground hover:bg-secondary hover:text-foreground'
+              }`}
+            >
+              <Sparkles
+                size={12}
+                className={agentConfig?.dbSearchFilters ? 'text-foreground shrink-0' : 'text-muted-foreground shrink-0'}
+              />
+              <span className="text-[11px] whitespace-nowrap">知识参考</span>
+              <span
+                className={`rounded px-1 py-0.2 font-mono text-[9px] font-semibold shrink-0 ${
+                  agentConfig?.dbSearchFilters
+                    ? 'bg-foreground/15 text-foreground'
+                    : 'bg-muted text-muted-foreground'
+                }`}
               >
-                <ToggleThumb hybrid={!!agentConfig?.dbSearchFilters} />
-              </ToggleButton>
-              <Label className="mt-0 text-[8px] text-muted-foreground">{t('chat.searchNotes')}</Label>
-            </div>
+                {agentConfig?.dbSearchFilters ? 'ON' : 'OFF'}
+              </span>
+            </button>
 
             <Button
-              className="flex size-7 items-center justify-center rounded-lg border-0 bg-white p-0 text-black shadow-sm transition-all duration-75 hover:bg-neutral-200 active:scale-[0.95] disabled:opacity-25"
+              className="flex size-7 items-center justify-center rounded-lg bg-foreground p-0 text-background transition-all duration-75 hover:bg-foreground/90 active:scale-[0.95] disabled:opacity-20 cursor-pointer"
               onClick={handleSubmitNewMessage}
-              disabled={loadingState !== 'idle'}
+              disabled={loadingState !== 'idle' || !userTextFieldInput.trim()}
               aria-label={t('chat.send')}
             >
-              <PiPaperPlaneRight className="size-3.5" color="#0b0d11" />
+              <ArrowUp className="size-4" strokeWidth={2.2} />
             </Button>
           </div>
         </div>

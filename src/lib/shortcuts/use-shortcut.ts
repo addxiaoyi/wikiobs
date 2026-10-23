@@ -8,16 +8,25 @@ import { useModalOpeners } from '@/contexts/ModalContext'
 function useAppShortcuts() {
   const { setSidebarShowing, openNewChat } = useChatContext()
   const { createUntitledNote } = useContentContext()
-  const { setIsNewDirectoryModalOpen } = useModalOpeners()
+  const { setIsNewDirectoryModalOpen, setIsCommandPaletteOpen, setIsSettingsModalOpen, setIsKnowledgeGraphOpen } = useModalOpeners()
 
   const handleShortcut = useCallback(
     (action: string) => {
       switch (action) {
+        case 'open-command-palette':
+          setIsCommandPaletteOpen((prev) => !prev)
+          break
         case 'open-new-note':
           createUntitledNote()
           break
         case 'open-new-directory-modal':
           setIsNewDirectoryModalOpen(true)
+          break
+        case 'open-settings-modal':
+          setIsSettingsModalOpen(true)
+          break
+        case 'open-graph-view':
+          setIsKnowledgeGraphOpen(true)
           break
         case 'open-search':
           setSidebarShowing('search')
@@ -33,7 +42,15 @@ function useAppShortcuts() {
           break
       }
     },
-    [createUntitledNote, setSidebarShowing, openNewChat, setIsNewDirectoryModalOpen],
+    [
+      createUntitledNote,
+      setSidebarShowing,
+      openNewChat,
+      setIsNewDirectoryModalOpen,
+      setIsCommandPaletteOpen,
+      setIsSettingsModalOpen,
+      setIsKnowledgeGraphOpen,
+    ],
   )
 
   const handleShortcutRef = useRef(handleShortcut)

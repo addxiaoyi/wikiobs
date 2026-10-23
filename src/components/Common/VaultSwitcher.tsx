@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { toast } from 'react-toastify'
-import Button from '@mui/material/Button'
-import Menu from '@mui/material/Menu'
-import MenuItem from '@mui/material/MenuItem'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import ListItemText from '@mui/material/ListItemText'
-import Divider from '@mui/material/Divider'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
-import { Check, LibraryBig } from 'lucide-react'
+import { Check, LibraryBig, Settings2, Folder } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
+import { cn } from '@/lib/ui'
 
 interface Vault {
   id: string
@@ -28,8 +29,7 @@ const VaultSwitcher: React.FC<VaultSwitcherProps> = ({ onOpenManagement }) => {
   const { t } = useTranslation()
   const [vaults, setVaults] = useState<Vault[]>([])
   const [currentVaultId, setCurrentVaultId] = useState<string | null>(null)
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const open = Boolean(anchorEl)
+  const [open, setOpen] = useState(false)
 
   const loadVaults = useCallback(async () => {
     try {
@@ -47,14 +47,6 @@ const VaultSwitcher: React.FC<VaultSwitcherProps> = ({ onOpenManagement }) => {
 
   const currentVault = vaults.find((v) => v.id === currentVaultId)
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleClose = () => {
-    setAnchorEl(null)
-  }
-
   const handleSwitch = async (vault: Vault) => {
     try {
       await window.multiVault.switch(vault.id)
@@ -62,146 +54,101 @@ const VaultSwitcher: React.FC<VaultSwitcherProps> = ({ onOpenManagement }) => {
     } catch {
       toast.error(t('error.generic'))
     }
-    handleClose()
+    setOpen(false)
   }
 
   const handleManage = () => {
-    handleClose()
+    setOpen(false)
     onOpenManagement()
   }
 
   return (
-    <>
-      <Button
-        id="vault-switcher-button"
-        onClick={handleClick}
-        size="small"
-        variant="text"
-        sx={{
-          minWidth: 0,
-          width: 40,
-          height: 40,
-          p: 0,
-          color: 'text.secondary',
-          '&:hover': { bgcolor: 'action.hover' },
-          position: 'relative',
-        }}
-        title={currentVault ? `${t('vault.current')}: ${currentVault.name}` : t('vault.manage')}
-        aria-label={currentVault ? `${t('vault.current')}: ${currentVault.name}` : t('vault.manage')}
-      >
-        <Box
-          sx={{
-            width: 24,
-            height: 24,
-            borderRadius: '4px',
-            bgcolor: currentVault ? 'primary.main' : 'action.disabledBackground',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '12px',
-            fontWeight: 'bold',
-            color: '#fff',
-            lineHeight: 1,
-          }}
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger asChild>
+        <button
+          id="vault-switcher-button"
+          className="icons-sidebar-button flex size-8 items-center justify-center rounded-md transition-colors hover:text-foreground"
+          title={currentVault ? `${t('vault.current')}: ${currentVault.name}` : t('vault.manage')}
+          aria-label={currentVault ? `${t('vault.current')}: ${currentVault.name}` : t('vault.manage')}
+          type="button"
         >
-          {currentVault ? currentVault.name.charAt(0).toUpperCase() : <LibraryBig size={14} aria-hidden="true" />}
-        </Box>
-      </Button>
+          <span className="flex size-5 items-center justify-center rounded border border-border bg-secondary text-[11px] font-semibold text-foreground shadow-sm transition-transform hover:scale-105 leading-none">
+            {currentVault ? currentVault.name.charAt(0).toUpperCase() : <LibraryBig size={12} aria-hidden="true" />}
+          </span>
+        </button>
+      </DropdownMenuTrigger>
 
-      <Menu
-        id="vault-switcher-menu"
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-        PaperProps={{
-          sx: {
-            minWidth: 240,
-            maxHeight: 360,
-            ml: 0.5,
-            bgcolor: '#1d2129',
-            color: '#e2e8f0',
-            border: '1px solid rgba(148, 163, 184, 0.18)',
-            boxShadow: '0 18px 40px rgba(0,0,0,0.35)',
-          },
-        }}
+      <DropdownMenuContent
+        align="start"
+        side="right"
+        className="w-64 border-border bg-popover/98 text-popover-foreground p-1.5 shadow-2xl backdrop-blur-2xl"
       >
-        <Box px={2} py={1}>
-          <Typography variant="caption" sx={{ color: '#94a3b8' }} fontWeight="bold">
-            {t('vault.title')}
-          </Typography>
+        <DropdownMenuLabel className="px-2 py-1.5">
+          <div className="text-[11px] font-medium text-muted-foreground">{t('vault.title')}</div>
           {currentVault && (
-            <>
-              <Typography variant="caption" display="block" sx={{ color: '#e2e8f0', mt: 0.5 }}>
-                {currentVault.name}
-              </Typography>
-              <Typography
-                variant="caption"
-                display="block"
-                title={currentVault.path}
-                sx={{ color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-              >
+            <div className="mt-1">
+              <div className="text-xs font-semibold text-foreground truncate">{currentVault.name}</div>
+              <div className="text-[10px] text-muted-foreground font-mono truncate" title={currentVault.path}>
                 {currentVault.path}
-              </Typography>
-            </>
+              </div>
+            </div>
           )}
-        </Box>
-        <Divider />
+        </DropdownMenuLabel>
+
+        <DropdownMenuSeparator className="bg-border" />
 
         {vaults.length === 0 ? (
-          <Box px={2} py={2} sx={{ color: '#94a3b8' }}>
-            <Box display="flex" alignItems="center" gap={1} mb={0.75}>
-              <LibraryBig size={16} aria-hidden="true" />
-              <Typography variant="body2" sx={{ color: '#e2e8f0', fontWeight: 600 }}>
-                {t('vault.noVaults')}
-              </Typography>
-            </Box>
-            <Typography variant="caption" sx={{ color: '#94a3b8' }}>
-              {t('vault.create')}
-            </Typography>
-          </Box>
+          <div className="px-3 py-3 text-center text-xs text-muted-foreground">
+            <LibraryBig size={16} className="mx-auto mb-1 text-muted-foreground" />
+            <div>{t('vault.noVaults')}</div>
+          </div>
         ) : (
-          vaults.map((vault) => (
-            <MenuItem key={vault.id} selected={vault.id === currentVaultId} onClick={() => handleSwitch(vault)} dense>
-              <ListItemIcon sx={{ minWidth: 28 }}>
-                <Box
-                  sx={{
-                    width: 20,
-                    height: 20,
-                    borderRadius: '3px',
-                    bgcolor: vault.id === currentVaultId ? 'primary.main' : 'action.disabledBackground',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '10px',
-                    fontWeight: 'bold',
-                    color: '#fff',
-                  }}
+          <div className="max-h-56 overflow-y-auto space-y-0.5 custom-scrollbar">
+            {vaults.map((vault) => {
+              const isSelected = vault.id === currentVaultId
+              return (
+                <DropdownMenuItem
+                  key={vault.id}
+                  onClick={() => handleSwitch(vault)}
+                  className={cn(
+                    'flex items-center justify-between gap-2 rounded px-2 py-1.5 text-xs transition-colors cursor-pointer',
+                    isSelected ? 'bg-[#7b68ee]/20 text-[#7b68ee] dark:text-[#a29bfe] font-medium' : 'text-foreground hover:bg-accent hover:text-foreground',
+                  )}
                 >
-                  {vault.name.charAt(0).toUpperCase()}
-                </Box>
-              </ListItemIcon>
-              <ListItemText
-                primary={vault.name}
-                primaryTypographyProps={{
-                  variant: 'body2',
-                  fontWeight: vault.id === currentVaultId ? 'bold' : 'normal',
-                }}
-                secondary={vault.isDefault ? t('vault.default') : undefined}
-                secondaryTypographyProps={{ variant: 'caption' }}
-              />
-              {vault.id === currentVaultId && <Check size={14} aria-label={t('vault.current')} />}
-            </MenuItem>
-          ))
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <span
+                      className={cn(
+                        'flex size-5 shrink-0 items-center justify-center rounded text-[10px] font-bold',
+                        isSelected ? 'bg-[#7b68ee] text-white' : 'bg-muted text-muted-foreground',
+                      )}
+                    >
+                      {vault.name.charAt(0).toUpperCase()}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate">{vault.name}</div>
+                      {vault.isDefault && (
+                        <span className="text-[10px] text-muted-foreground">{t('vault.default')}</span>
+                      )}
+                    </div>
+                  </div>
+                  {isSelected && <Check size={14} className="text-[#7b68ee] shrink-0" />}
+                </DropdownMenuItem>
+              )
+            })}
+          </div>
         )}
 
-        <Divider />
-        <MenuItem onClick={handleManage} dense>
-          <ListItemText primary={t('vault.manage')} primaryTypographyProps={{ variant: 'body2' }} />
-        </MenuItem>
-      </Menu>
-    </>
+        <DropdownMenuSeparator className="bg-border" />
+
+        <DropdownMenuItem
+          onClick={handleManage}
+          className="flex items-center gap-2 rounded px-2 py-1.5 text-xs text-foreground hover:bg-accent hover:text-foreground cursor-pointer"
+        >
+          <Settings2 size={13} className="text-muted-foreground" />
+          <span>{t('vault.manage')}</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 

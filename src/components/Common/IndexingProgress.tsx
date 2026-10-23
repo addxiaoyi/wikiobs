@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { YStack, H2, SizableText } from 'tamagui'
 import gsap from 'gsap'
+import { Loader2 } from 'lucide-react'
 
-import CircularProgress from '@mui/material/CircularProgress'
 import ReorModal from './Modal'
 import { animateProgress } from '@/lib/gsap-animations'
 import { useTranslation } from '@/lib/i18n'
@@ -70,34 +69,30 @@ const IndexingProgress: React.FC<IndexingProgressProps> = ({ indexingProgress, s
 
   return (
     <ReorModal isOpen onClose={() => {}} hideCloseButton>
-      <YStack className="mx-3 mb-3 mt-2 w-[min(500px,calc(100vw-2rem))] gap-2">
-        <H2 ref={titleRef} fontWeight="semi-bold" fontSize="xl" color="$gray13">
+      <div className="mx-3 mb-3 mt-2 flex w-[min(500px,calc(100vw-2rem))] flex-col gap-2">
+        <h2 ref={titleRef} className="text-xl font-semibold text-foreground">
           {indexingProgress === 0 ? t('indexing.initializing') : t('indexing.title')}
-        </H2>
-        <div
-          className={`mb-2 h-4 w-full overflow-hidden rounded-full border-2 border-gray-400 ${
-            indexingProgress !== 0 ? 'bg-neutral-800' : ''
-          }`}
-        >
-          <div ref={progressBarRef} className="h-full bg-blue-600" style={{ width: '0%' }} />
+        </h2>
+        <div className="mb-2 h-2.5 w-full overflow-hidden rounded-full bg-secondary">
+          <div ref={progressBarRef} className="h-full rounded-full bg-[#7b68ee] transition-all duration-150" style={{ width: '0%' }} />
         </div>
         <div className="flex min-w-0 items-center gap-2">
-          {indexingProgress === 0 && <CircularProgress size={20} thickness={7} className="shrink-0 text-blue-500" />}
+          {indexingProgress === 0 && <Loader2 size={16} className="shrink-0 animate-spin text-[#7b68ee]" />}
           <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-            <SizableText fontSize={14} color="$gray13">
+            <span className="text-sm text-foreground">
               {indexingProgress > 0 ? `${Math.round(indexingProgress * 100)}%` : t('indexing.preparing')}
-            </SizableText>
-            <SizableText className="shrink-0 tabular-nums" fontSize={12} color="$gray10">
+            </span>
+            <span className="shrink-0 tabular-nums text-xs text-muted-foreground">
               {eta || `${elapsedSeconds}s`}
-            </SizableText>
+            </span>
           </div>
         </div>
         {status && status !== 'Complete' && (
-          <SizableText className="truncate" fontSize={12} color="$gray10">
+          <span className="truncate text-xs text-muted-foreground">
             {status}
-          </SizableText>
+          </span>
         )}
-      </YStack>
+      </div>
     </ReorModal>
   )
 }

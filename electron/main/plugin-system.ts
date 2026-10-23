@@ -9,6 +9,7 @@ import * as path from 'path'
 import crypto from 'crypto'
 import Store from 'electron-store'
 import { logger } from './common/logger'
+import { resolveExistingVaultPath } from './filesystem/pathGuard'
 
 // 插件类型定义
 interface PluginManifest {
@@ -19,6 +20,17 @@ interface PluginManifest {
   author?: string
   permissions: string[]
   contributions?: PluginContributions
+}
+
+export interface MarketplacePlugin {
+  id: string
+  name: string
+  version: string
+  description: string
+  author: string
+  permissions: string[]
+  source: 'bundled'
+  installed: boolean
 }
 
 export interface PluginManifestPreview {
@@ -79,7 +91,7 @@ interface PluginAPI {
   app: {
     getVaultPath: () => string
     getNoteContent: (notePath: string) => string | null
-    setNoteContent: (notePath: string, content: string) => void
+    setNoteContent: (notePath: string, content: string, vaultPath?: string) => void
     showNotification: (message: string, type?: 'info' | 'warning' | 'error') => void
   }
 }
@@ -97,10 +109,88 @@ const pluginStorage: Map<string, Map<string, unknown>> = new Map()
 const hookCallbacks: Map<string, Array<(data: unknown) => void | Promise<void>>> = new Map()
 const eventBus: PluginEvent[] = []
 
+const bundledMarketplace: Omit<MarketplacePlugin, 'installed'>[] = [
+  {
+    id: 'word-count-on-save',
+    name: 'Word Count on Save',
+    version: '1.0.0',
+    description: 'Adds word and character counts to note frontmatter when a note is saved.',
+    author: 'WIKIOBS',
+    permissions: ['notes.read', 'notes.write'],
+    source: 'bundled',
+  },
+]
+
 // 获取插件目录
 function getPluginsDir(): string {
   const userDataPath = app.getPath('userData')
   return path.join(userDataPath, PLUGINS_DIR)
+}
+
+function getBundledPluginsDir(): string {
+  const root = app.isPackaged ? process.resourcesPath : app.getAppPath()
+  return path.join(root, 'plugins')
+}
+
+function getMarketplace(): MarketplacePlugin[] {
+  const installed = new Set(getAllPlugins().map((plugin) => `${plugin.manifest.name}@${plugin.manifest.version}`))
+  return bundledMarketplace.map((plugin) => ({
+    ...plugin,
+    installed: installed.has(`${plugin.name}@${plugin.version}`),
+  }))
+}
+
+async function installMarketplacePlugin(
+  pluginId: string,
+): Promise<{ success: boolean; error?: string; plugin?: unknown }> {
+  const entry = bundledMarketplace.find((plugin) => plugin.id === pluginId)
+  if (!entry) return { success: false, error: 'Marketplace plugin was not found.' }
+
+  const sourcePath = path.join(getBundledPluginsDir(), entry.id)
+  if (!fs.existsSync(sourcePath)) return { success: false, error: 'Bundled plugin payload is missing.' }
+  const installed = getAllPlugins().find((plugin) => plugin.manifest.name === entry.name)
+  if (installed) {
+    return { success: false, error: 'This marketplace plugin is already installed. Upgrade is not available yet.' }
+  }
+  return installPlugin(sourcePath)
+}
+
+function copyPluginTree(source: string, destination: string): void {
+  fs.mkdirSync(destination, { recursive: true })
+  for (const entry of fs.readdirSync(source, { withFileTypes: true })) {
+    if (entry.isSymbolicLink()) throw new Error('Plugin packages cannot contain symbolic links.')
+    const from = path.join(source, entry.name)
+    const to = path.join(destination, entry.name)
+    if (entry.isDirectory()) copyPluginTree(from, to)
+    else if (entry.isFile()) fs.copyFileSync(from, to)
+    else throw new Error('Plugin package contains an unsupported filesystem entry.')
+  }
+}
+
+function resolvePluginDirectory(pluginId: string): string {
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/.test(pluginId)) {
+    throw new Error('Invalid plugin ID.')
+  }
+  const pluginsDir = path.resolve(getPluginsDir())
+  const resolved = path.resolve(pluginsDir, pluginId)
+  const relative = path.relative(pluginsDir, resolved)
+  if (relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
+    throw new Error('Plugin path must stay inside the plugins directory.')
+  }
+  return resolved
+}
+
+function validatePluginEntry(pluginPath: string, main: string): string {
+  if (typeof main !== 'string' || main.trim() === '' || path.isAbsolute(main)) {
+    throw new Error('Plugin entry must be a relative path.')
+  }
+  const root = path.resolve(pluginPath)
+  const entry = path.resolve(root, main)
+  const relative = path.relative(root, entry)
+  if (relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
+    throw new Error('Plugin entry must stay inside the plugin directory.')
+  }
+  return entry
 }
 
 // 确保插件目录存在
@@ -133,6 +223,7 @@ function validateManifest(value: unknown): PluginManifestPreview {
   if (manifest.permissions !== undefined && !Array.isArray(manifest.permissions)) {
     throw new Error('Manifest permissions must be an array.')
   }
+  validatePluginEntry('.', manifest.main)
 
   return {
     name: manifest.name,
@@ -217,12 +308,7 @@ function createPluginAPI(pluginId: string): PluginAPI {
         try {
           const vaultPath = store.get('vaultDirectory') as string
           if (!vaultPath) return null
-          const resolved = path.resolve(vaultPath, notePath)
-          // Ensure path stays within vault directory
-          if (!resolved.startsWith(path.resolve(vaultPath) + path.sep) && resolved !== path.resolve(vaultPath)) {
-            logger.error('PluginSystem', `Plugin tried to access path outside vault: ${notePath}`)
-            return null
-          }
+          const resolved = resolveExistingVaultPath(vaultPath, notePath)
           if (fs.existsSync(resolved)) {
             return fs.readFileSync(resolved, 'utf-8')
           }
@@ -231,14 +317,10 @@ function createPluginAPI(pluginId: string): PluginAPI {
         }
         return null
       },
-      setNoteContent: (notePath: string, content: string) => {
-        const vaultPath = store.get('vaultDirectory') as string
+      setNoteContent: (notePath: string, content: string, vaultOverride?: string) => {
+        const vaultPath = vaultOverride || (store.get('vaultDirectory') as string)
         if (!vaultPath) throw new Error('No vault directory configured')
-        const resolved = path.resolve(vaultPath, notePath)
-        // Ensure path stays within vault directory
-        if (!resolved.startsWith(path.resolve(vaultPath) + path.sep) && resolved !== path.resolve(vaultPath)) {
-          throw new Error('Path must stay inside the current vault.')
-        }
+        const resolved = resolveExistingVaultPath(vaultPath, notePath)
         try {
           const dir = path.dirname(resolved)
           if (!fs.existsSync(dir)) {
@@ -314,7 +396,7 @@ async function loadPlugin(pluginPath: string): Promise<Plugin | null> {
   }
 
   try {
-    const mainPath = path.join(pluginPath, manifest.main)
+    const mainPath = validatePluginEntry(pluginPath, manifest.main)
     if (fs.existsSync(mainPath)) {
       const api = createPluginAPI(pluginId)
       plugin.api = api
@@ -348,7 +430,7 @@ async function unloadPlugin(pluginId: string): Promise<boolean> {
 
   try {
     if (plugin.api) {
-      const mainPath = path.join(plugin.path, plugin.manifest.main)
+      const mainPath = validatePluginEntry(plugin.path, plugin.manifest.main)
       const pluginModule = require(mainPath)
       if (typeof pluginModule.deactivate === 'function') {
         await pluginModule.deactivate()
@@ -463,6 +545,10 @@ async function executePluginHook(hookName: string, data: unknown): Promise<void>
   await triggerHook(hookName, data)
 }
 
+export async function notifyPluginHook(hookName: string, data: unknown): Promise<void> {
+  await triggerHook(hookName, data)
+}
+
 // 安装插件（从 ZIP 或目录）
 async function installPlugin(source: string): Promise<{ success: boolean; error?: string; plugin?: Plugin }> {
   ensurePluginsDir()
@@ -491,34 +577,33 @@ async function installPlugin(source: string): Promise<{ success: boolean; error?
         }
       }
 
-      zip.extractAllTo(destPath, true)
+      const stagingPath = `${destPath}.staging-${crypto.randomUUID()}`
+      zip.extractAllTo(stagingPath, true)
+      if (!loadManifest(stagingPath)) throw new Error('Plugin manifest is invalid.')
+      fs.renameSync(stagingPath, destPath)
     } else {
       // 从目录安装
       destPath = path.join(pluginsDir, path.basename(source))
       if (fs.existsSync(destPath)) {
         return { success: false, error: 'Plugin already exists' }
       }
-      fs.mkdirSync(destPath, { recursive: true })
+      const stagingPath = `${destPath}.staging-${crypto.randomUUID()}`
+      copyPluginTree(source, stagingPath)
+      if (!loadManifest(stagingPath)) {
+        fs.rmSync(stagingPath, { recursive: true, force: true })
+        throw new Error('Plugin manifest is invalid.')
+      }
+      fs.renameSync(stagingPath, destPath)
 
       // 复制文件
-      const copyDir = (src: string, dest: string) => {
-        fs.mkdirSync(dest, { recursive: true })
-        const entries = fs.readdirSync(src, { withFileTypes: true })
-        for (const entry of entries) {
-          const srcPath = path.join(src, entry.name)
-          const destinationPath = path.join(dest, entry.name)
-          if (entry.isDirectory()) {
-            copyDir(srcPath, destinationPath)
-          } else {
-            fs.copyFileSync(srcPath, destinationPath)
-          }
-        }
-      }
-      copyDir(source, destPath)
     }
 
     const plugin = await loadPlugin(destPath)
-    return { success: true, plugin: plugin || undefined }
+    if (!plugin?.enabled || plugin.error) {
+      fs.rmSync(destPath, { recursive: true, force: true })
+      return { success: false, error: plugin?.error || 'Plugin activation failed.' }
+    }
+    return { success: true, plugin }
   } catch (e) {
     return { success: false, error: String(e) }
   }
@@ -530,7 +615,7 @@ async function uninstallPlugin(pluginId: string): Promise<boolean> {
   if (!plugin) {
     // 尝试从目录删除
     ensurePluginsDir()
-    const pluginPath = path.join(getPluginsDir(), pluginId)
+    const pluginPath = resolvePluginDirectory(pluginId)
     if (fs.existsSync(pluginPath)) {
       fs.rmSync(pluginPath, { recursive: true })
       return true
@@ -556,8 +641,7 @@ function enablePlugin(pluginId: string): boolean {
   }
 
   // 未加载则尝试从目录加载
-  const pluginsDir = getPluginsDir()
-  const pluginPath = path.join(pluginsDir, pluginId)
+  const pluginPath = resolvePluginDirectory(pluginId)
   if (fs.existsSync(pluginPath)) {
     // 同步加载（不 await，因为 IPC handler 需要同步返回）
     loadPlugin(pluginPath).then((loaded) => {
@@ -589,6 +673,13 @@ export function registerPluginSystemHandlers() {
     return getAllPlugins().map(toPluginListItem)
   })
 
+  ipcMain.handle('plugins:marketplace:list', async () => getMarketplace())
+
+  ipcMain.handle('plugins:marketplace:install', async (_event, pluginId: string) => {
+    const result = await installMarketplacePlugin(pluginId)
+    return result.plugin ? { ...result, plugin: toPluginListItem(result.plugin as Plugin) } : result
+  })
+
   ipcMain.handle('plugins:inspect', async (_event, source: string) => inspectPluginSource(source))
 
   ipcMain.handle('plugins:loaded', async () => {
@@ -596,7 +687,7 @@ export function registerPluginSystemHandlers() {
   })
 
   ipcMain.handle('plugins:load', async (_event, pluginId: string) => {
-    const pluginPath = path.join(getPluginsDir(), pluginId)
+    const pluginPath = resolvePluginDirectory(pluginId)
     return loadPlugin(pluginPath)
   })
 
@@ -637,7 +728,7 @@ export function registerPluginSystemHandlers() {
       return existing.error ? { success: false, error: existing.error } : { success: true }
     }
 
-    const pluginPath = path.join(getPluginsDir(), pluginId)
+    const pluginPath = resolvePluginDirectory(pluginId)
     if (!fs.existsSync(pluginPath)) return { success: false, error: 'Plugin directory not found.' }
     const loaded = await loadPlugin(pluginPath)
     if (!loaded || loaded.error || !loaded.enabled) {

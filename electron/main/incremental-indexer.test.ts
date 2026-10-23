@@ -23,6 +23,10 @@ jest.mock('./common/scanner', () => ({
   scanMarkdownFiles: jest.fn(),
 }))
 
+jest.mock('./vector-database/tableHelperFunctions', () => ({
+  updateFileInTable: jest.fn().mockResolvedValue(undefined),
+}))
+
 jest.mock('./common/logger', () => ({
   logger: {
     debug: jest.fn(),
@@ -38,6 +42,7 @@ jest.mock('./common/logger', () => ({
 
 // Need to import after mocks are set up
 import { scanMarkdownFiles } from './common/scanner'
+import { updateFileInTable } from './vector-database/tableHelperFunctions'
 import { incrementalIndex, registerIncrementalIndexerHandlers } from './incremental-indexer'
 
 function createTempDir(): string {
@@ -57,10 +62,12 @@ function writeFile(filePath: string, content: string): void {
 describe('incrementalIndex', () => {
   let tmpDir: string
   let userDataPath: string
+  let dbTableClient: { deleteDBItemsByFilePaths: jest.Mock }
 
   beforeEach(() => {
     tmpDir = createTempDir()
     userDataPath = createTempDir()
+    dbTableClient = { deleteDBItemsByFilePaths: jest.fn().mockResolvedValue(undefined) }
     jest.clearAllMocks()
     ;(scanMarkdownFiles as jest.Mock).mockReturnValue([])
   })
@@ -71,7 +78,7 @@ describe('incrementalIndex', () => {
   })
 
   it('should return zero counts when no files exist', async () => {
-    const result = await incrementalIndex(tmpDir, null, userDataPath)
+    const result = await incrementalIndex(tmpDir, dbTableClient as never, userDataPath)
     expect(result).toEqual({ added: 0, updated: 0, deleted: 0 })
   })
 
@@ -80,7 +87,7 @@ describe('incrementalIndex', () => {
     writeFile(filePath, '# Hello')
     ;(scanMarkdownFiles as jest.Mock).mockReturnValue([filePath])
 
-    const result = await incrementalIndex(tmpDir, null, userDataPath)
+    const result = await incrementalIndex(tmpDir, dbTableClient as never, userDataPath)
     expect(result.added).toBe(1)
     expect(result.updated).toBe(0)
     expect(result.deleted).toBe(0)
@@ -92,13 +99,13 @@ describe('incrementalIndex', () => {
     ;(scanMarkdownFiles as jest.Mock).mockReturnValue([filePath])
 
     // First run: file is added
-    await incrementalIndex(tmpDir, null, userDataPath)
+    await incrementalIndex(tmpDir, dbTableClient as never, userDataPath)
 
     // Modify the file
     writeFile(filePath, '# Hello Updated')
 
     // Second run: file should be updated
-    const result = await incrementalIndex(tmpDir, null, userDataPath)
+    const result = await incrementalIndex(tmpDir, dbTableClient as never, userDataPath)
     expect(result.updated).toBe(1)
     expect(result.added).toBe(0)
     expect(result.deleted).toBe(0)
@@ -110,7 +117,7 @@ describe('incrementalIndex', () => {
     ;(scanMarkdownFiles as jest.Mock).mockReturnValue([filePath])
     const dbTableClient = { deleteDBItemsByFilePaths: jest.fn().mockResolvedValue(undefined) } as any
 
-    await incrementalIndex(tmpDir, null, userDataPath)
+    await incrementalIndex(tmpDir, dbTableClient as never, userDataPath)
     fs.unlinkSync(filePath)
     ;(scanMarkdownFiles as jest.Mock).mockReturnValue([])
 
@@ -128,14 +135,31 @@ describe('incrementalIndex', () => {
     writeFile(firstFile, '# First')
     writeFile(secondFile, '# Second')
     ;(scanMarkdownFiles as jest.Mock).mockReturnValue([firstFile])
-    const firstResult = await incrementalIndex(firstVault, null, userDataPath)
+    const firstResult = await incrementalIndex(firstVault, dbTableClient as never, userDataPath)
 
     ;(scanMarkdownFiles as jest.Mock).mockReturnValue([secondFile])
-    const secondResult = await incrementalIndex(secondVault, null, userDataPath)
+    const secondResult = await incrementalIndex(secondVault, dbTableClient as never, userDataPath)
 
     expect(firstResult).toMatchObject({ added: 1, deleted: 0 })
     expect(secondResult).toMatchObject({ added: 1, deleted: 0 })
     expect(fs.readdirSync(userDataPath).filter((file) => file.startsWith('indexer-state-'))).toHaveLength(2)
+  })
+
+  it('retries an index write that failed previously without marking it complete', async () => {
+    const filePath = path.join(tmpDir, 'retry.md')
+    writeFile(filePath, '# Retry this index')
+    ;(scanMarkdownFiles as jest.Mock).mockReturnValue([filePath])
+    const updateFile = updateFileInTable as jest.Mock
+    const dbTableClient = {}
+    updateFile
+      .mockRejectedValueOnce(new Error('temporary database failure'))
+      .mockResolvedValueOnce(undefined)
+
+    await expect(incrementalIndex(tmpDir, dbTableClient as never, userDataPath)).rejects.toThrow('Failed to index')
+    const result = await incrementalIndex(tmpDir, dbTableClient as never, userDataPath)
+
+    expect(result.added).toBe(1)
+    expect(updateFile).toHaveBeenCalledTimes(2)
   })
 
   it('should report progress via callback', async () => {
@@ -144,7 +168,7 @@ describe('incrementalIndex', () => {
     ;(scanMarkdownFiles as jest.Mock).mockReturnValue([filePath])
 
     const onProgress = jest.fn()
-    await incrementalIndex(tmpDir, null, userDataPath, onProgress)
+    await incrementalIndex(tmpDir, dbTableClient as never, userDataPath, onProgress)
 
     // Should be called at least once for progress and once for completion
     expect(onProgress).toHaveBeenCalled()
@@ -157,10 +181,12 @@ describe('incrementalIndex', () => {
 describe('computeContentHash (indirect via incrementalIndex)', () => {
   let tmpDir: string
   let userDataPath: string
+  let dbTableClient: { deleteDBItemsByFilePaths: jest.Mock }
 
   beforeEach(() => {
     tmpDir = createTempDir()
     userDataPath = createTempDir()
+    dbTableClient = { deleteDBItemsByFilePaths: jest.fn().mockResolvedValue(undefined) }
     jest.clearAllMocks()
     ;(scanMarkdownFiles as jest.Mock).mockReturnValue([])
   })
@@ -176,9 +202,9 @@ describe('computeContentHash (indirect via incrementalIndex)', () => {
     ;(scanMarkdownFiles as jest.Mock).mockReturnValue([filePath])
 
     // First run: add
-    await incrementalIndex(tmpDir, null, userDataPath)
+    await incrementalIndex(tmpDir, dbTableClient as never, userDataPath)
     // Second run with same content: no change
-    const result = await incrementalIndex(tmpDir, null, userDataPath)
+    const result = await incrementalIndex(tmpDir, dbTableClient as never, userDataPath)
     expect(result.added).toBe(0)
     expect(result.updated).toBe(0)
     expect(result.deleted).toBe(0)

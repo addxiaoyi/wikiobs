@@ -1,3 +1,5 @@
+import * as fs from 'fs'
+import * as path from 'path'
 import { app, ipcMain, shell } from 'electron'
 import Store from 'electron-store'
 
@@ -35,6 +37,20 @@ const registerElectronUtilsHandlers = (
 
   ipcMain.handle('get-user-data-path', () => {
     return app.getPath('userData')
+  })
+
+  ipcMain.handle('get-default-vault-path', () => {
+    let docsPath: string
+    try {
+      docsPath = app.getPath('documents')
+    } catch {
+      docsPath = app.getPath('userData')
+    }
+    const defaultVault = path.join(docsPath, 'WIKIOBS-Notes')
+    if (!fs.existsSync(defaultVault)) {
+      fs.mkdirSync(defaultVault, { recursive: true })
+    }
+    return defaultVault
   })
 }
 

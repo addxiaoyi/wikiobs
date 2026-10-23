@@ -45,16 +45,16 @@ const LLMSelectOrButton: React.FC<LLMSelectOrButtonProps> = ({ selectedLLM, setS
         ) : (
           <Select value={selectedLLM} onValueChange={(value) => handleLLMChange(value)}>
             <SelectTrigger
-              className={`h-7 w-32 border-0 text-[10px] ${state === 'light' ? 'text-black' : 'text-white'}focus:ring-0 focus:ring-offset-0`}
+              className="h-7 w-32 border-0 text-[10px] text-foreground focus:ring-0 focus:ring-offset-0"
             >
               <SelectValue placeholder="选择大模型" />
             </SelectTrigger>
-            <SelectContent className="rounded-md border border-dark-gray-c-eight bg-[#1c1c1c]">
+            <SelectContent className="rounded-md border border-border bg-popover text-popover-foreground">
               {llmConfigs.map((llm) => (
                 <SelectItem
                   key={llm.modelName}
                   value={llm.modelName}
-                  className="cursor-pointer text-[10px] text-gray-300 hover:bg-[#252525] focus:bg-[#252525] focus:text-gray-200"
+                  className="cursor-pointer text-[10px] text-foreground hover:bg-accent focus:bg-accent focus:text-foreground"
                 >
                   {llm.modelName}
                 </SelectItem>

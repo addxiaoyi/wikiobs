@@ -1,20 +1,11 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState } from 'react'
 import { LLMAPIConfig } from 'electron/main/electron-store/storeConfig'
 import posthog from 'posthog-js'
 import { toast } from 'react-toastify'
-import { Input, XStack, YStack } from 'tamagui'
+import { Settings2, Plus, X, Loader2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogPortal,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogOverlay,
-} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import ReorModal from '@/components/Common/Modal'
 import ExternalLink from '../../../Common/ExternalLink'
 import errorToStringRendererProcess from '@/lib/error'
 import { useTranslation } from '@/lib/i18n'
@@ -40,32 +31,59 @@ const ModelNameInput: React.FC<ModelNameInputProps> = ({ modelNames, setModelNam
     }
   }
 
+  const removeModelName = (index: number) => {
+    setModelNames(modelNames.filter((_, i) => i !== index))
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      addModelName()
+    }
+  }
+
   return (
-    <YStack className="">
-      <h4 className="mb-1 font-medium">{t('llm.modelNames')}</h4>
-      <XStack flex={1} gap="$2">
+    <div className="space-y-1.5">
+      <label className="text-xs font-medium text-foreground block">{t('llm.modelNames')}</label>
+      <div className="flex items-center gap-2">
         <Input
-          className="mt-0 w-full"
           placeholder={t('llm.modelNamesPlaceholder')}
           value={newModelName}
-          onChangeText={setNewModelName}
-          size="$1"
-          py="$4"
-          px="$2"
+          onChange={(e) => setNewModelName(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className="h-8 text-xs font-mono"
         />
-        <Button onClick={addModelName} type="button" variant="secondary">
-          {t('llm.addModel')}
+        <Button
+          onClick={addModelName}
+          type="button"
+          variant="secondary"
+          size="sm"
+          className="h-8 px-2.5 shrink-0 gap-1 border-border"
+        >
+          <Plus size={13} />
+          <span>{t('llm.addModel')}</span>
         </Button>
-      </XStack>
-      <div className="flex flex-wrap gap-2">
-        {modelNames.map((name, index) => (
-          // eslint-disable-next-line react/no-array-index-key
-          <span key={index} className="rounded bg-secondary px-2 py-1 text-sm">
-            {name}
-          </span>
-        ))}
       </div>
-    </YStack>
+      {modelNames.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 pt-1">
+          {modelNames.map((name, index) => (
+            <span
+              key={`${name}-${index}`}
+              className="inline-flex items-center gap-1 rounded bg-secondary border border-border px-2 py-0.5 text-[11px] font-mono text-foreground"
+            >
+              <span>{name}</span>
+              <button
+                type="button"
+                onClick={() => removeModelName(index)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -130,85 +148,97 @@ const CustomLLMAPISetupModal: React.FC<RemoteLLMModalProps> = ({ isOpen, onClose
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogPortal>
-        <DialogOverlay>
-          <DialogContent
-            className="flex max-h-[calc(100dvh-16px)] flex-col overflow-hidden p-4 sm:max-w-[525px]"
-            style={{ overflow: 'hidden' }}
+    <ReorModal isOpen={isOpen} onClose={handleClose} className="max-w-[480px] p-5">
+      {/* Header */}
+      <div className="flex items-start gap-3 pb-3 border-b border-border">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-[#7b68ee]/30 bg-[#7b68ee]/15 text-[#7b68ee] shadow-sm shadow-[#7b68ee]/20">
+          <Settings2 size={18} strokeWidth={2} />
+        </div>
+        <div className="min-w-0 flex-1 pr-6">
+          <h2 className="text-sm font-semibold text-foreground tracking-tight">{t('llm.customSetup')}</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">{t('llm.customDescription')}</p>
+        </div>
+      </div>
+
+      <div className="pt-3.5 space-y-3">
+        {currentError && (
+          <div className="flex items-start gap-2 rounded-lg border border-red-500/25 bg-red-500/10 p-2.5 text-xs text-red-600 dark:text-red-200">
+            <AlertCircle size={14} className="mt-0.5 shrink-0 text-red-500" />
+            <span>{currentError}</span>
+          </div>
+        )}
+
+        <div className="space-y-1">
+          <label htmlFor="apiUrl" className="text-xs font-medium text-foreground block">
+            {t('llm.apiUrlLabel')}
+          </label>
+          <Input
+            id="apiUrl"
+            placeholder={t('llm.apiUrlPlaceholder')}
+            value={apiURL}
+            onChange={(e) => {
+              setApiURL(e.target.value)
+              setCurrentError('')
+            }}
+            disabled={isSaving}
+            className="h-8 text-xs font-mono"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label htmlFor="apiName" className="text-xs font-medium text-foreground block">
+            {t('llm.apiNameLabel')}
+          </label>
+          <Input
+            id="apiName"
+            placeholder="例如: Custom-OAI, Together, DeepSeek"
+            value={apiName}
+            onChange={(e) => {
+              setApiName(e.target.value)
+              setCurrentError('')
+            }}
+            disabled={isSaving}
+            className="h-8 text-xs font-mono"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label htmlFor="apiKey" className="text-xs font-medium text-foreground block">
+            {t('llm.apiKeyLabel')}
+          </label>
+          <Input
+            id="apiKey"
+            placeholder={t('llm.apiKeyPlaceholder')}
+            value={apiKey}
+            onChange={(e) => {
+              setApiKey(e.target.value)
+              setCurrentError('')
+            }}
+            type="password"
+            disabled={isSaving}
+            className="h-8 text-xs font-mono"
+          />
+        </div>
+
+        <ModelNameInput modelNames={modelNames} setModelNames={setModelNames} />
+
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
+          <Button variant="secondary" size="sm" onClick={handleClose} disabled={isSaving} className="text-xs">
+            {t('button.cancel')}
+          </Button>
+          <Button
+            variant="accent"
+            size="sm"
+            onClick={handleSave}
+            disabled={isSaving || !apiName.trim() || !apiURL.trim()}
+            className="text-xs shadow-md shadow-[#7b68ee]/25 gap-1.5"
           >
-            <DialogHeader className="shrink-0">
-              <DialogTitle>{t('llm.customSetup')}</DialogTitle>
-              <DialogDescription>
-                {t('llm.customDescription')}{' '}
-                <ExternalLink href="https://www.reorproject.org/docs/documentation/openai-like-api">
-                  {t('llm.docs')}
-                </ExternalLink>
-              </DialogDescription>
-            </DialogHeader>
-            <div className="min-h-0 flex-1 overflow-y-auto py-4">
-              <div className="grid gap-2">
-                <div className="grid gap-1">
-                  <label htmlFor="apiUrl">{t('llm.apiUrlLabel')}</label>
-                  <Input
-                    id="apiUrl"
-                    placeholder={t('llm.apiUrlPlaceholder')}
-                    value={apiURL}
-                    onChangeText={(value) => {
-                      setApiURL(value)
-                      setCurrentError('')
-                    }}
-                    size="$1"
-                    py="$4"
-                    px="$2"
-                  />
-                  <p className="mt-0 text-xs text-muted-foreground">{t('llm.apiUrlHint')}</p>
-                </div>
-                <div className="grid gap-1">
-                  <label htmlFor="apiName">{t('llm.apiNameLabel')}</label>
-                  <Input
-                    id="apiName"
-                    placeholder={t('llm.apiNamePlaceholder')}
-                    value={apiName}
-                    onChangeText={(value) => {
-                      setApiName(value)
-                      setCurrentError('')
-                    }}
-                    size="$1"
-                    py="$4"
-                    px="$2"
-                  />
-                  <p className="mt-0 text-xs text-muted-foreground">{t('llm.apiNameHint')}</p>
-                </div>
-                <div className="grid gap-1">
-                  <label htmlFor="apiKey">{t('llm.optionalApiKeyLabel')}</label>
-                  <Input
-                    id="apiKey"
-                    placeholder={t('llm.apiKeyPlaceholder')}
-                    value={apiKey}
-                    onChangeText={(value) => {
-                      setApiKey(value)
-                      setCurrentError('')
-                    }}
-                    size="$1"
-                    py="$4"
-                    px="$2"
-                  />
-                  <p className="mt-0 text-xs text-muted-foreground">{t('llm.apiKeyHint')}</p>
-                </div>
-                <ModelNameInput modelNames={modelNames} setModelNames={setModelNames} />
-                {currentError && <p className="text-xs text-destructive">{currentError}</p>}
-              </div>
-            </div>
-            <DialogFooter className="shrink-0 border-t border-border pt-3">
-              <Button variant="secondary" onClick={handleSave} disabled={isSaving}>
-                {t('llm.save')}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </DialogOverlay>
-      </DialogPortal>
-    </Dialog>
+            {isSaving && <Loader2 size={12} className="animate-spin" />}
+            <span>{t('llm.save')}</span>
+          </Button>
+        </div>
+      </div>
+    </ReorModal>
   )
 }
 

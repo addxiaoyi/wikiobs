@@ -1,26 +1,26 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import Button from '@mui/material/Button'
-import IconButton from '@mui/material/IconButton'
-import TextField from '@mui/material/TextField'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Switch from '@mui/material/Switch'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import LinearProgress from '@mui/material/LinearProgress'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Alert from '@mui/material/Alert'
-import Chip from '@mui/material/Chip'
-import Checkbox from '@mui/material/Checkbox'
-import Divider from '@mui/material/Divider'
+import {
+  Blocks,
+  Plus,
+  Info,
+  AlertCircle,
+  CheckCircle2,
+  FolderOpen,
+  ShieldAlert,
+  Trash2,
+  Loader2,
+  Store,
+} from 'lucide-react'
 import gsap from 'gsap'
-import { Info, X } from 'lucide-react'
+
+import Modal from './Modal'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import { Checkbox } from '@/components/ui/checkbox'
 import { useTranslation } from '@/lib/i18n'
-import { staggerFadeInUp, fadeInScale } from '@/lib/gsap-animations'
+import { staggerFadeInUp } from '@/lib/gsap-animations'
+import { cn } from '@/lib/ui'
 
 interface Plugin {
   id: string
@@ -46,26 +46,40 @@ interface PluginManifestPreview {
 interface PluginManagerModalProps {
   isOpen: boolean
   onClose: () => void
+  embedded?: boolean
 }
 
-const PluginManagerModal: React.FC<PluginManagerModalProps> = ({ isOpen, onClose }) => {
+type PluginSubView = 'list' | 'install' | 'detail' | 'uninstall'
+
+interface MarketplacePlugin {
+  id: string
+  name: string
+  version: string
+  description: string
+  author: string
+  permissions: string[]
+  installed: boolean
+}
+
+const PluginManagerModal: React.FC<PluginManagerModalProps> = ({ isOpen, onClose, embedded }) => {
   const { t } = useTranslation()
   const [plugins, setPlugins] = useState<Plugin[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
-  const [showInstallDialog, setShowInstallDialog] = useState(false)
+  const [subView, setSubView] = useState<PluginSubView>('list')
+
   const [installPath, setInstallPath] = useState('')
   const [installing, setInstalling] = useState(false)
   const [inspecting, setInspecting] = useState(false)
   const [manifestPreview, setManifestPreview] = useState<PluginManifestPreview | null>(null)
   const [trustPlugin, setTrustPlugin] = useState(false)
-  const [detailPlugin, setDetailPlugin] = useState<Plugin | null>(null)
-  const [uninstallTarget, setUninstallTarget] = useState<Plugin | null>(null)
+  const [selectedPlugin, setSelectedPlugin] = useState<Plugin | null>(null)
+  const [marketplace, setMarketplace] = useState<MarketplacePlugin[]>([])
+  const [showMarketplace, setShowMarketplace] = useState(false)
 
   const contentRef = useRef<HTMLDivElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
-  const successRef = useRef<HTMLDivElement>(null)
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const showSuccess = (message: string) => {
@@ -77,15 +91,11 @@ const PluginManagerModal: React.FC<PluginManagerModalProps> = ({ isOpen, onClose
     }, 3000)
   }
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    return () => {
       if (successTimerRef.current) clearTimeout(successTimerRef.current)
-    },
-    [],
-  )
-
-  const installDialogRef = useRef<HTMLDivElement>(null)
-  const detailRef = useRef<HTMLDivElement>(null)
+    }
+  }, [])
 
   const loadPlugins = useCallback(async () => {
     setLoading(true)
@@ -100,66 +110,58 @@ const PluginManagerModal: React.FC<PluginManagerModalProps> = ({ isOpen, onClose
     }
   }, [t])
 
+  const loadMarketplace = useCallback(async () => {
+    try {
+      setMarketplace((await window.plugin.marketplace.list()) || [])
+    } catch (err) {
+      setError(`${t('error.generic')}: ${err}`)
+    }
+  }, [t])
+
   useEffect(() => {
     if (isOpen) {
       loadPlugins()
+      loadMarketplace()
     } else {
-      setShowInstallDialog(false)
-      setDetailPlugin(null)
-      setUninstallTarget(null)
+      setSubView('list')
+      setSelectedPlugin(null)
       setManifestPreview(null)
       setTrustPlugin(false)
       setError(null)
       setSuccessMsg(null)
+      setShowMarketplace(false)
     }
-  }, [isOpen, loadPlugins])
+  }, [isOpen, loadPlugins, loadMarketplace])
 
-  // GSAP: plugin cards stagger
+  const installMarketplacePlugin = async (entry: MarketplacePlugin) => {
+    const permissions = entry.permissions.length > 0 ? entry.permissions.join(', ') : 'none'
+    const trusted = window.confirm(
+      `${entry.name} v${entry.version} will run in the main process and requests: ${permissions}. Install it?`,
+    )
+    if (!trusted) return
+
+    try {
+      const result = await window.plugin.marketplace.install(entry.id)
+      if (!result.success) throw new Error(result.error || t('error.generic'))
+      showSuccess(`${entry.name} ${t('plugin.installed')}`)
+      await Promise.all([loadPlugins(), loadMarketplace()])
+    } catch (err) {
+      setError(`${t('error.generic')}: ${err}`)
+    }
+  }
+
+  // GSAP: Cards entrance
   useEffect(() => {
-    if (!isOpen || loading || !listRef.current) return
+    if (!isOpen || loading || subView !== 'list' || !listRef.current) return
     const list = listRef.current
     const ctx = gsap.context(() => {
-      const items = list.querySelectorAll('.plugin-card')
+      const items = list.querySelectorAll('.plugin-card-item')
       if (items.length) {
-        staggerFadeInUp(items, 0.3, 0.04, 0.1)
+        staggerFadeInUp(items, 0.25, 0.03, 0.05)
       }
     }, listRef)
     return () => ctx.revert()
-  }, [isOpen, loading, plugins])
-
-  // GSAP: success message
-  useEffect(() => {
-    if (successMsg && successRef.current) {
-      const ctx = gsap.context(() => {
-        fadeInScale(successRef.current, 0.4, 0)
-      }, successRef)
-      return () => ctx.revert()
-    }
-  }, [successMsg])
-
-  // GSAP: install dialog form
-  useEffect(() => {
-    if (showInstallDialog && installDialogRef.current) {
-      const dialog = installDialogRef.current
-      const ctx = gsap.context(() => {
-        const items = dialog.querySelectorAll('.plugin-install-form-item')
-        if (items.length) {
-          staggerFadeInUp(items, 0.3, 0.06, 0.1)
-        }
-      }, installDialogRef)
-      return () => ctx.revert()
-    }
-  }, [showInstallDialog])
-
-  // GSAP: detail view
-  useEffect(() => {
-    if (detailPlugin && detailRef.current) {
-      const ctx = gsap.context(() => {
-        fadeInScale(detailRef.current, 0.4, 0)
-      }, detailRef)
-      return () => ctx.revert()
-    }
-  }, [detailPlugin])
+  }, [isOpen, loading, plugins, subView])
 
   const handleToggle = async (plugin: Plugin) => {
     try {
@@ -205,7 +207,7 @@ const PluginManagerModal: React.FC<PluginManagerModalProps> = ({ isOpen, onClose
     try {
       const result = await window.plugin.install(installPath.trim())
       if (!result.success) throw new Error(result.error || t('error.generic'))
-      setShowInstallDialog(false)
+      setSubView('list')
       setInstallPath('')
       setManifestPreview(null)
       setTrustPlugin(false)
@@ -222,7 +224,8 @@ const PluginManagerModal: React.FC<PluginManagerModalProps> = ({ isOpen, onClose
     try {
       const result = await window.plugin.uninstall(plugin.id)
       if (!result) throw new Error(t('error.generic'))
-      setDetailPlugin(null)
+      setSubView('list')
+      setSelectedPlugin(null)
       showSuccess(t('plugin.uninstalled'))
       await loadPlugins()
     } catch (err) {
@@ -241,396 +244,418 @@ const PluginManagerModal: React.FC<PluginManagerModalProps> = ({ isOpen, onClose
     }
   }
 
-  const handleClose = () => {
-    if (!installing) onClose()
-  }
-
-  const closeInstallDialog = () => {
-    if (installing || inspecting) return
-    setShowInstallDialog(false)
-    setManifestPreview(null)
-    setTrustPlugin(false)
-    setError(null)
-  }
-
-  const getStatusColor = (enabled: boolean) => (enabled ? 'success' : 'default')
-  let installButtonLabel = t('plugin.inspect')
-  if (installing) installButtonLabel = t('scheduled.loading')
-  else if (manifestPreview) installButtonLabel = t('plugin.install')
+  let installLabel = t('plugin.inspect')
+  if (manifestPreview) installLabel = t('plugin.install')
+  if (installing) installLabel = t('scheduled.loading')
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} maxWidth="md" fullWidth>
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pr: 1 }}>
-        {t('plugin.title')}
-        <IconButton onClick={handleClose} aria-label={t('button.close')} title={t('button.close')} size="small">
-          <X size={16} />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent ref={contentRef}>
-        {error && (
-          <Box mb={2}>
-            <Alert
-              severity="error"
-              onClose={() => setError(null)}
-              action={
-                installPath.trim() ? (
+    <Modal isOpen={isOpen} onClose={onClose} embedded={embedded} className="max-w-[620px] p-5">
+      {/* Header */}
+      <div className="flex items-start gap-3 border-b border-border pb-4">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-[#7b68ee]/30 bg-[#7b68ee]/15 text-[#7b68ee] shadow-sm shadow-[#7b68ee]/20 dark:text-[#9d8ff5]">
+          <Blocks size={18} strokeWidth={2} />
+        </div>
+        <div className="min-w-0 flex-1 pr-6">
+          <h2 className="text-base font-semibold tracking-tight text-foreground">{t('plugin.title')}</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">管理、安装与配置 Obsidian 生态与第三方社区插件</p>
+        </div>
+      </div>
+
+      <div ref={contentRef} className="space-y-3.5 pt-4">
+        {showMarketplace && (
+          <div className="space-y-2 rounded-lg border border-border bg-card p-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-foreground">Plugin Marketplace</span>
+              <Button variant="ghost" size="sm" onClick={() => setShowMarketplace(false)} className="h-6 px-2 text-xs">
+                Back
+              </Button>
+            </div>
+            {marketplace.map((entry) => (
+              <div key={entry.id} className="rounded-md border border-border bg-background p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-xs font-semibold text-foreground">{entry.name}</div>
+                    <div className="mt-1 text-[11px] leading-relaxed text-muted-foreground">{entry.description}</div>
+                    <div className="mt-1 font-mono text-[10px] text-muted-foreground">
+                      v{entry.version} · {entry.author}
+                    </div>
+                  </div>
                   <Button
-                    color="inherit"
-                    size="small"
-                    onClick={handleInstall}
-                    disabled={installing}
-                    aria-label={t('button.retry')}
+                    size="sm"
+                    variant={entry.installed ? 'secondary' : 'accent'}
+                    disabled={entry.installed}
+                    onClick={() => installMarketplacePlugin(entry)}
+                    className="shrink-0 text-xs"
                   >
-                    {t('button.retry')}
+                    {entry.installed ? 'Installed' : 'Install'}
                   </Button>
-                ) : undefined
-              }
-            >
-              {error}
-            </Alert>
-          </Box>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {entry.permissions.map((permission) => (
+                    <span
+                      key={permission}
+                      className="rounded border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground"
+                    >
+                      {permission}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        {/* Alerts */}
+        {error && (
+          <div className="flex items-start gap-2.5 rounded-lg border border-red-500/25 bg-red-500/10 p-3 text-xs text-red-600 dark:text-red-200">
+            <AlertCircle size={15} className="mt-0.5 shrink-0 text-red-500" />
+            <div className="flex-1 break-all">{error}</div>
+            <button type="button" onClick={() => setError(null)} className="text-red-500 hover:text-red-400">
+              ×
+            </button>
+          </div>
         )}
 
         {successMsg && (
-          <Box ref={successRef} mb={2}>
-            <Alert severity="success" onClose={() => setSuccessMsg(null)}>
-              {successMsg}
-            </Alert>
-          </Box>
+          <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-700 dark:text-emerald-200">
+            <CheckCircle2 size={15} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
+            <span>{successMsg}</span>
+          </div>
         )}
 
+        {/* Loading */}
         {loading && (
-          <Box py={4}>
-            <LinearProgress />
-            <Typography variant="body2" color="text.secondary" align="center" mt={2}>
-              {t('scheduled.loading')}
-            </Typography>
-          </Box>
+          <div className="flex flex-col items-center justify-center gap-2 py-8 text-muted-foreground">
+            <Loader2 size={20} className="animate-spin text-[#7b68ee]" />
+            <span className="text-xs">{t('scheduled.loading')}</span>
+          </div>
         )}
 
-        {!loading && plugins.length === 0 && (
-          <Box py={4} px={2} textAlign="center">
-            <Typography variant="body1" color="text.primary" fontWeight={600} gutterBottom>
-              {t('plugin.noPlugins')}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 420, mx: 'auto' }}>
-              {t('plugin.emptyHint')}
-            </Typography>
-          </Box>
-        )}
-
-        {!loading && plugins.length > 0 && (
-          <Box ref={listRef} mt={1} display="flex" flexDirection="column" gap={1}>
-            {plugins.map((plugin) => (
-              <Card
-                key={plugin.id}
-                className="plugin-card"
-                variant="outlined"
-                role="group"
-                tabIndex={0}
-                aria-label={plugin.name}
-                sx={{ cursor: 'pointer' }}
-                onClick={() => setDetailPlugin(plugin)}
-                onKeyDown={(event) => {
-                  if (event.target !== event.currentTarget) return
-                  if (event.key !== 'Enter' && event.key !== ' ') return
-                  event.preventDefault()
-                  setDetailPlugin(plugin)
+        {/* Sub-view: Install Plugin */}
+        {!showMarketplace && !loading && subView === 'install' && (
+          <div className="space-y-3.5 rounded-lg border border-border bg-card p-4">
+            <div className="flex items-center justify-between border-b border-border pb-2">
+              <span className="text-xs font-semibold text-foreground">{t('plugin.install')}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSubView('list')
+                  setManifestPreview(null)
+                  setTrustPlugin(false)
                 }}
+                className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
               >
-                <CardContent sx={{ pb: 1, '&:last-child': { pb: 1 } }}>
-                  <Box display="flex" justifyContent="space-between" alignItems="flex-start">
-                    <Box flex={1}>
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <Typography variant="subtitle2" fontWeight="bold">
-                          {plugin.name}
-                        </Typography>
-                        <Chip label={`v${plugin.version}`} size="small" variant="outlined" />
-                        <Chip
-                          label={plugin.enabled ? t('plugin.enabled') : t('plugin.disabled')}
-                          color={getStatusColor(plugin.enabled)}
-                          size="small"
-                        />
-                      </Box>
-                      {plugin.description && (
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          mt={0.5}
-                          sx={{ lineClamp: 2, overflow: 'hidden', textOverflow: 'ellipsis' }}
-                        >
-                          {plugin.description}
-                        </Typography>
-                      )}
-                      {plugin.author && (
-                        <Typography variant="caption" color="text.secondary" mt={0.5} display="block">
-                          {t('plugin.byAuthor')}: {plugin.author}
-                        </Typography>
-                      )}
-                      {plugin.error && (
-                        <Alert severity="error" sx={{ mt: 1, py: 0.25 }}>
-                          {t('plugin.activationFailed')}: {plugin.error}
-                        </Alert>
-                      )}
-                    </Box>
-                    <IconButton
-                      size="small"
-                      onClick={(event) => {
-                        event.stopPropagation()
-                        setDetailPlugin(plugin)
-                      }}
-                      title={`${t('plugin.title')}: ${plugin.name}`}
-                      aria-label={`${t('plugin.title')}: ${plugin.name}`}
-                    >
-                      <Info size={16} aria-hidden="true" />
-                    </IconButton>
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          size="small"
-                          checked={plugin.enabled}
-                          inputProps={{ role: 'switch', 'aria-label': `${plugin.name}: ${t('plugin.enabled')}` }}
-                          onChange={(e) => {
-                            e.stopPropagation()
-                            handleToggle(plugin)
-                          }}
-                        />
-                      }
-                      label=""
-                      sx={{ mr: 0, ml: 1 }}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </Box>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
+                返回列表
+              </Button>
+            </div>
+
+            <div className="space-y-1">
+              <label htmlFor="plugin-install-path" className="block text-xs font-medium text-foreground">
+                {t('plugin.installPath')}
+              </label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="plugin-install-path"
+                  placeholder="/path/to/plugin/directory"
+                  value={installPath}
+                  onChange={(e) => {
+                    setInstallPath(e.target.value)
+                    setManifestPreview(null)
+                    setTrustPlugin(false)
+                  }}
+                  disabled={installing || inspecting}
+                  className="h-8 border-border bg-background font-mono text-xs text-foreground"
+                />
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleBrowse}
+                  disabled={installing || inspecting}
+                  className="h-8 shrink-0 gap-1 border-border px-2.5"
+                >
+                  <FolderOpen size={13} />
+                  <span>{t('obsidianCompat.browse')}</span>
+                </Button>
+              </div>
+            </div>
+
+            {manifestPreview && (
+              <div className="space-y-2.5 rounded-lg border border-border bg-muted/40 p-3 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-foreground">
+                    {manifestPreview.name}{' '}
+                    <span className="font-normal text-muted-foreground">v{manifestPreview.version}</span>
+                  </span>
+                  {manifestPreview.author && (
+                    <span className="text-[11px] text-muted-foreground">By {manifestPreview.author}</span>
+                  )}
+                </div>
+                {manifestPreview.description && (
+                  <p className="text-[11px] leading-relaxed text-foreground">{manifestPreview.description}</p>
+                )}
+                <div className="flex items-start gap-1.5 rounded border border-amber-500/20 bg-amber-500/10 p-2 text-[11px] text-amber-600 dark:text-amber-200">
+                  <ShieldAlert size={14} className="mt-0.5 shrink-0 text-amber-500" />
+                  <span>{t('plugin.trustWarning')}</span>
+                </div>
+                <div className="flex items-center gap-2 pt-1">
+                  <Checkbox
+                    id="trust-confirm"
+                    checked={trustPlugin}
+                    onCheckedChange={(checked) => setTrustPlugin(Boolean(checked))}
+                    label={t('plugin.trustConfirm')}
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-2 border-t border-border pt-2">
+              <div className="flex items-center gap-1.5">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setShowMarketplace(true)}
+                  className="h-7 gap-1 border-border px-2.5 text-xs"
+                >
+                  <Store size={12} />
+                  <span>Marketplace</span>
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setSubView('list')}
+                  disabled={installing || inspecting}
+                >
+                  {t('button.cancel')}
+                </Button>
+                <Button
+                  variant="accent"
+                  size="sm"
+                  onClick={handleInstall}
+                  disabled={installing || inspecting || !installPath.trim() || Boolean(manifestPreview && !trustPlugin)}
+                  className="gap-1.5"
+                >
+                  {(installing || inspecting) && <Loader2 size={12} className="animate-spin" />}
+                  <span>{installLabel}</span>
+                </Button>
+              </div>
+            </div>
+          </div>
         )}
 
-        <Box mt={2} display="flex" justifyContent="flex-end">
-          <Button
-            variant="contained"
-            onClick={() => {
-              setShowInstallDialog(true)
-              setInstallPath('')
-              setManifestPreview(null)
-              setTrustPlugin(false)
-            }}
-          >
-            {t('plugin.install')}
-          </Button>
-        </Box>
-      </DialogContent>
-
-      <DialogActions>
-        <Button onClick={handleClose}>{t('button.close')}</Button>
-      </DialogActions>
-
-      {/* Install Dialog */}
-      <Dialog open={showInstallDialog} onClose={closeInstallDialog} maxWidth="sm" fullWidth>
-        <DialogTitle
-          ref={installDialogRef}
-          sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pr: 1 }}
-        >
-          {t('plugin.install')}
-          <IconButton
-            onClick={closeInstallDialog}
-            aria-label={t('button.close')}
-            title={t('button.close')}
-            size="small"
-          >
-            <X size={16} />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent>
-          <Box
-            display="flex"
-            gap={1}
-            alignItems="flex-end"
-            flexDirection={{ xs: 'column', sm: 'row' }}
-            className="plugin-install-form-item"
-          >
-            <TextField
-              fullWidth
-              margin="normal"
-              label={t('plugin.installPath')}
-              value={installPath}
-              onChange={(e) => {
-                setInstallPath(e.target.value)
-                setManifestPreview(null)
-                setTrustPlugin(false)
-              }}
-              disabled={installing || inspecting}
-              placeholder="/path/to/plugin/directory"
-            />
-            <Button
-              variant="outlined"
-              onClick={handleBrowse}
-              disabled={installing || inspecting}
-              sx={{
-                mb: { xs: 0, sm: 1 },
-                minWidth: 'auto',
-                whiteSpace: 'nowrap',
-                alignSelf: { xs: 'stretch', sm: 'auto' },
-              }}
-            >
-              {t('obsidianCompat.browse')}
-            </Button>
-          </Box>
-          {error && (
-            <Alert severity="error" sx={{ mt: 2, overflowWrap: 'anywhere' }} onClose={() => setError(null)}>
-              {error}
-            </Alert>
-          )}
-          {manifestPreview && (
-            <Box mt={2} p={1.5} border="1px solid" borderColor="divider" borderRadius={1.5}>
-              <Typography variant="subtitle2">
-                {manifestPreview.name} v{manifestPreview.version}
-              </Typography>
-              {manifestPreview.description && (
-                <Typography variant="body2" color="text.secondary" mt={0.5}>
-                  {manifestPreview.description}
-                </Typography>
-              )}
-              <Typography variant="caption" display="block" mt={1} color="warning.main">
-                {t('plugin.trustWarning')}
-              </Typography>
-              <Typography variant="caption" display="block" mt={1}>
-                {t('plugin.permissions')}
-              </Typography>
-              <Box display="flex" flexWrap="wrap" gap={0.5} mt={0.5}>
-                {(manifestPreview.permissions.length ? manifestPreview.permissions : [t('plugin.noPermissions')]).map(
-                  (permission) => (
-                    <Chip key={permission} label={permission} size="small" variant="outlined" />
-                  ),
-                )}
-              </Box>
-              <FormControlLabel
-                control={<Checkbox checked={trustPlugin} onChange={(event) => setTrustPlugin(event.target.checked)} />}
-                label={t('plugin.trustConfirm')}
-                sx={{ mt: 1, alignItems: 'flex-start' }}
-              />
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closeInstallDialog} disabled={installing || inspecting}>
-            {t('button.cancel')}
-          </Button>
-          <Button
-            onClick={handleInstall}
-            variant="contained"
-            disabled={installing || inspecting || !installPath.trim() || Boolean(manifestPreview && !trustPlugin)}
-          >
-            {installButtonLabel}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Plugin Detail Dialog */}
-      <Dialog open={!!detailPlugin} onClose={() => setDetailPlugin(null)} maxWidth="sm" fullWidth>
-        {detailPlugin && (
-          <>
-            <DialogTitle
-              ref={detailRef}
-              sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pr: 1 }}
-            >
-              {detailPlugin.name}
-              <IconButton
-                onClick={() => setDetailPlugin(null)}
-                aria-label={t('button.close')}
-                title={t('button.close')}
-                size="small"
+        {/* Sub-view: Plugin Detail */}
+        {!showMarketplace && !loading && subView === 'detail' && selectedPlugin && (
+          <div className="space-y-3.5 rounded-lg border border-border bg-card p-4 text-xs">
+            <div className="flex items-center justify-between border-b border-border pb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-foreground">{selectedPlugin.name}</span>
+                <span className="py-0.2 rounded border border-border bg-muted/40 px-1.5 font-mono text-[10px] text-muted-foreground">
+                  v{selectedPlugin.version}
+                </span>
+                <span
+                  className={cn(
+                    'rounded px-1.5 py-0.2 text-[10px] font-mono',
+                    selectedPlugin.enabled
+                      ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border border-emerald-500/20'
+                      : 'bg-muted/40 text-muted-foreground border border-border',
+                  )}
+                >
+                  {selectedPlugin.enabled ? t('plugin.enabled') : t('plugin.disabled')}
+                </span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSubView('list')}
+                className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
               >
-                <X size={16} />
-              </IconButton>
-            </DialogTitle>
-            <DialogContent>
-              <Box display="flex" gap={1} alignItems="center" mb={1}>
-                <Chip label={`v${detailPlugin.version}`} size="small" variant="outlined" />
-                <Chip
-                  label={detailPlugin.enabled ? t('plugin.enabled') : t('plugin.disabled')}
-                  color={getStatusColor(detailPlugin.enabled)}
-                  size="small"
-                />
-              </Box>
+                返回列表
+              </Button>
+            </div>
 
-              {detailPlugin.description && (
-                <Typography variant="body2" color="text.secondary" mb={2}>
-                  {detailPlugin.description}
-                </Typography>
+            {selectedPlugin.description && (
+              <p className="leading-relaxed text-foreground">{selectedPlugin.description}</p>
+            )}
+
+            <div className="space-y-1 text-[11px] text-muted-foreground">
+              {selectedPlugin.author && (
+                <div>
+                  <strong className="text-foreground">{t('plugin.byAuthor')}:</strong> {selectedPlugin.author}
+                </div>
               )}
+              <div>
+                <strong className="text-foreground">ID:</strong> <span className="font-mono">{selectedPlugin.id}</span>
+              </div>
+            </div>
 
-              {detailPlugin.author && (
-                <Typography variant="body2" mb={1}>
-                  <strong>{t('plugin.byAuthor')}:</strong> {detailPlugin.author}
-                </Typography>
-              )}
-
-              <Typography variant="body2" mb={1}>
-                <strong>ID:</strong> {detailPlugin.id}
-              </Typography>
-
-              <Divider sx={{ my: 1 }} />
-              <Typography variant="subtitle2" gutterBottom>
-                {t('plugin.permissions')}
-              </Typography>
-              <Box display="flex" flexWrap="wrap" gap={0.5}>
-                {(detailPlugin.permissions?.length ? detailPlugin.permissions : [t('plugin.noPermissions')]).map(
-                  (permission) => (
-                    <Chip key={permission} label={permission} size="small" variant="outlined" />
+            {/* Permissions */}
+            <div className="space-y-1.5 border-t border-border pt-2">
+              <span className="block font-medium text-foreground">{t('plugin.permissions')}</span>
+              <div className="flex flex-wrap gap-1">
+                {(selectedPlugin.permissions?.length ? selectedPlugin.permissions : [t('plugin.noPermissions')]).map(
+                  (perm) => (
+                    <span
+                      key={perm}
+                      className="rounded border border-border bg-muted/40 px-2 py-0.5 font-mono text-[10px] text-muted-foreground"
+                    >
+                      {perm}
+                    </span>
                   ),
                 )}
-              </Box>
+              </div>
+            </div>
 
-              {detailPlugin.settings && Object.keys(detailPlugin.settings).length > 0 && (
-                <>
-                  <Divider sx={{ my: 1 }} />
-                  <Typography variant="subtitle2" gutterBottom>
-                    {t('plugin.settings')}
-                  </Typography>
-                  {Object.entries(detailPlugin.settings).map(([key, value]) => (
-                    <Typography key={key} variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>
-                      {key}: {String(value)}
-                    </Typography>
-                  ))}
-                </>
-              )}
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setDetailPlugin(null)}>{t('button.close')}</Button>
-              <Button onClick={() => setUninstallTarget(detailPlugin)} variant="contained" color="error">
+            <div className="flex items-center justify-between border-t border-border pt-3">
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setSubView('uninstall')}
+                className="gap-1.5 text-xs"
+              >
+                <Trash2 size={13} />
+                <span>{t('plugin.uninstall')}</span>
+              </Button>
+              <Button variant="secondary" size="sm" onClick={() => setSubView('list')}>
+                {t('button.close')}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Sub-view: Uninstall Confirm */}
+        {!showMarketplace && !loading && subView === 'uninstall' && selectedPlugin && (
+          <div className="space-y-3 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-xs">
+            <span className="block border-b border-red-500/20 pb-1 font-semibold text-red-600 dark:text-red-200">
+              {t('plugin.uninstallConfirm')}
+            </span>
+            <p className="leading-relaxed text-foreground">
+              {t('plugin.uninstallWarning', { name: selectedPlugin.name })}
+            </p>
+            <div className="flex items-center justify-end gap-2 border-t border-red-500/20 pt-2">
+              <Button variant="secondary" size="sm" onClick={() => setSubView('detail')}>
+                {t('button.cancel')}
+              </Button>
+              <Button variant="destructive" size="sm" onClick={() => handleUninstall(selectedPlugin)}>
                 {t('plugin.uninstall')}
               </Button>
-            </DialogActions>
-          </>
+            </div>
+          </div>
         )}
-      </Dialog>
 
-      <Dialog open={Boolean(uninstallTarget)} onClose={() => setUninstallTarget(null)} maxWidth="xs" fullWidth>
-        <DialogTitle>{t('plugin.uninstallConfirm')}</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" color="text.secondary">
-            {uninstallTarget ? t('plugin.uninstallWarning', { name: uninstallTarget.name }) : ''}
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setUninstallTarget(null)}>{t('button.cancel')}</Button>
-          <Button
-            color="error"
-            variant="contained"
-            onClick={() => {
-              if (!uninstallTarget) return
-              const target = uninstallTarget
-              setUninstallTarget(null)
-              handleUninstall(target)
-            }}
-          >
-            {t('plugin.uninstall')}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Dialog>
+        {/* Default View: Plugins List */}
+        {!showMarketplace && !loading && subView === 'list' && (
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between px-1 text-xs">
+              <span className="font-medium text-muted-foreground">已安装插件 ({plugins.length})</span>
+              <div className="flex items-center gap-1.5">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setShowMarketplace(true)}
+                  className="h-7 gap-1 border-border px-2.5 text-xs"
+                >
+                  <Store size={12} />
+                  <span>Marketplace</span>
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setSubView('install')
+                    setInstallPath('')
+                    setManifestPreview(null)
+                    setTrustPlugin(false)
+                  }}
+                  className="h-7 gap-1 border-border bg-secondary px-2.5 text-xs text-foreground hover:bg-secondary/80"
+                >
+                  <Plus size={12} />
+                  <span>{t('plugin.install')}</span>
+                </Button>
+              </div>
+            </div>
+
+            {plugins.length === 0 ? (
+              <div className="rounded-lg border border-border bg-card px-4 py-8 text-center">
+                <div className="mx-auto mb-2 flex size-11 items-center justify-center rounded-xl border border-border bg-muted/40 text-muted-foreground">
+                  <Blocks size={22} />
+                </div>
+                <h3 className="text-xs font-semibold text-foreground">{t('plugin.noPlugins')}</h3>
+                <p className="mx-auto mt-1 max-w-xs text-[11px] leading-relaxed text-muted-foreground">
+                  {t('plugin.emptyHint')}
+                </p>
+              </div>
+            ) : (
+              <div ref={listRef} className="custom-scrollbar max-h-80 space-y-1.5 overflow-y-auto pr-1">
+                {plugins.map((plugin) => (
+                  <div
+                    key={plugin.id}
+                    className="plugin-card-item rounded-lg border border-border bg-card p-3 text-xs transition-colors hover:border-border/80"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate font-semibold text-foreground">{plugin.name}</span>
+                          <span className="py-0.2 rounded border border-border bg-muted/40 px-1.5 font-mono text-[10px] text-muted-foreground">
+                            v{plugin.version}
+                          </span>
+                          <span
+                            className={cn(
+                              'rounded px-1.5 py-0.2 text-[10px] font-mono',
+                              plugin.enabled
+                                ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border border-emerald-500/20'
+                                : 'bg-muted/40 text-muted-foreground border border-border',
+                            )}
+                          >
+                            {plugin.enabled ? t('plugin.enabled') : t('plugin.disabled')}
+                          </span>
+                        </div>
+                        {plugin.description && (
+                          <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-muted-foreground">
+                            {plugin.description}
+                          </p>
+                        )}
+                        {plugin.error && (
+                          <div className="mt-1.5 rounded border border-red-500/30 bg-red-500/10 p-1.5 text-[10px] text-red-600 dark:text-red-300">
+                            {plugin.error}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex shrink-0 items-center gap-1.5 pt-0.5">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedPlugin(plugin)
+                            setSubView('detail')
+                          }}
+                          className="size-7 p-0 text-muted-foreground hover:text-foreground"
+                          aria-label={`${plugin.name}: Details`}
+                          title="查看详情"
+                        >
+                          <Info size={14} />
+                        </Button>
+                        <Switch
+                          checked={plugin.enabled}
+                          onCheckedChange={() => handleToggle(plugin)}
+                          title={plugin.enabled ? t('plugin.disabled') : t('plugin.enabled')}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="mt-2 flex items-center justify-end gap-2.5 border-t border-border pt-4">
+        <Button variant="secondary" size="sm" onClick={onClose} className="text-xs">
+          {t('button.close')}
+        </Button>
+      </div>
+    </Modal>
   )
 }
 

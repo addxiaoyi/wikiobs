@@ -136,7 +136,7 @@ export const TooltipGroup = ({
   )
 }
 
-const TooltipComponent = forwardRef(function Tooltip(props: ScopedTooltipProps<TooltipProps>) {
+const TooltipComponent = forwardRef(function Tooltip(props: ScopedTooltipProps<TooltipProps>, _ref: any) {
   const {
     children,
     delay: delayProp,

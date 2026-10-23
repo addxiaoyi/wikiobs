@@ -1,5 +1,4 @@
 import React, { ReactNode } from 'react'
-import { YStack, XStack, SizableText } from 'tamagui'
 
 interface SettingsSectionProps {
   title: string
@@ -16,47 +15,37 @@ interface SettingsRowProps {
 }
 
 const SettingsSection: React.FC<SettingsSectionProps> = ({ title, children, footnote, error }) => (
-  <YStack px="$4" backgroundColor="$gray1" width="100%" height="100%" justifyContent="space-between">
-    <YStack>
-      <h2 className="mb-2">{title}</h2>
-      <XStack className="h-[2px] w-full bg-neutral-700" />
-      <YStack maxWidth="100%" width="100%" overflow="hidden">
+  <div className="flex flex-col justify-between w-full h-full p-6 space-y-4">
+    <div className="flex flex-col space-y-4">
+      <div className="flex items-center justify-between pb-3 border-b border-border">
+        <h2 className="text-base font-semibold text-foreground tracking-tight">{title}</h2>
+      </div>
+      <div className="w-full rounded-xl border border-border bg-card p-4 divide-y divide-border shadow-sm backdrop-blur-sm">
         {children}
-        {error && (
-          <SizableText size="$1" color="$red" py="$2">
-            {error}
-          </SizableText>
-        )}
-      </YStack>
-    </YStack>
+      </div>
+      {error && (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
+          {error}
+        </div>
+      )}
+    </div>
     {footnote && (
-      <SizableText size="$1" py="$2">
+      <div className="text-[11px] text-muted-foreground pt-2">
         {footnote}
-      </SizableText>
+      </div>
     )}
-  </YStack>
+  </div>
 )
 
-export const SettingsRow: React.FC<SettingsRowProps> = ({ title, description, control, divider = true }) => {
+export const SettingsRow: React.FC<SettingsRowProps> = ({ title, description, control }) => {
   return (
-    <>
-      <XStack width="100%">
-        <XStack justifyContent="space-between" alignItems="center" py="$3" width="100%">
-          <YStack flex={1} pr="$4">
-            <SizableText size="$3" fontWeight="semi-bold">
-              {title}
-            </SizableText>
-            {description && (
-              <SizableText size="$1" py="$2">
-                {description}
-              </SizableText>
-            )}
-          </YStack>
-          {control}
-        </XStack>
-      </XStack>
-      {divider && <XStack className="h-[2px] w-full bg-neutral-700" />}
-    </>
+    <div className="flex w-full items-center justify-between py-3 gap-4 group">
+      <div className="flex-1 pr-2">
+        <div className="text-xs font-semibold text-foreground tracking-tight">{title}</div>
+        {description && <div className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{description}</div>}
+      </div>
+      <div className="shrink-0 flex items-center">{control}</div>
+    </div>
   )
 }
 

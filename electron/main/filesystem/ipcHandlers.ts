@@ -12,7 +12,8 @@ import { GetFilesInfoTree, createFileRecursive, isHidden, GetFilesInfoListForLis
 import { FileInfoTree, WriteFileProps, RenameFileProps, FileInfoWithContent } from './types'
 import ImageStorage from './storage/ImageStore'
 import VideoStorage from './storage/VideoStore'
-import { resolveExistingVaultPath, resolveVaultPath } from './pathGuard'
+import { resolveExistingVaultPath } from './pathGuard'
+import { notifyPluginHook } from '../plugin-system'
 
 const imageStorage = new ImageStorage(app.getPath('userData'))
 const videoStorage = new VideoStorage(app.getPath('userData'))
@@ -82,13 +83,18 @@ const registerFileHandlers = (store: Store<StoreSchema>, _windowsManager: Window
   ipcMain.handle('write-file', async (event, writeFileProps: WriteFileProps) => {
     const vaultDirectory = windowsManager.getVaultDirectoryForWinContents(event.sender)
     if (!vaultDirectory) throw new Error('No vault is selected.')
-    const safePath = resolveVaultPath(vaultDirectory, writeFileProps.filePath)
+    const safePath = resolveExistingVaultPath(vaultDirectory, writeFileProps.filePath)
     if (!fs.existsSync(path.dirname(safePath))) {
       fs.mkdirSync(path.dirname(safePath), {
         recursive: true,
       })
     }
     fs.writeFileSync(safePath, writeFileProps.content, 'utf-8')
+    await notifyPluginHook('note:saved', {
+      path: safePath,
+      content: writeFileProps.content,
+      vaultPath: vaultDirectory,
+    })
   })
 
   ipcMain.handle('store-image', async (event, imageData: string, originalName: string, blockID: string) => {
@@ -154,7 +160,7 @@ const registerFileHandlers = (store: Store<StoreSchema>, _windowsManager: Window
       windowInfo,
       {
         oldFilePath: resolveExistingVaultPath(windowInfo.vaultDirectoryForWindow, renameFileProps.oldFilePath),
-        newFilePath: resolveVaultPath(windowInfo.vaultDirectoryForWindow, renameFileProps.newFilePath),
+        newFilePath: resolveExistingVaultPath(windowInfo.vaultDirectoryForWindow, renameFileProps.newFilePath),
       },
       event.sender,
     )
@@ -174,13 +180,15 @@ const registerFileHandlers = (store: Store<StoreSchema>, _windowsManager: Window
   ipcMain.handle('create-file', async (event, filePath: string, content: string): Promise<void> => {
     const vaultDirectory = windowsManager.getVaultDirectoryForWinContents(event.sender)
     if (!vaultDirectory) throw new Error('No vault is selected.')
-    createFileRecursive(resolveVaultPath(vaultDirectory, filePath), content, 'utf-8')
+    const safePath = resolveExistingVaultPath(vaultDirectory, filePath)
+    createFileRecursive(safePath, content, 'utf-8')
+    await notifyPluginHook('note:created', { path: safePath, content, vaultPath: vaultDirectory })
   })
 
   ipcMain.handle('create-directory', async (event, dirPath: string): Promise<void> => {
     const vaultDirectory = windowsManager.getVaultDirectoryForWinContents(event.sender)
     if (!vaultDirectory) throw new Error('No vault is selected.')
-    dirPath = resolveVaultPath(vaultDirectory, dirPath)
+    dirPath = resolveExistingVaultPath(vaultDirectory, dirPath)
     const mkdirRecursiveSync = (_dirPath: string) => {
       const parentDir = path.dirname(_dirPath)
       if (!fs.existsSync(parentDir)) {

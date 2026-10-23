@@ -9,6 +9,7 @@ import * as path from 'path'
 import Store from 'electron-store'
 import { logger } from './common/logger'
 import WindowsManager from './common/windowManager'
+import { resolveExistingVaultPath } from './filesystem/pathGuard'
 
 interface ObsidianNote {
   filePath: string
@@ -278,13 +279,10 @@ async function importObsidianVault(vaultPath: string, targetPathOverride?: strin
 
             const outputContent = `${serializeFrontmatter(reorFrontmatter)}\n${note.content}`
 
-            // 检查是否已存在
+            // Never replace an existing note during import; it may contain local edits.
             if (fs.existsSync(targetFilePath)) {
-              const existingContent = fs.readFileSync(targetFilePath, 'utf-8')
-              if (existingContent === outputContent) {
-                result.skipped++
-                continue
-              }
+              result.skipped++
+              continue
             }
 
             fs.writeFileSync(targetFilePath, outputContent, 'utf-8')
@@ -405,8 +403,15 @@ async function exportVaultZip(
 
 // 注册 IPC handlers
 export function registerObsidianCompatHandlers(windowsManager?: WindowsManager) {
-  ipcMain.handle('obsidian:import', async (_event, vaultPath: string, targetPath?: string) => {
-    return importObsidianVault(vaultPath, targetPath)
+  ipcMain.handle('obsidian:import', async (_event, sourcePath: string, targetPath?: string) => {
+    const currentVault =
+      windowsManager?.getVaultDirectoryForWinContents(_event.sender) || (store.get('vaultDirectory') as string)
+    if (!currentVault) throw new Error('No vault directory configured.')
+    const safeTarget = targetPath ? resolveExistingVaultPath(currentVault, targetPath) : currentVault
+    if (!fs.existsSync(sourcePath) || !fs.statSync(sourcePath).isDirectory()) {
+      throw new Error('Obsidian source must be an existing directory.')
+    }
+    return importObsidianVault(sourcePath, safeTarget)
   })
 
   ipcMain.handle('obsidian:export', async (_event, options: { outputDir: string }) => {

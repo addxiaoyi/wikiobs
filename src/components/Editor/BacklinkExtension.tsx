@@ -104,7 +104,7 @@ const backlinkPlugin = (updateSuggestionsState: (state: SuggestionsState | null)
 
               decorations.push(
                 Decoration.inline(backlinkStart, backlinkEnd, {
-                  style: 'color: #92c8fc; text-decoration: underline; cursor: pointer;',
+                  class: 'wiki-backlink-capsule',
                   'data-backlink': 'true',
                 }),
               )
@@ -115,6 +115,18 @@ const backlinkPlugin = (updateSuggestionsState: (state: SuggestionsState | null)
         return DecorationSet.create(doc, decorations)
       },
       handleDOMEvents: {
+        click: (_view, event) => {
+          const target = event.target as HTMLElement | null
+          const backlinkEl = target?.closest('[data-backlink="true"]')
+          if (backlinkEl) {
+            const noteName = backlinkEl.textContent?.trim()
+            if (noteName) {
+              window.dispatchEvent(new CustomEvent('wiki-open-note', { detail: { noteName } }))
+              return true
+            }
+          }
+          return false
+        },
         keydown: (view, event) => {
           if (event.key === '[') {
             const { state, dispatch } = view

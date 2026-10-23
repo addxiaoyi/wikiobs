@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
-
-import { Button } from '@material-tailwind/react'
+import { FolderEdit, Loader2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { toast } from 'react-toastify'
 
 import ReorModal from '../Common/Modal'
@@ -74,35 +75,56 @@ const RenameDirModal: React.FC = () => {
     }
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !isUpdatingDirName) {
+      e.preventDefault()
       sendDirRename()
+    } else if (e.key === 'Escape') {
+      onClose()
     }
   }
 
   return (
-    <ReorModal isOpen={!!fileDirToBeRenamed} onClose={onClose}>
-      <div className="my-2 w-full min-w-0 max-w-[420px]">
-        <h2 className="mb-3 text-xl font-semibold text-white">{t('file.renameDirTitle')}</h2>
-        <input
-          type="text"
-          aria-label={t('file.renameDirTitle')}
-          className="block w-full rounded-md border border-gray-300 bg-neutral-900 px-3 py-2 text-white transition duration-150 ease-in-out placeholder:text-gray-400 focus:border-blue-300 focus:outline-none"
-          value={dirName}
-          onChange={handleNameChange}
-          onKeyDown={handleKeyPress}
-          placeholder={t('file.renameDirTitle')}
-        />
-        <div className="flex items-center gap-3">
-          <Button
-            className="mb-2 mt-3 h-10 w-[80px] cursor-pointer border-none bg-blue-600 px-2 py-0 text-center hover:bg-blue-600"
-            onClick={sendDirRename}
-            placeholder=""
+    <ReorModal isOpen={Boolean(fileDirToBeRenamed)} onClose={onClose} className="max-w-[420px] p-5">
+      <div className="flex items-start gap-3 pb-3 border-b border-border">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-[#7b68ee]/30 bg-[#7b68ee]/15 text-[#7b68ee] dark:text-[#9d8ff5] shadow-sm shadow-[#7b68ee]/20">
+          <FolderEdit size={18} strokeWidth={2} />
+        </div>
+        <div className="min-w-0 flex-1 pr-6">
+          <h2 className="text-sm font-semibold text-foreground tracking-tight">{t('file.renameDirTitle')}</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">输入文件夹的新名称，路径内所有子文件将保持相对关系</p>
+        </div>
+      </div>
+
+      <div className="pt-3.5 space-y-3">
+        <div className="space-y-1">
+          <Input
+            aria-label={t('file.renameDirTitle')}
+            value={dirName}
+            onChange={handleNameChange}
+            onKeyDown={handleKeyDown}
+            placeholder={t('file.renameDirTitle')}
             disabled={isUpdatingDirName}
-          >
-            {t('file.renameBtn')}
+            autoFocus
+            className="h-8 bg-background border-border text-foreground text-xs focus:border-[#7b68ee]"
+          />
+          {errorMessage && <p className="text-[11px] text-red-400 pt-0.5">{errorMessage}</p>}
+        </div>
+
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
+          <Button variant="secondary" size="sm" onClick={onClose} disabled={isUpdatingDirName} className="text-xs">
+            {t('button.cancel')}
           </Button>
-          {errorMessage && <p className="text-xs text-red-500">{errorMessage}</p>}
+          <Button
+            variant="accent"
+            size="sm"
+            onClick={sendDirRename}
+            disabled={isUpdatingDirName || !dirName.trim() || Boolean(errorMessage)}
+            className="text-xs shadow-md shadow-[#7b68ee]/25 gap-1.5"
+          >
+            {isUpdatingDirName && <Loader2 size={12} className="animate-spin" />}
+            <span>{t('file.renameBtn')}</span>
+          </Button>
         </div>
       </div>
     </ReorModal>

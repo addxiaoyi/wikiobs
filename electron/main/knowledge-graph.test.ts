@@ -1,4 +1,17 @@
-import { getEntityRelations, findRelated, exportToJson, exportToDot, parseLinks, type KnowledgeGraph, type Entity, type Relation } from './knowledge-graph'
+import * as fs from 'fs'
+import * as os from 'os'
+import * as path from 'path'
+import {
+  buildKnowledgeGraph,
+  getEntityRelations,
+  findRelated,
+  exportToJson,
+  exportToDot,
+  parseLinks,
+  type KnowledgeGraph,
+  type Entity,
+  type Relation,
+} from './knowledge-graph'
 
 // parseWikiLinksInternal is not exported directly, but parseLinks delegates to it
 // parseTags and extractEntities are also not exported
@@ -227,5 +240,41 @@ describe('exportToDot', () => {
     }
     const dot = exportToDot(graph)
     expect(dot).toContain('Note \\"Special\\"')
+  })
+})
+
+describe('buildKnowledgeGraph wiki link resolution', () => {
+  it('resolves heading and block links using relative paths and avoids ambiguous basename matches', async () => {
+    const vaultPath = fs.mkdtempSync(path.join(os.tmpdir(), 'knowledge-graph-'))
+    const notes: Record<string, string> = {
+      'folder/source.md': '[[Target#Overview|target section]] [[../shared/Note^intro]] [[Duplicate]]',
+      'folder/Target.md': '# Overview',
+      'shared/Note.md': '# Shared note',
+      'first/Duplicate.md': '# First duplicate',
+      'second/Duplicate.md': '# Second duplicate',
+    }
+
+    try {
+      for (const [relativePath, content] of Object.entries(notes)) {
+        const notePath = path.join(vaultPath, relativePath)
+        fs.mkdirSync(path.dirname(notePath), { recursive: true })
+        fs.writeFileSync(notePath, content, 'utf8')
+      }
+
+      const graph = await buildKnowledgeGraph({ vaultPath })
+      const sourcePath = path.join('folder', 'source.md')
+      const resolvedLinks = graph.links.filter((link) => link.sourceFile === sourcePath)
+
+      expect(resolvedLinks.map((link) => [link.targetFile, link.linkType])).toEqual([
+        [path.join('folder', 'Target.md'), 'internal'],
+        [path.join('shared', 'Note.md'), 'internal'],
+        ['Duplicate', 'broken'],
+      ])
+      expect(resolvedLinks[0].targetTitle).toBe('target section')
+      expect(graph.relations.filter((relation) => relation.source === `note:${sourcePath}`)).toHaveLength(2)
+      expect(graph.entities.some((entity) => entity.id === 'note:Duplicate')).toBe(false)
+    } finally {
+      fs.rmSync(vaultPath, { recursive: true, force: true })
+    }
   })
 })

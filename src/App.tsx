@@ -1,64 +1,120 @@
 import React, { lazy, Suspense, useEffect, useState, useRef } from 'react'
 
 import { Portal } from '@headlessui/react'
-import posthog from 'posthog-js'
 import { ToastContainer, toast } from 'react-toastify'
 import gsap from 'gsap'
 
 import 'react-toastify/dist/ReactToastify.css'
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
+import { appMuiTheme } from '@/theme/appMuiTheme'
 import IndexingProgress from './components/Common/IndexingProgress'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { I18nProvider } from './lib/i18n'
 import { Easing } from '@/lib/gsap-animations'
+import ErrorBoundary from './components/Common/ErrorBoundary'
+import { WikiObsLogo } from './components/Common/WikiObsLogo'
+import ShinyText from './components/ui/ShinyText'
+import ReactBitsShowcase from './components/Showcase/ReactBitsShowcase'
 
 const MainPageComponent = lazy(() => import('./components/MainPage'))
 const InitialSetupSinglePage = lazy(() => import('./components/Settings/InitialSettingsSinglePage'))
 
 const PageLoader = () => (
-  <div className="flex h-screen items-center justify-center bg-background text-sm text-muted-foreground">
-    <div className="flex items-center gap-3" role="status" aria-live="polite">
-      <span className="size-2 rounded-full bg-primary" />
-      <span>Loading workspace…</span>
+  <div className="flex h-screen w-full flex-col items-center justify-center bg-[#0e1015] text-[#f8fafc] select-none font-sans">
+    <div className="flex flex-col items-center gap-3.5" role="status" aria-live="polite">
+      <WikiObsLogo size={36} className="animate-pulse drop-shadow-[0_0_16px_rgba(123,104,238,0.6)]" />
+      <span className="text-xs font-medium text-slate-400 tracking-wider">正在加载 WikiOBS 工作区…</span>
     </div>
   </div>
 )
 
-const BrowserPreview = () => (
-  <div className="flex min-h-screen bg-[#17191d] text-[#f4f5f7]">
-    <aside className="hidden w-64 border-r border-white/10 bg-[#202329] p-5 md:block">
-      <div className="mb-8 text-lg font-semibold tracking-tight">WIKIOBS</div>
-      <div className="space-y-2 text-sm text-white/60">
-        <div className="rounded-md bg-white/10 px-3 py-2 text-white">Notes</div>
-        <div className="px-3 py-2">Search</div>
-        <div className="px-3 py-2">Knowledge graph</div>
-      </div>
-    </aside>
-    <main className="flex min-w-0 flex-1 flex-col">
-      <header className="flex h-14 items-center justify-between border-b border-white/10 px-5">
-        <span className="text-sm text-white/60">Local knowledge workspace</span>
-        <button className="rounded-md border border-white/15 px-3 py-1.5 text-xs text-white/75" type="button" disabled>
-          Electron preview
-        </button>
-      </header>
-      <section className="mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center px-6 py-16">
-        <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-blue-300/80">WIKIOBS</p>
-        <h1 className="max-w-2xl text-3xl font-semibold tracking-tight md:text-5xl">Your notes, connected.</h1>
-        <p className="mt-4 max-w-xl text-sm leading-6 text-white/55">
-          The browser preview is running without Electron APIs. Launch the desktop app to open a vault, index notes, and
-          use local AI.
-        </p>
-        <div className="mt-10 grid gap-3 sm:grid-cols-3">
-          {['Wiki import', 'AI organization', 'Hybrid search'].map((feature) => (
-            <div className="border border-white/10 bg-white/[0.03] p-4" key={feature}>
-              <div className="text-sm font-medium">{feature}</div>
-              <div className="mt-2 text-xs text-white/45">Available in the desktop runtime</div>
-            </div>
-          ))}
+const BrowserPreview = () => {
+  const [activeTab, setActiveTab] = useState<'overview' | 'components'>('overview')
+
+  return (
+    <div className="flex min-h-screen bg-[#0e1015] text-[#f8fafc] font-sans selection:bg-[#7b68ee]/30">
+      <aside className="hidden w-64 border-r border-white/10 bg-[#141722]/60 p-5 md:block backdrop-blur-xl">
+        <div className="mb-8 flex items-center gap-2 text-sm font-semibold tracking-wide text-foreground">
+          <WikiObsLogo size={20} className="drop-shadow-[0_0_8px_rgba(123,104,238,0.5)]" />
+          <ShinyText text="WIKIOBS" color="#e4e4e7" shineColor="#ffffff" speed={3} />
         </div>
-      </section>
-    </main>
-  </div>
-)
+        <div className="space-y-1.5 text-xs text-muted-foreground">
+          <button
+            type="button"
+            onClick={() => setActiveTab('overview')}
+            className={`w-full text-left rounded-lg px-3 py-2 font-medium transition-colors ${
+              activeTab === 'overview'
+                ? 'bg-[#7b68ee]/15 text-foreground border border-[#7b68ee]/30'
+                : 'hover:text-foreground hover:bg-white/5'
+            }`}
+          >
+            笔记与工作区
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('components')}
+            className={`w-full text-left rounded-lg px-3 py-2 font-medium transition-colors ${
+              activeTab === 'components'
+                ? 'bg-[#7b68ee]/15 text-foreground border border-[#7b68ee]/30'
+                : 'hover:text-foreground hover:bg-white/5'
+            }`}
+          >
+            React Bits 组件展厅
+          </button>
+        </div>
+      </aside>
+      <main className="flex min-w-0 flex-1 flex-col bg-[#0e1015] overflow-y-auto">
+        <header className="flex h-12 items-center justify-between border-b border-white/10 px-5 bg-[#141722]/40 backdrop-blur-md sticky top-0 z-10">
+          <span className="text-xs text-muted-foreground">本地知识库工作区 · 纯净离线版</span>
+          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-muted-foreground">
+            {activeTab === 'components' ? 'React Bits Showcase' : '桌面预览环境'}
+          </span>
+        </header>
+
+        {activeTab === 'components' ? (
+          <div className="p-8 max-w-5xl mx-auto w-full">
+            <ReactBitsShowcase />
+          </div>
+        ) : (
+          <section className="mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center px-6 py-16">
+            <div className="mb-4 inline-flex size-14 items-center justify-center rounded-2xl border border-[#7b68ee]/30 bg-[#7b68ee]/10 text-[#7b68ee] shadow-2xl backdrop-blur-md">
+              <WikiObsLogo size={32} />
+            </div>
+            <h1 className="max-w-2xl text-2xl font-bold tracking-tight text-white md:text-4xl">
+              <ShinyText
+                text="WIKIOBS 本地知识库工作区"
+                color="#e4e4e7"
+                shineColor="#ffffff"
+                speed={2.5}
+                shineWidth={45}
+                softness={0.8}
+              />
+            </h1>
+            <p className="mt-3 max-w-xl text-xs leading-relaxed text-muted-foreground sm:text-sm">
+              检测到您正在外部浏览器中访问开发端口。WIKIOBS 为纯本地 Electron 桌面知识库应用，请双击项目根目录下的 <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-xs text-[#a29bfe]">launch.bat</code> 启动完整的桌面端体验。
+            </p>
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              {[
+                { title: '双向链接关联', desc: '原生支持 [[WikiLinks]] 双向链接' },
+                { title: '动态力导向图谱', desc: '基于关系网的局部与全局图谱视图' },
+                { title: '本地向量模型', desc: '本地离线隐私保障，零数据上传' },
+              ].map((feature) => (
+                <div className="rounded-xl border border-white/10 bg-[#141722]/50 p-4 backdrop-blur-sm" key={feature.title}>
+                  <div className="text-xs font-semibold text-foreground">{feature.title}</div>
+                  <div className="mt-1.5 text-[11px] text-muted-foreground leading-normal">{feature.desc}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-10">
+              <ReactBitsShowcase />
+            </div>
+          </section>
+        )}
+      </main>
+    </div>
+  )
+}
 
 const calculateIndexingProgress = (update: { current: number; total: number }) => {
   if (update.total <= 0) return 0
@@ -91,33 +147,7 @@ const App: React.FC = () => {
   useEffect(() => {
     if (!isElectronRuntime) {
       setUserHasConfiguredSettingsForIndexing(false)
-      return
     }
-    const root = window.document.documentElement
-    root.classList.add('dark')
-  }, [isElectronRuntime])
-
-  useEffect(() => {
-    if (!isElectronRuntime) return
-    const initialisePosthog = async () => {
-      try {
-        if (await window.electronStore.getAnalyticsMode()) {
-          const posthogKey = (typeof process !== 'undefined' && process.env ? process.env.VITE_POSTHOG_KEY : '') || ''
-          if (posthogKey) {
-            posthog.init(posthogKey, {
-              api_host: 'https://us.i.posthog.com',
-              autocapture: false,
-            })
-            posthog.register({
-              reorAppVersion: await window.electronUtils.getReorAppVersion(),
-            })
-          }
-        }
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : String(error))
-      }
-    }
-    initialisePosthog().catch((error) => toast.error(error instanceof Error ? error.message : String(error)))
   }, [isElectronRuntime])
 
   useEffect(() => {
@@ -150,7 +180,8 @@ const App: React.FC = () => {
         setUserHasConfiguredSettingsForIndexing(configuedInitialSettings)
 
         if (initialDirectory && defaultEmbedFunc) {
-          await window.database.indexFilesInDirectory()
+          setIndexingProgress(1)
+          window.database.indexFilesInDirectory().catch(() => undefined)
         }
       } catch (error) {
         setUserHasConfiguredSettingsForIndexing(false)
@@ -161,25 +192,10 @@ const App: React.FC = () => {
     fetchSettings().catch((error) => toast.error(error instanceof Error ? error.message : String(error)))
   }, [isElectronRuntime])
 
-  // Switch stages immediately. A nested exit/enter translate made the whole workspace appear to drift.
   useEffect(() => {
     if (userHasConfiguredSettingsForIndexing === undefined) return
-
-    let nextStage: 'setup' | 'indexing' | 'main'
-    if (!userHasConfiguredSettingsForIndexing) {
-      nextStage = 'setup'
-    } else if (indexingProgress < 1) {
-      nextStage = 'indexing'
-    } else {
-      nextStage = 'main'
-    }
-
-    if (nextStage === currentStage) return
-
-    stageAnimationRef.current?.kill()
-    stageAnimationRef.current = null
-    setCurrentStage(nextStage)
-  }, [userHasConfiguredSettingsForIndexing, indexingProgress, currentStage])
+    setCurrentStage(userHasConfiguredSettingsForIndexing ? 'main' : 'setup')
+  }, [userHasConfiguredSettingsForIndexing])
 
   // Fade the new stage without translating a layout root.
   useEffect(() => {
@@ -213,41 +229,48 @@ const App: React.FC = () => {
   }, [currentStage])
 
   const handleAllInitialSettingsAreReady = () => {
-    window.database.indexFilesInDirectory()
+    setUserHasConfiguredSettingsForIndexing(true)
+    setCurrentStage('main')
+    setIndexingProgress(1)
+    window.database.indexFilesInDirectory().catch((err) => {
+      console.warn('Indexing error:', err)
+    })
   }
 
   return !isElectronRuntime ? (
     <BrowserPreview />
   ) : (
-    <ThemeProvider>
-      <I18nProvider>
-        <div className="max-h-screen font-sans">
-          <Portal>
-            <ToastContainer
-              theme="dark"
-              position="bottom-right"
-              autoClose={3000}
-              hideProgressBar={false}
-              closeOnClick
-              pauseOnHover
-              toastClassName="text-xs"
-            />{' '}
-          </Portal>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <I18nProvider>
+          <MuiThemeProvider theme={appMuiTheme}>
+            <div className="max-h-screen font-sans">
+              <Portal>
+                <ToastContainer
+                  theme="dark"
+                  position="bottom-right"
+                  autoClose={3000}
+                  hideProgressBar={false}
+                  closeOnClick
+                  pauseOnHover
+                  toastClassName="text-xs"
+                />{' '}
+              </Portal>
 
-          <Suspense fallback={<PageLoader />}>
-            <div ref={stageContainerRef} data-stage-container>
-              {!userHasConfiguredSettingsForIndexing && userHasConfiguredSettingsForIndexing !== undefined && (
-                <InitialSetupSinglePage readyForIndexing={handleAllInitialSettingsAreReady} />
-              )}
-              {userHasConfiguredSettingsForIndexing && indexingProgress < 1 && (
-                <IndexingProgress indexingProgress={indexingProgress} status={indexingStatus} />
-              )}
-              {userHasConfiguredSettingsForIndexing && indexingProgress >= 1 && <MainPageComponent />}
+              <Suspense fallback={<PageLoader />}>
+                <div ref={stageContainerRef} data-stage-container>
+                  {userHasConfiguredSettingsForIndexing === undefined && <PageLoader />}
+                  {!userHasConfiguredSettingsForIndexing && userHasConfiguredSettingsForIndexing !== undefined && (
+                    <InitialSetupSinglePage readyForIndexing={handleAllInitialSettingsAreReady} />
+                  )}
+                  {userHasConfiguredSettingsForIndexing && <MainPageComponent />}
+                </div>
+              </Suspense>
             </div>
-          </Suspense>
-        </div>
-      </I18nProvider>
-    </ThemeProvider>
+          </MuiThemeProvider>
+        </I18nProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   )
 }
 

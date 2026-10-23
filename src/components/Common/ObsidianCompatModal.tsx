@@ -1,21 +1,24 @@
-/* eslint-disable no-console -- Import diagnostics are shown in the development console. */
-
 import React, { useState, useEffect, useRef } from 'react'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import Button from '@mui/material/Button'
-import IconButton from '@mui/material/IconButton'
-import TextField from '@mui/material/TextField'
-import LinearProgress from '@mui/material/LinearProgress'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Alert from '@mui/material/Alert'
+import {
+  FolderArchive,
+  FolderOpen,
+  ArrowRightLeft,
+  X,
+  AlertCircle,
+  CheckCircle2,
+  Loader2,
+  Upload,
+  Download,
+} from 'lucide-react'
 import gsap from 'gsap'
-import { X } from 'lucide-react'
+
+import ReorModal from './Modal'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Progress } from '@/components/ui/progress'
 import { useTranslation } from '@/lib/i18n'
 import { staggerFadeInUp, fadeInScale } from '@/lib/gsap-animations'
+import { cn } from '@/lib/ui'
 
 interface ObsidianExportOptions {
   outputDir: string
@@ -28,9 +31,10 @@ interface ObsidianCompatModalProps {
   isOpen: boolean
   onClose: () => void
   vaultDir?: string
+  embedded?: boolean
 }
 
-const ObsidianCompatModal: React.FC<ObsidianCompatModalProps> = ({ isOpen, onClose, vaultDir: propVaultDir }) => {
+const ObsidianCompatModal: React.FC<ObsidianCompatModalProps> = ({ isOpen, onClose, vaultDir: propVaultDir, embedded }) => {
   const { t } = useTranslation()
   const [vaultDir, setVaultDir] = useState(propVaultDir || '')
   const [mode, setMode] = useState<'export' | 'import'>('export')
@@ -68,15 +72,15 @@ const ObsidianCompatModal: React.FC<ObsidianCompatModalProps> = ({ isOpen, onClo
         try {
           const dir = await window.electronStore.getVaultDirectoryForWindow()
           setVaultDir(dir)
-        } catch (err) {
-          console.error('Failed to load vault directory:', err)
+        } catch {
+          // ignore
         }
       }
     }
     loadVaultDir()
   }, [propVaultDir])
 
-  // GSAP: 表单元素错位入场
+  // GSAP: Form entrance
   useEffect(() => {
     if (!isOpen || !contentRef.current) return
 
@@ -84,18 +88,18 @@ const ObsidianCompatModal: React.FC<ObsidianCompatModalProps> = ({ isOpen, onClo
     const ctx = gsap.context(() => {
       const formItems = container.querySelectorAll('.obsidian-form-item')
       if (formItems.length) {
-        staggerFadeInUp(formItems, 0.35, 0.08, 0.1)
+        staggerFadeInUp(formItems, 0.25, 0.05, 0.05)
       }
     }, container)
 
     return () => ctx.revert()
   }, [isOpen])
 
-  // GSAP: 结果弹入
+  // GSAP: Result
   useEffect(() => {
     if (result && resultRef.current) {
       const ctx = gsap.context(() => {
-        fadeInScale(resultRef.current, 0.4, 0)
+        fadeInScale(resultRef.current, 0.35, 0)
       })
       return () => ctx.revert()
     }
@@ -202,96 +206,157 @@ const ObsidianCompatModal: React.FC<ObsidianCompatModalProps> = ({ isOpen, onClo
   }
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pr: 1 }}>
-        {t('obsidianCompat.title')}
-        <IconButton onClick={handleClose} aria-label={t('button.close')} title={t('button.close')} size="small">
-          <X size={16} />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent ref={contentRef}>
-        <Box className="obsidian-form-item" sx={{ display: 'flex', gap: 1, mb: 3 }}>
-          <Button variant={mode === 'export' ? 'contained' : 'outlined'} onClick={() => setMode('export')}>
-            {t('obsidianCompat.exportToObsidian')}
-          </Button>
-          <Button variant={mode === 'import' ? 'contained' : 'outlined'} onClick={() => setMode('import')}>
-            {t('obsidianCompat.importFromObsidian')}
-          </Button>
-        </Box>
+    <ReorModal isOpen={isOpen} onClose={handleClose} embedded={embedded} className="max-w-[560px] p-5">
+      {/* Header */}
+      <div className="flex items-start gap-3 pb-4 border-b border-border">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-[#7b68ee]/30 bg-[#7b68ee]/15 text-[#7b68ee] dark:text-[#9d8ff5] shadow-sm shadow-[#7b68ee]/20">
+          <FolderArchive size={18} strokeWidth={2} />
+        </div>
+        <div className="min-w-0 flex-1 pr-6">
+          <h2 className="text-base font-semibold text-foreground tracking-tight">{t('obsidianCompat.title')}</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">在 Obsidian 格式与 WIKIOBS 知识库之间双向无损迁移</p>
+        </div>
+      </div>
 
+      <div ref={contentRef} className="pt-4 space-y-3.5">
+        {/* Mode Selector Tabs */}
+        <div className="obsidian-form-item flex rounded-lg bg-muted/40 border border-border p-1">
+          <button
+            type="button"
+            onClick={() => {
+              setMode('export')
+              setResult(null)
+            }}
+            className={cn(
+              'flex-1 flex items-center justify-center gap-1.5 rounded-md py-1.5 text-xs font-medium transition-all',
+              mode === 'export'
+                ? 'bg-[#7b68ee] text-white shadow-sm'
+                : 'text-muted-foreground hover:text-foreground',
+            )}
+          >
+            <Download size={13} />
+            <span>{t('obsidianCompat.exportToObsidian')}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setMode('import')
+              setResult(null)
+            }}
+            className={cn(
+              'flex-1 flex items-center justify-center gap-1.5 rounded-md py-1.5 text-xs font-medium transition-all',
+              mode === 'import'
+                ? 'bg-[#7b68ee] text-white shadow-sm'
+                : 'text-muted-foreground hover:text-foreground',
+            )}
+          >
+            <Upload size={13} />
+            <span>{t('obsidianCompat.importFromObsidian')}</span>
+          </button>
+        </div>
+
+        {/* Result alert */}
         {result && (
-          <Box ref={resultRef}>
-            <Alert severity={result.success ? 'success' : 'error'} sx={{ mb: 2 }}>
-              {result.message}
-            </Alert>
-          </Box>
+          <div
+            ref={resultRef}
+            className={cn(
+              'rounded-lg border p-3 text-xs flex items-start gap-2.5',
+              result.success
+                ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200'
+                : 'border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-200',
+            )}
+          >
+            {result.success ? (
+              <CheckCircle2 size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+            ) : (
+              <AlertCircle size={15} className="text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+            )}
+            <div className="flex-1 break-all">{result.message}</div>
+          </div>
         )}
 
+        {/* Processing progress */}
         {isProcessing && progress && (
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="body2" sx={{ mb: 1 }}>
-              {t('obsidianCompat.processing', { current: progress.current, total: progress.total })}
-              {progress.fileName && ` - ${progress.fileName}`}
-            </Typography>
-            <LinearProgress variant="determinate" value={(progress.current / progress.total) * 100} />
-          </Box>
+          <div className="space-y-1.5 rounded-lg border border-purple-500/20 bg-purple-500/10 p-3">
+            <div className="flex items-center justify-between text-xs text-purple-700 dark:text-purple-200">
+              <span className="flex items-center gap-1.5 truncate">
+                <Loader2 size={13} className="animate-spin text-[#7b68ee] shrink-0" />
+                <span>
+                  {t('obsidianCompat.processing', { current: progress.current, total: progress.total })}
+                  {progress.fileName && ` · ${progress.fileName}`}
+                </span>
+              </span>
+            </div>
+            <Progress value={(progress.current / progress.total) * 100} className="h-1.5 bg-purple-950/40" />
+          </div>
         )}
 
-        {mode === 'export' ? (
-          <Box className="obsidian-form-item">
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              {t('obsidianCompat.exportDesc')}
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1, flexDirection: { xs: 'column', sm: 'row' } }}>
-              <TextField
-                fullWidth
-                label={t('obsidianCompat.outputDir')}
-                value={outputDir}
-                onChange={(e) => setOutputDir(e.target.value)}
-                placeholder={t('obsidianCompat.selectOutputPlaceholder')}
-                inputProps={{ 'aria-label': t('obsidianCompat.outputDir') }}
+        {/* Directory Picker Form */}
+        <div className="obsidian-form-item rounded-lg border border-border bg-card p-3 space-y-2">
+          <p className="text-xs text-foreground leading-relaxed">
+            {mode === 'export' ? t('obsidianCompat.exportDesc') : t('obsidianCompat.importDesc')}
+          </p>
+          <div className="space-y-1 pt-1">
+            <label htmlFor="obsidian-dir-input" className="text-xs font-medium text-foreground block">
+              {mode === 'export' ? t('obsidianCompat.outputDir') : t('obsidianCompat.sourceDir')}
+            </label>
+            <div className="flex items-center gap-2">
+              <Input
+                id="obsidian-dir-input"
+                placeholder={
+                  mode === 'export'
+                    ? t('obsidianCompat.selectOutputPlaceholder')
+                    : t('obsidianCompat.selectSourcePlaceholder')
+                }
+                value={mode === 'export' ? outputDir : sourceDir}
+                onChange={(e) => (mode === 'export' ? setOutputDir(e.target.value) : setSourceDir(e.target.value))}
+                className="h-8 bg-background border-border text-foreground text-xs font-mono"
               />
               <Button
-                variant="outlined"
-                onClick={() => handleBrowse('output')}
-                sx={{ alignSelf: { xs: 'flex-end', sm: 'auto' } }}
+                variant="secondary"
+                size="sm"
+                onClick={() => handleBrowse(mode === 'export' ? 'output' : 'source')}
+                className="h-8 px-2.5 gap-1 shrink-0 border-border"
               >
-                {t('obsidianCompat.browse')}
+                <FolderOpen size={13} />
+                <span>{t('obsidianCompat.browse')}</span>
               </Button>
-            </Box>
-          </Box>
-        ) : (
-          <Box className="obsidian-form-item">
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              {t('obsidianCompat.importDesc')}
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1, flexDirection: { xs: 'column', sm: 'row' } }}>
-              <TextField
-                fullWidth
-                label={t('obsidianCompat.sourceDir')}
-                value={sourceDir}
-                onChange={(e) => setSourceDir(e.target.value)}
-                placeholder={t('obsidianCompat.selectSourcePlaceholder')}
-                inputProps={{ 'aria-label': t('obsidianCompat.sourceDir') }}
-              />
-              <Button
-                variant="outlined"
-                onClick={() => handleBrowse('source')}
-                sx={{ alignSelf: { xs: 'flex-end', sm: 'auto' } }}
-              >
-                {t('obsidianCompat.browse')}
-              </Button>
-            </Box>
-          </Box>
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose}>{t('button.close')}</Button>
-        <Button variant="contained" onClick={mode === 'export' ? handleExport : handleImport} disabled={isProcessing}>
-          {mode === 'export' ? t('obsidianCompat.startExport') : t('obsidianCompat.startImport')}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="flex items-center justify-end gap-2.5 pt-4 mt-2 border-t border-border">
+        <Button variant="secondary" size="sm" onClick={handleClose} disabled={isProcessing} className="text-xs">
+          {t('button.close')}
         </Button>
-      </DialogActions>
-    </Dialog>
+        <Button
+          variant="accent"
+          size="sm"
+          onClick={mode === 'export' ? handleExport : handleImport}
+          disabled={isProcessing || (mode === 'export' ? !outputDir : !sourceDir)}
+          className="text-xs gap-1.5 shadow-md shadow-[#7b68ee]/25"
+        >
+          {isProcessing ? (
+            <>
+              <Loader2 size={13} className="animate-spin" />
+              <span>处理中...</span>
+            </>
+          ) : mode === 'export' ? (
+            <>
+              <Download size={13} />
+              <span>{t('obsidianCompat.startExport')}</span>
+            </>
+          ) : (
+            <>
+              <Upload size={13} />
+              <span>{t('obsidianCompat.startImport')}</span>
+            </>
+          )}
+        </Button>
+      </div>
+    </ReorModal>
   )
 }
 

@@ -53,13 +53,23 @@ if (release().startsWith('6.1')) app.disableHardwareAcceleration()
 // Disable GPU acceleration for macOS 21.6
 if (process.platform === 'darwin' && release().startsWith('21.6')) app.disableHardwareAcceleration()
 
-// Set application name for Windows 10+ notifications
-if (process.platform === 'win32') app.setAppUserModelId(app.getName())
+// Set application name for Windows 10+ notifications & taskbar
+app.name = 'WIKIOBS by Helstera'
+if (process.platform === 'win32') app.setAppUserModelId('com.helstera.wikiobs')
 
 if (!app.requestSingleInstanceLock()) {
   app.quit()
   process.exit(0)
 }
+
+app.on('second-instance', () => {
+  const allWindows = BrowserWindow.getAllWindows()
+  if (allWindows.length) {
+    if (allWindows[0].isMinimized()) allWindows[0].restore()
+    allWindows[0].show()
+    allWindows[0].focus()
+  }
+})
 
 const preload = join(__dirname, '../preload/index.js')
 const url = process.env.VITE_DEV_SERVER_URL
@@ -79,10 +89,12 @@ app.whenReady().then(() => {
 })
 
 app.on('window-all-closed', () => {
+  logger.info('App', 'window-all-closed event triggered')
   if (process.platform !== 'darwin') app.quit()
 })
 
 app.on('before-quit', async () => {
+  logger.info('App', 'before-quit event triggered')
   shutdownScheduler()
   ollamaService.stop()
   logger.close()
@@ -123,7 +135,7 @@ registerPathHandlers()
 registerWikiImporterHandlers(store, windowsManager)
 registerObsidianCompatHandlers(windowsManager)
 registerAIOrganizationHandlers(store, windowsManager)
-registerHybridSearchHandlers()
+registerHybridSearchHandlers(windowsManager)
 registerIncrementalIndexerHandlers(store, windowsManager)
 registerKnowledgeGraphHandlers(store, windowsManager)
 registerScheduledTasksHandlers(windowsManager)

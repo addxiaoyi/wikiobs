@@ -2,7 +2,7 @@ import React from 'react'
 
 const LoadingDots = () => {
   return (
-    <div className="flex space-x-1 text-lg text-white">
+    <div className="flex space-x-1 text-lg text-primary">
       <span className="animate-bounce">.</span>
       <span className="animate-bounce delay-200">.</span>
       <span className="animate-bounce">.</span>

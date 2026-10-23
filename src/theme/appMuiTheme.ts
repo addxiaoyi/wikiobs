@@ -1,6 +1,6 @@
 import { alpha, createTheme } from '@mui/material/styles'
 
-const ACCENT = '#ffffff'
+const ACCENT = '#7b68ee'
 const SURFACE = '#111319'
 
 const restoreDialogFocus = (dialog: HTMLElement): void => {
@@ -118,12 +118,12 @@ export const appMuiTheme = createTheme({
           transition: 'all 75ms ease',
         },
         containedPrimary: {
-          backgroundColor: '#ffffff',
-          color: '#080a0f',
+          backgroundColor: '#7b68ee',
+          color: '#ffffff',
           fontWeight: 600,
           '&:hover': {
-            backgroundColor: '#f1f5f9',
-            boxShadow: '0 0 16px rgba(255, 255, 255, 0.15)',
+            backgroundColor: '#6c5ce7',
+            boxShadow: '0 0 16px rgba(123, 104, 238, 0.35)',
           },
         },
         outlined: {
@@ -133,6 +133,48 @@ export const appMuiTheme = createTheme({
             borderColor: 'rgba(255, 255, 255, 0.28)',
             backgroundColor: 'rgba(255, 255, 255, 0.06)',
           },
+        },
+      },
+    },
+    MuiCheckbox: {
+      styleOverrides: {
+        root: {
+          color: 'rgba(255, 255, 255, 0.3)',
+          borderRadius: 4,
+          padding: 6,
+          '&.Mui-checked': {
+            color: '#7b68ee',
+          },
+        },
+      },
+    },
+    MuiSwitch: {
+      styleOverrides: {
+        root: {
+          width: 36,
+          height: 20,
+          padding: 0,
+        },
+        switchBase: {
+          padding: 2,
+          '&.Mui-checked': {
+            transform: 'translateX(16px)',
+            color: '#fff',
+            '& + .MuiSwitch-track': {
+              backgroundColor: '#7b68ee',
+              opacity: 1,
+            },
+          },
+        },
+        thumb: {
+          width: 16,
+          height: 16,
+          boxShadow: 'none',
+        },
+        track: {
+          borderRadius: 10,
+          backgroundColor: 'rgba(255, 255, 255, 0.2)',
+          opacity: 1,
         },
       },
     },
@@ -165,7 +207,33 @@ export const appMuiTheme = createTheme({
       },
     },
     MuiLinearProgress: {
-      styleOverrides: { root: { height: 4, borderRadius: 999 } },
+      styleOverrides: {
+        root: {
+          height: 4,
+          borderRadius: 999,
+          backgroundColor: 'rgba(123, 104, 238, 0.2)',
+        },
+        bar: {
+          backgroundColor: '#7b68ee',
+        },
+      },
+    },
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: {
+          backgroundColor: '#0c0e14',
+          color: '#f8fafc',
+          border: '1px solid rgba(255, 255, 255, 0.12)',
+          borderRadius: 6,
+          fontSize: '11px',
+          fontWeight: 500,
+          padding: '4px 8px',
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.6)',
+        },
+        arrow: {
+          color: '#0c0e14',
+        },
+      },
     },
   },
 })

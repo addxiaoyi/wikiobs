@@ -14,6 +14,7 @@ import { StoreSchema } from './electron-store/storeConfig'
 import WindowsManager from './common/windowManager'
 import type { WikiImporterOptions } from './wiki-importer'
 import type LanceDBTableWrapper from './vector-database/lanceTableWrapper'
+import { updateFileInTable } from './vector-database/tableHelperFunctions'
 
 // 类型定义
 interface ScheduleConfig {
@@ -47,6 +48,7 @@ export interface ScheduledTask {
 interface ScheduledTaskInstance extends ScheduledTask {
   timer?: NodeJS.Timeout
   cronJob?: object
+  controller?: AbortController
 }
 
 type ScheduledTaskInput = Omit<ScheduledTask, 'id' | 'status' | 'createdAt' | 'lastRun' | 'nextRun' | 'enabled'> & {
@@ -60,7 +62,7 @@ const TASKS_FILE = 'scheduled-tasks.json'
 
 // 获取任务文件路径
 function getTasksFilePath(): string {
-  const userDataPath = (store.get('userDataPath') as string) || '.'
+  const userDataPath = (store.get('userDataPath') as string) || app.getPath('userData')
   return path.join(userDataPath, TASKS_FILE)
 }
 
@@ -68,8 +70,12 @@ function getTasksFilePath(): string {
 function loadTasks(): ScheduledTask[] {
   try {
     const tasksPath = getTasksFilePath()
-    if (fs.existsSync(tasksPath)) {
-      return JSON.parse(fs.readFileSync(tasksPath, 'utf-8'))
+    const legacyPath = path.resolve(TASKS_FILE)
+    const sourcePath = fs.existsSync(tasksPath) ? tasksPath : legacyPath
+    if (sourcePath !== legacyPath || fs.existsSync(legacyPath)) {
+      const loaded = JSON.parse(fs.readFileSync(sourcePath, 'utf-8'))
+      if (Array.isArray(loaded)) return loaded
+      logger.error('ScheduledTasks', `Invalid scheduled task data in ${sourcePath}`)
     }
   } catch (e) {
     logger.error('ScheduledTasks', 'Failed to load scheduled tasks', e)
@@ -100,7 +106,9 @@ function saveTasks(): void {
       createdAt: t.createdAt,
     }))
 
-    fs.writeFileSync(tasksPath, JSON.stringify(tasksArray, null, 2), 'utf-8')
+    const temporaryPath = `${tasksPath}.${process.pid}.tmp`
+    fs.writeFileSync(temporaryPath, JSON.stringify(tasksArray, null, 2), 'utf-8')
+    fs.renameSync(temporaryPath, tasksPath)
   } catch (e) {
     logger.error('ScheduledTasks', 'Failed to save scheduled tasks', e)
   }
@@ -200,15 +208,44 @@ function getMarkdownFiles(dir: string): string[] {
 // 任务执行上下文
 const executeContext: { windowsManager?: WindowsManager } = {}
 
+function getVaultWindow(vaultPath: string): { dbTableClient: LanceDBTableWrapper } | null {
+  const windowsManager = executeContext.windowsManager
+  if (!windowsManager) return null
+
+  for (const win of BrowserWindow.getAllWindows()) {
+    const windowInfo = windowsManager.getWindowInfoForContents(win.webContents)
+    if (windowInfo && path.resolve(windowInfo.vaultDirectoryForWindow) === path.resolve(vaultPath)) {
+      return { dbTableClient: windowInfo.dbTableClient }
+    }
+  }
+  return null
+}
+
+function getTaskVaultPath(task: ScheduledTask): string | undefined {
+  const configuredPath = task.config.vaultPath
+  if (typeof configuredPath === 'string' && configuredPath.trim()) return configuredPath
+  return (store.get('vaultDirectory') as string) || undefined
+}
+
+function throwIfTaskCancelled(signal: AbortSignal): void {
+  if (signal.aborted) throw new Error('Task cancelled.')
+}
+
 // 执行任务
 async function executeTask(taskId: string): Promise<{ success: boolean; error?: string }> {
   const task = tasks.get(taskId)
   if (!task) {
     return { success: false, error: 'Task not found' }
   }
+  if (task.status === 'running') {
+    return { success: false, error: 'Task is already running' }
+  }
 
   task.status = 'running'
   task.lastRun = new Date().toISOString()
+  const controller = new AbortController()
+  task.controller = controller
+  saveTasks()
 
   try {
     // 根据任务类型执行不同的操作
@@ -216,9 +253,24 @@ async function executeTask(taskId: string): Promise<{ success: boolean; error?: 
       case 'wiki-import': {
         const { importFromWiki } = await import('./wiki-importer')
         const source = task.config.source as string
-        if (source) {
-          const options: WikiImporterOptions = { source, sourceType: 'url' }
-          await importFromWiki(options)
+        if (!source) throw new Error('Wiki import task is missing a source.')
+        const vaultPath = getTaskVaultPath(task)
+        if (!vaultPath) throw new Error('Wiki import task has no vault configured.')
+        const sourceType = task.config.sourceType as WikiImporterOptions['sourceType'] | undefined
+        const options: WikiImporterOptions = {
+          source,
+          sourceType: sourceType || 'url',
+          outputDir: (task.config.outputDir as string) || path.join(vaultPath, 'WikiImports'),
+        }
+        const result = await importFromWiki({ ...options, signal: controller.signal })
+        if (result.cancelled) throw new Error('Task cancelled.')
+        if (!result.success) throw new Error(result.errors.join('\n') || 'Wiki import failed.')
+        const windowInfo = getVaultWindow(vaultPath)
+        if (windowInfo) {
+          for (const filePath of result.filesToIndex) {
+            throwIfTaskCancelled(controller.signal)
+            await updateFileInTable(windowInfo.dbTableClient, filePath)
+          }
         }
         break
       }
@@ -226,32 +278,23 @@ async function executeTask(taskId: string): Promise<{ success: boolean; error?: 
       case 'ai-organize': {
         const { organizeNotes } = await import('./ai-organization')
         // 获取所有笔记文件
-        const vaultPath = store.get('vaultPath') as string
+        const vaultPath = getTaskVaultPath(task)
         if (vaultPath) {
           const files = getMarkdownFiles(vaultPath)
-          await organizeNotes(files, store, executeContext.windowsManager!)
+          if (!executeContext.windowsManager) throw new Error('Window manager is not available.')
+          await organizeNotes(files, store, executeContext.windowsManager, undefined, controller.signal)
         }
         break
       }
 
       case 'incremental-index': {
         const { incrementalIndex } = await import('./incremental-indexer')
-        const vaultDir = store.get('vaultDirectory') as string
+        const vaultDir = getTaskVaultPath(task)
         const userDataPath = app.getPath('userData')
         if (vaultDir) {
           // 从活跃窗口获取 dbTableClient
-          let dbTableClient: LanceDBTableWrapper | null = null
-          const windows = BrowserWindow.getAllWindows()
-          for (const win of windows) {
-            if (executeContext.windowsManager) {
-              const info = executeContext.windowsManager.getWindowInfoForContents(win.webContents)
-              if (info) {
-                dbTableClient = info.dbTableClient as LanceDBTableWrapper | null
-                break
-              }
-            }
-          }
-          await incrementalIndex(vaultDir, dbTableClient, userDataPath)
+          const dbTableClient = getVaultWindow(vaultDir)?.dbTableClient || null
+          await incrementalIndex(vaultDir, dbTableClient, userDataPath, undefined, controller.signal)
         }
         break
       }
@@ -266,16 +309,24 @@ async function executeTask(taskId: string): Promise<{ success: boolean; error?: 
         break
     }
 
-    task.status = 'idle'
-    task.nextRun = calculateNextRun(task)
-    task.lastError = undefined
-    saveTasks()
+    if (tasks.get(taskId) === task) {
+      task.controller = undefined
+      task.status = 'idle'
+      task.nextRun = task.enabled ? calculateNextRun(task) : undefined
+      task.lastError = undefined
+      saveTasks()
+    }
 
     return { success: true }
   } catch (e) {
-    task.status = 'error'
-    task.lastError = String(e)
-    saveTasks()
+    if (tasks.get(taskId) === task) {
+      task.controller = undefined
+      const cancelled = controller.signal.aborted
+      task.status = cancelled ? 'idle' : 'error'
+      task.lastError = cancelled ? undefined : String(e)
+      task.nextRun = task.enabled ? calculateNextRun(task) : undefined
+      saveTasks()
+    }
 
     return { success: false, error: String(e) }
   }
@@ -295,7 +346,7 @@ function startTaskScheduler(taskId: string): void {
   if (!task.enabled) return
 
   // 计算下次执行时间
-  task.nextRun = calculateNextRun(task)
+  task.nextRun = task.enabled ? calculateNextRun(task) : undefined
 
   if (task.schedule.type === 'interval' && task.schedule.intervalMinutes) {
     const intervalMs = task.schedule.intervalMinutes * 60 * 1000
@@ -322,6 +373,9 @@ function startTaskScheduler(taskId: string): void {
 function stopTaskScheduler(taskId: string): void {
   const task = tasks.get(taskId)
   if (!task) return
+
+  task.controller?.abort()
+  task.controller = undefined
 
   if (task.timer) {
     clearInterval(task.timer as unknown as number)
@@ -407,7 +461,7 @@ function updateTask(taskId: string, updates: Partial<ScheduledTask>): ScheduledT
     startTaskScheduler(task.id)
   }
 
-  task.nextRun = calculateNextRun(task)
+  task.nextRun = task.enabled ? calculateNextRun(task) : undefined
   saveTasks()
 
   return task
@@ -428,22 +482,39 @@ function removeTask(taskId: string): boolean {
 // 手动触发任务
 function triggerTask(taskId: string): boolean {
   const task = tasks.get(taskId)
-  if (!task) return false
+  if (!task || task.status === 'running') return false
 
   executeTask(taskId)
   return true
 }
 
+function cancelTask(taskId: string): boolean {
+  const task = tasks.get(taskId)
+  if (!task?.controller) return false
+  task.controller.abort()
+  return true
+}
+
 // 初始化调度器
 async function initScheduler(): Promise<void> {
+  for (const taskId of tasks.keys()) stopTaskScheduler(taskId)
+  tasks.clear()
+
   const loadedTasks = loadTasks()
 
   for (const taskData of loadedTasks) {
-    tasks.set(taskData.id, taskData as ScheduledTaskInstance)
-    if (taskData.enabled) {
-      startTaskScheduler(taskData.id)
+    const restoredTask: ScheduledTaskInstance = {
+      ...taskData,
+      status: taskData.status === 'running' ? 'idle' : taskData.status,
+      nextRun: undefined,
+    }
+    tasks.set(restoredTask.id, restoredTask)
+    if (restoredTask.enabled) {
+      startTaskScheduler(restoredTask.id)
     }
   }
+
+  saveTasks()
 
   logger.info('ScheduledTasks', `Initialized ${tasks.size} scheduled tasks`)
 }
@@ -472,7 +543,11 @@ export function registerScheduledTasksHandlers(_windowsManager?: WindowsManager)
   })
 
   ipcMain.handle('scheduled-tasks:add', async (_event, taskConfig: ScheduledTaskInput) => {
-    return addTask(taskConfig)
+    const windowInfo = _windowsManager?.getWindowInfoForContents(_event.sender)
+    const config = windowInfo
+      ? { ...taskConfig, config: { ...taskConfig.config, vaultPath: windowInfo.vaultDirectoryForWindow } }
+      : taskConfig
+    return addTask(config)
   })
 
   ipcMain.handle('scheduled-tasks:update', async (_event, taskId: string, updates: Partial<ScheduledTask>) => {
@@ -485,6 +560,10 @@ export function registerScheduledTasksHandlers(_windowsManager?: WindowsManager)
 
   ipcMain.handle('scheduled-tasks:trigger', async (_event, taskId: string) => {
     return { success: triggerTask(taskId) }
+  })
+
+  ipcMain.handle('scheduled-tasks:cancel', async (_event, taskId: string) => {
+    return { success: cancelTask(taskId) }
   })
 
   ipcMain.handle('scheduled-tasks:enable', async (_event, taskId: string) => {
@@ -508,6 +587,7 @@ export {
   updateTask,
   removeTask,
   triggerTask,
+  cancelTask,
   initScheduler,
   initializeScheduler,
   shutdownScheduler,

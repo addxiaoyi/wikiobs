@@ -72,7 +72,7 @@ const InitialEmbeddingModelSettings: React.FC<InitialEmbeddingModelSettingsProps
           {t('embedding.defaultEmbeddingDesc')}{' '}
           <button
             type="button"
-            className="cursor-pointer border-0 bg-transparent p-0 text-left text-foreground underline"
+            className="cursor-pointer border-0 bg-transparent p-0 text-left text-[#a29bfe] underline decoration-[#7b68ee]/50 transition-colors hover:text-[#c4b5fd]"
             onClick={() => setShowNewEmbeddingModelModal(true)}
           >
             {t('embedding.custom')}

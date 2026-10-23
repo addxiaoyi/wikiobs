@@ -1,6 +1,5 @@
 import React, { useRef, useEffect } from 'react'
-import { SizableText, YStack } from 'tamagui'
-import { File } from '@tamagui/lucide-icons'
+import { FileText } from 'lucide-react'
 import gsap from 'gsap'
 import { useContentContext } from '@/contexts/ContentContext'
 import { useModalOpeners } from '@/contexts/ModalContext'
@@ -24,13 +23,14 @@ const EmptyPage: React.FC = () => {
       const textEl = container.querySelector('[data-animation="empty-text"]') as HTMLElement
       const subtextEl = container.querySelector('[data-animation="empty-subtext"]') as HTMLElement
       const btnItems = container.querySelectorAll('[data-animation="empty-buttons"] button')
+      const shortcutsEl = container.querySelector('[data-animation="empty-shortcuts"]') as HTMLElement
 
       const tl = gsap.timeline({ defaults: { ease: Easing.smooth } })
 
       tl.fromTo(
         iconEl,
         { autoAlpha: 0, scale: 0.5 },
-        { autoAlpha: 0.78, scale: 1, duration: 0.8, ease: Easing.elastic },
+        { autoAlpha: 1, scale: 1, duration: 0.8, ease: Easing.elastic },
       )
       tl.fromTo(textEl, { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: 0.4 }, '-=0.3')
       tl.fromTo(subtextEl, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.35 }, '-=0.2')
@@ -44,6 +44,9 @@ const EmptyPage: React.FC = () => {
           '-=0.1',
         )
       }
+      if (shortcutsEl) {
+        tl.fromTo(shortcutsEl, { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.4 }, '-=0.1')
+      }
     }, container)
 
     return () => {
@@ -55,35 +58,53 @@ const EmptyPage: React.FC = () => {
     <div ref={containerRef} className="empty-page flex size-full min-w-0 flex-col items-center justify-center px-6">
       <div className="flex max-w-[360px] flex-col items-center text-center">
         <div className="empty-icon-shell mb-5" data-animation="empty-icon">
-          <File color="#ffffff" size={56} strokeWidth={1.5} />
+          <div className="flex size-16 items-center justify-center rounded-2xl border border-[#7b68ee]/30 bg-[#7b68ee]/10 text-[#7b68ee] shadow-2xl backdrop-blur-md">
+            <FileText size={32} strokeWidth={1.6} className="drop-shadow-[0_0_12px_rgba(123,104,238,0.4)]" />
+          </div>
         </div>
-        <SizableText className="mb-0 text-lg font-semibold tracking-tight" data-animation="empty-text" color="$foreground" size="$6">
+        <h2 className="mb-0 text-base font-semibold tracking-tight text-foreground" data-animation="empty-text">
           {t('empty.noFile')}
-        </SizableText>
-        <SizableText
-          className="max-w-[300px] text-center text-sm leading-relaxed"
+        </h2>
+        <p
+          className="max-w-[300px] text-center text-xs leading-relaxed text-muted-foreground pt-1.5"
           data-animation="empty-subtext"
-          color="$gray10"
-          paddingTop={8}
         >
           {t('empty.openFile')}
-        </SizableText>
-        <YStack className="flex-row gap-2.5" data-animation="empty-buttons" paddingTop={24}>
+        </p>
+        <div className="flex flex-row gap-2.5 pt-5" data-animation="empty-buttons">
           <button
-            className="cursor-pointer rounded-lg border-0 bg-white px-4 py-2 text-sm font-semibold text-neutral-950 shadow-sm transition-all duration-75 hover:bg-neutral-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
+            className="cursor-pointer rounded-lg border border-[#7b68ee]/30 bg-[#7b68ee] px-4 py-2 text-xs font-medium text-white shadow-lg shadow-[#7b68ee]/25 transition-all duration-75 hover:bg-[#6c5ce7] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#7b68ee]"
             onClick={() => createUntitledNote()}
             type="button"
           >
             {t('empty.createFile')}
           </button>
           <button
-            className="cursor-pointer rounded-lg border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-medium text-neutral-200 backdrop-blur-sm transition-all duration-75 hover:bg-white/10 hover:text-white active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
+            className="cursor-pointer rounded-lg border border-border bg-secondary/50 px-4 py-2 text-xs font-medium text-foreground backdrop-blur-sm transition-all duration-75 hover:bg-secondary active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             onClick={() => setIsNewDirectoryModalOpen(true)}
             type="button"
           >
             {t('empty.createFolder')}
           </button>
-        </YStack>
+        </div>
+
+        <div
+          data-animation="empty-shortcuts"
+          className="mt-8 flex w-full flex-col gap-2 rounded-xl border border-border bg-card/60 px-4 py-3 text-left backdrop-blur-sm"
+        >
+          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+            <span>指令面板</span>
+            <kbd className="rounded border border-border bg-muted/60 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">Ctrl + K</kbd>
+          </div>
+          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+            <span>新建空白笔记</span>
+            <kbd className="rounded border border-border bg-muted/60 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">Ctrl + N</kbd>
+          </div>
+          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+            <span>全局搜索</span>
+            <kbd className="rounded border border-border bg-muted/60 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">Ctrl + Shift + F</kbd>
+          </div>
+        </div>
       </div>
     </div>
   )

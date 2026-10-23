@@ -45,6 +45,7 @@ const electronUtils = {
   openNewWindow: createIPCHandler<() => Promise<void>>('open-new-window'),
   getReorAppVersion: createIPCHandler<() => Promise<string>>('get-reor-app-version'),
   getUserAppPath: createIPCHandler<() => Promise<string>>('get-user-data-path'),
+  getDefaultVaultPath: createIPCHandler<() => Promise<string>>('get-default-vault-path'),
 }
 
 const electronStore = {
@@ -146,6 +147,7 @@ const llm = {
 export interface WikiImportOptions {
   sourceType: 'url' | 'sitemap' | 'mediawiki-api' | 'xml-dump' | 'crawl4ai'
   source: string
+  importId?: string
 }
 
 export interface WikiImportResult {
@@ -154,6 +156,8 @@ export interface WikiImportResult {
   skipped: number
   errors: string[]
   files: string[]
+  filesToIndex: string[]
+  cancelled?: boolean
 }
 
 export interface WikiImportProgress {
@@ -188,7 +192,7 @@ export interface AIOrganizationProgress {
 
 const wikiImporter = {
   import: createIPCHandler<(options: WikiImportOptions) => Promise<WikiImportResult>>('wiki-import'),
-  cancel: createIPCHandler<() => Promise<{ cancelled: boolean }>>('wiki-import-cancel'),
+  cancel: createIPCHandler<(importId: string) => Promise<{ cancelled: boolean }>>('wiki-import-cancel'),
   onProgress: (callback: (progress: WikiImportProgress) => void) => {
     const listener = (_event: Electron.IpcRendererEvent, progress: WikiImportProgress) => callback(progress)
     ipcRenderer.on('wiki-import-progress', listener)
@@ -283,6 +287,7 @@ const scheduledTasks = {
     ),
   remove: createIPCHandler<(taskId: string) => Promise<{ success: boolean }>>('scheduled-tasks:remove'),
   trigger: createIPCHandler<(taskId: string) => Promise<{ success: boolean }>>('scheduled-tasks:trigger'),
+  cancel: createIPCHandler<(taskId: string) => Promise<{ success: boolean }>>('scheduled-tasks:cancel'),
   enable: createIPCHandler<(taskId: string) => Promise<ScheduledTask | null>>('scheduled-tasks:enable'),
   disable: createIPCHandler<(taskId: string) => Promise<ScheduledTask | null>>('scheduled-tasks:disable'),
 }
@@ -484,6 +489,20 @@ const plugin = {
   load: createIPCHandler<(pluginId: string) => Promise<Plugin | null>>('plugins:load'),
   unload: createIPCHandler<(pluginId: string) => Promise<boolean>>('plugins:unload'),
   getApi: createIPCHandler<(pluginId: string) => Promise<Record<string, unknown>>>('plugins:get-api'),
+  marketplace: {
+    list: createIPCHandler<() => Promise<Array<{
+      id: string
+      name: string
+      version: string
+      description: string
+      author: string
+      permissions: string[]
+      installed: boolean
+    }>>>('plugins:marketplace:list'),
+    install: createIPCHandler<(pluginId: string) => Promise<{ success: boolean; error?: string; plugin?: Plugin }>>(
+      'plugins:marketplace:install',
+    ),
+  },
 }
 
 // Graph types

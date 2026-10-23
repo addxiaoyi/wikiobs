@@ -11,21 +11,21 @@ interface CheckboxProps extends React.ComponentPropsWithoutRef<typeof CheckboxPr
 
 const Checkbox: React.FC<CheckboxProps> = ({ className, label, id, ...props }) => {
   return (
-    <div className="flex items-center">
+    <div className="flex items-center gap-2">
       <CheckboxPrimitive.Root
         id={id}
         className={cn(
-          'shadow-blackA4 hover:bg-violet3 flex h-[25px] w-[25px] appearance-none items-center justify-center rounded-[4px] bg-white shadow-[0_2px_10px] outline-none focus:shadow-[0_0_0_2px_black]',
+          'flex size-4 appearance-none items-center justify-center rounded border border-border bg-background transition-colors hover:border-[#7b68ee]/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#7b68ee] data-[state=checked]:border-[#7b68ee] data-[state=checked]:bg-[#7b68ee] data-[state=checked]:text-white',
           className,
         )}
         {...props}
       >
-        <CheckboxPrimitive.Indicator>
-          <CheckIcon />
+        <CheckboxPrimitive.Indicator className="flex items-center justify-center text-white">
+          <CheckIcon className="size-3.5" />
         </CheckboxPrimitive.Indicator>
       </CheckboxPrimitive.Root>
       {label && (
-        <label className="pl-[15px] text-[15px] leading-none text-white" htmlFor={id}>
+        <label className="select-none text-xs text-foreground cursor-pointer" htmlFor={id}>
           {label}
         </label>
       )}

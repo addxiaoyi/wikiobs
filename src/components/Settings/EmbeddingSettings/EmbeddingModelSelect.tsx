@@ -27,7 +27,7 @@ const EmbeddingModelSelect: React.FC<EmbeddingModelSelectProps> = ({
             <SelectItem key={model} value={model}>
               <div>
                 <div>{config.readableName || model}</div>
-                <div className="text-xs text-gray-400">{config.description}</div>
+                <div className="text-xs text-muted-foreground">{config.description}</div>
               </div>
             </SelectItem>
           ))}
