@@ -73,7 +73,7 @@ export const EditorSection = () => {
               onClick={() => themeActions.set('dark')}
               className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
                 currentTheme === 'dark'
-                  ? 'bg-[#7b68ee] text-white shadow-sm'
+                  ? 'bg-brand text-white shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -86,7 +86,7 @@ export const EditorSection = () => {
               onClick={() => themeActions.set('light')}
               className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
                 currentTheme === 'light'
-                  ? 'bg-[#7b68ee] text-white shadow-sm'
+                  ? 'bg-brand text-white shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >

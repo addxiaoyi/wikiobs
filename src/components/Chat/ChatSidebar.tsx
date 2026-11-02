@@ -23,7 +23,7 @@ export const ChatItem: React.FC<ChatItemProps> = ({ chatMetadata, onRequestDelet
   const isSelected = chatMetadata.id === currentChat?.id
   const itemClasses = `group relative flex items-center justify-between cursor-pointer py-1.5 px-2.5 rounded-md font-sans text-xs transition-all duration-75 ${
     isSelected
-      ? 'font-medium bg-[#7b68ee]/15 text-[#7b68ee] dark:text-[#a29bfe] border-l-2 border-[#7b68ee] shadow-sm'
+      ? 'font-medium bg-brand/15 text-brand border-l-2 border-brand shadow-sm'
       : 'text-muted-foreground hover:text-foreground hover:bg-accent'
   }`
 
@@ -45,7 +45,7 @@ export const ChatItem: React.FC<ChatItemProps> = ({ chatMetadata, onRequestDelet
           onClick={() => openContent(chatMetadata.id)}
         >
           <div className="flex min-w-0 flex-1 items-center gap-2">
-            <MessageSquare size={13} className={`shrink-0 ${isSelected ? 'text-[#7b68ee]' : 'text-muted-foreground'}`} />
+            <MessageSquare size={13} className={`shrink-0 ${isSelected ? 'text-brand' : 'text-muted-foreground'}`} />
             <span className="truncate text-xs font-medium">
               {chatMetadata.displayName}
             </span>
@@ -123,7 +123,7 @@ export const ChatSidebar: React.FC = () => {
           <button
             aria-label={t('chat.startNew')}
             className="chat-new-button flex cursor-pointer items-center justify-center gap-2 rounded-md 
-                    bg-[#7b68ee] hover:bg-[#6c5ce7] py-2 text-white shadow-sm
+                    bg-brand hover:bg-brand-hover py-2 text-white shadow-sm
                     transition-all duration-75 active:scale-[0.99]
                     focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/40"
             type="button"

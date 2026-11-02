@@ -32,7 +32,7 @@ const CodeBlockWithCopy: React.FC<{ language?: string; code: string }> = ({ lang
   }, [code, language])
 
   return (
-    <div className="my-3 overflow-hidden rounded-lg border border-border bg-card shadow-xl">
+    <div className="my-3 overflow-hidden rounded-lg border border-border bg-card">
       <div className="flex h-8 items-center justify-between border-b border-border bg-secondary/50 px-3">
         <div className="flex items-center gap-1.5 text-[11px] font-mono text-muted-foreground">
           <Terminal size={12} className="text-muted-foreground" />
@@ -80,7 +80,7 @@ const ThinkingSection: React.FC<{ thinking: string; isStreaming?: boolean }> = (
         className="flex w-full cursor-pointer items-center justify-between px-3 py-2 text-xs text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground"
       >
         <div className="flex items-center gap-2">
-          <BrainCircuit size={14} className={isStreaming ? 'animate-pulse text-[#7b68ee]' : 'text-muted-foreground'} />
+          <BrainCircuit size={14} className={isStreaming ? 'animate-pulse text-brand' : 'text-muted-foreground'} />
           <span className="font-medium text-foreground">思考过程</span>
           {isStreaming && <span className="text-[10px] text-muted-foreground">正在思考...</span>}
         </div>
@@ -167,7 +167,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
             },
             blockquote({ children }) {
               return (
-                <blockquote className="my-2 rounded-r border-l-2 border-[#7b68ee] bg-[#7b68ee]/[0.05] py-1 pl-3 italic text-muted-foreground">
+                <blockquote className="my-2 rounded-r border-l-2 border-brand bg-brand/[0.05] py-1 pl-3 italic text-muted-foreground">
                   {children}
                 </blockquote>
               )

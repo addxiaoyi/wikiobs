@@ -63,7 +63,7 @@ const DirectorySelector: React.FC<DirectorySelectorProps> = ({ setErrorMsg }) =>
         onClick={handleDirectorySelection}
         className="flex items-center gap-1.5"
       >
-        <Folder size={13} className="text-[#7b68ee]" />
+        <Folder size={13} className="text-brand" />
         <span>{t('settings.selectDirectory')}</span>
       </Button>
       {userDirectory && (

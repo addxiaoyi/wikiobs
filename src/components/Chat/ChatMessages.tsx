@@ -133,34 +133,30 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
           {/* Empty Conversation Welcome Hero */}
           {!hasMessages && (
             <div className="my-auto flex max-w-md flex-col items-center justify-center py-12 text-center select-none">
-              <div className="mb-3 flex size-12 items-center justify-center rounded-2xl border border-[#7b68ee]/30 bg-[#7b68ee]/10 shadow-lg shadow-[#7b68ee]/15 backdrop-blur-md">
-                <WikiObsLogo size={24} className="drop-shadow-[0_0_8px_rgba(123,104,238,0.5)]" />
+              <div className="mb-3 flex size-12 items-center justify-center rounded-2xl border border-brand/30 bg-brand/10">
+                <WikiObsLogo size={24} />
               </div>
-              <h3 className="text-sm font-semibold tracking-tight text-foreground">
-                WIKIOBS 本地智能助理
-              </h3>
+              <h3 className="text-sm font-semibold tracking-tight text-foreground">WIKIOBS 本地智能助理</h3>
               <p className="mt-1 text-xs text-muted-foreground leading-relaxed max-w-xs">
                 基于本地模型与知识图谱的隐私离线推理
               </p>
 
               <div className="mt-6 flex flex-col gap-2 w-full text-left">
-                {[
-                  '总结当前知识库的核心主题脉络',
-                  '帮我检索库中关联的关键笔记',
-                  '基于当前笔记提出后续拓展思考',
-                ].map((prompt) => (
-                  <button
-                    key={prompt}
-                    type="button"
-                    onClick={() => {
-                      setUserTextFieldInput(prompt)
-                    }}
-                    className="flex items-center gap-2 rounded-lg border border-border/60 bg-card/60 px-3 py-2 text-xs text-muted-foreground shadow-sm transition-all duration-150 hover:border-[#7b68ee]/50 hover:bg-[#7b68ee]/10 hover:text-foreground active:scale-[0.99] cursor-pointer"
-                  >
-                    <Sparkles size={12} className="text-[#7b68ee] shrink-0" />
-                    <span className="truncate">{prompt}</span>
-                  </button>
-                ))}
+                {['总结当前知识库的核心主题脉络', '帮我检索库中关联的关键笔记', '基于当前笔记提出后续拓展思考'].map(
+                  (prompt) => (
+                    <button
+                      key={prompt}
+                      type="button"
+                      onClick={() => {
+                        setUserTextFieldInput(prompt)
+                      }}
+                      className="flex items-center gap-2 rounded-lg border border-border/60 bg-card/60 px-3 py-2 text-xs text-muted-foreground shadow-sm transition-all duration-150 hover:border-brand-hover/50 hover:bg-brand-hover/10 hover:text-foreground active:scale-[0.99] cursor-pointer"
+                    >
+                      <Sparkles size={12} className="text-brand shrink-0" />
+                      <span className="truncate">{prompt}</span>
+                    </button>
+                  ),
+                )}
               </div>
             </div>
           )}
@@ -178,7 +174,10 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
           )}
 
           {errorMessage && loadingState === 'idle' && (
-            <div className="chat-error-state flex items-center justify-between gap-3 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-600 dark:text-red-300" role="alert">
+            <div
+              className="chat-error-state flex items-center justify-between gap-3 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-600 dark:text-red-300"
+              role="alert"
+            >
               <span>{errorMessage}</span>
               <button
                 type="button"
@@ -192,7 +191,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
 
           {loadingState === 'waiting-for-first-token' && (
             <div className="my-2 flex w-full max-w-3xl items-center gap-2 px-2 py-1.5 text-xs text-muted-foreground">
-              <Loader2 size={13} className="animate-spin text-[#7b68ee]" />
+              <Loader2 size={13} className="animate-spin text-brand" />
               <span className="font-mono text-[11px]">{t('chat.thinking')}...</span>
             </div>
           )}

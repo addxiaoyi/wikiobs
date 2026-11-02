@@ -137,7 +137,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ editor }) => {
   return (
     <div
       ref={searchBarRef}
-      className="editor-search-popover fixed right-4 top-11 max-w-[calc(100vw-32px)] rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl backdrop-blur-xl"
+      className="editor-search-popover fixed right-4 top-11 max-w-[calc(100vw-32px)] rounded-xl border border-border bg-popover text-popover-foreground shadow-sm"
       style={{
         zIndex: 1000,
       }}
@@ -155,7 +155,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ editor }) => {
             aria-label={t('search.find')}
             // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
-            className="w-full bg-transparent p-1.5 pr-20 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+            className="w-full bg-transparent p-1.5 pr-20 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           />
           <div
             className="absolute right-3 top-1/2 -translate-y-1/2 select-none text-xs font-medium text-muted-foreground"
@@ -205,7 +205,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ editor }) => {
               onChange={(event) => handleReplaceChange(event.target.value)}
               placeholder={t('search.replace')}
               aria-label={t('search.replace')}
-              className="w-full bg-transparent p-1.5 pr-16 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+              className="w-full bg-transparent p-1.5 pr-16 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
             />

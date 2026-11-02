@@ -14,7 +14,7 @@ const WindowControls = ({ onClose, onMaximize, onNewChat }: WindowControlsProps)
 
   return (
     <div className="group absolute right-2.5 top-2.5 z-10 opacity-0 transition-opacity duration-200 hover:opacity-100 focus-within:opacity-100">
-      <div className="flex items-center gap-0.5 rounded-lg border border-white/10 bg-[#12141c]/85 p-0.5 shadow-xl backdrop-blur-xl">
+      <div className="flex items-center gap-0.5 rounded-lg border border-[var(--line)] bg-[var(--surface-1)] p-0.5 shadow-sm">
         {onNewChat && (
           <button
             type="button"

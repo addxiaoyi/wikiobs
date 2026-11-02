@@ -2,11 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 主题令牌分两层：
+   1. 品牌层只有三档，色值存成「空格分隔三元组」，消费端写 rgb(var(--accent-ink))，
+      同一份色值既能作纯色，也能被 Tailwind 的 brand/xx 透明度接管；
+   2. 产品令牌层（--surface-* / --line* / --ink*）随明暗切换。
+   选择器不能用 :where() 包起来——那会把特异性降到 0，比 :root 还低，
+   浅色主题就压不住 :root 里的暗色默认值。这里两套都用「类/属性选择器」，
+   与 :root 同特异性、靠书写顺序取胜，并且浅色块显式重写品牌三档。
+   --accent / --accent-foreground 属于 shadcn HSL 槽位（bg-accent 等），
+   与品牌色无关，由 tailwind.config.js 的 :root 段维护，这里不再出现同名变量。 */
+:root {
+  --accent-ink: 123 104 238;
+  --accent-hover: 108 92 231;
+  --accent-soft: rgb(var(--accent-ink) / 0.08);
+}
+
 :root,
 .dark,
 html.dark,
 body.dark,
 [data-theme='dark'] {
+  color-scheme: dark;
   /* Obsidian Dark Theme - Primary Identity */
   --bg-000: 240 10% 4%;
   --gen-100: 0 0% 98%;
@@ -18,14 +34,17 @@ body.dark,
   --line-strong: rgba(255, 255, 255, 0.16);
   --ink: #f8fafc;
   --ink-muted: #94a3b8;
-  --accent: #7b68ee;
-  --accent-soft: rgba(123, 104, 238, 0.15);
+  /* 品牌三档：深底提亮一档，避免主色在近黑背景上发闷。 */
+  --accent-ink: 157 143 245;
+  --accent-hover: 143 134 251;
+  --accent-soft: rgb(var(--accent-ink) / 0.15);
 }
 
 .light,
 html.light,
 body.light,
 [data-theme='light'] {
+  color-scheme: light;
   /* Obsidian Light Theme */
   --bg-000: 0 0% 100%;
   --gen-100: 222.2 84% 4.9%;
@@ -37,8 +56,10 @@ body.light,
   --line-strong: rgba(0, 0, 0, 0.16);
   --ink: #1e2025;
   --ink-muted: #64748b;
-  --accent: #7b68ee;
-  --accent-soft: rgba(123, 104, 238, 0.08);
+  /* 显式写回浅色品牌三档：不依赖 :root 的巧合，也避免以后调整默认值时暗色漏过去。 */
+  --accent-ink: 123 104 238;
+  --accent-hover: 108 92 231;
+  --accent-soft: rgb(var(--accent-ink) / 0.08);
 }
 
 html,
@@ -50,49 +71,46 @@ body {
   overflow-y: hidden;
 }
 
+/* preflight 被关闭，Tailwind 预置的 `*{border-style:solid}` 不存在，这里补回 solid：
+   否则 border-style 落成 none，CSS 规范下 computed border-width 恒为 0，
+   全站 .border / .border-b 等工具类只设宽度、画不出线。 */
 * {
   box-sizing: border-box;
-  border: none;
+  border-width: 0;
+  border-style: solid;
+  border-color: hsl(var(--border));
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 ::selection {
-  background: rgba(123, 104, 238, 0.25);
+  background: rgb(var(--accent-ink) / 0.25);
   color: inherit;
 }
 
 .dark ::selection,
 html.dark ::selection {
-  background: rgba(123, 104, 238, 0.45);
+  background: rgb(var(--accent-ink) / 0.45);
   color: #ffffff;
 }
 
 :focus-visible {
-  outline: 2px solid rgba(123, 104, 238, 0.65);
+  outline: 2px solid rgb(var(--accent-ink) / 0.65);
   outline-offset: 1px;
 }
 
 a {
   cursor: pointer;
-  color: #7b68ee;
+  color: rgb(var(--accent-ink));
   text-decoration: underline;
-  text-decoration-color: rgba(123, 104, 238, 0.4);
+  text-decoration-color: rgb(var(--accent-ink) / 0.4);
   text-underline-offset: 3px;
   transition: opacity 75ms ease, text-decoration-color 75ms ease;
 }
 
-.dark a {
-  color: #a29bfe;
-}
-
 a:hover {
-  text-decoration-color: #7b68ee;
-  color: #6c5ce7;
+  text-decoration-color: rgb(var(--accent-ink));
+  color: rgb(var(--accent-hover));
   opacity: 1;
-}
-
-.dark a:hover {
-  color: #c4b5fd;
 }
 
 ::marker {
@@ -110,28 +128,22 @@ a:hover {
 button {
   -webkit-app-region: no-drag;
   background-color: transparent;
-  border-style: none;
+  border-width: 0;
+  border-style: solid;
   color: inherit;
   padding: 0;
 }
 
-.glass-panel {
-  background: var(--surface-1);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--line);
-}
-
-.glass-card {
-  background: var(--surface-2);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--line);
-  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.15);
+/* preflight 关闭后 UA 的 cursor: pointer 也没了，这里给可点击控件补回手型；
+   不用 * 通配，避免给纯文本容器加上手型。 */
+button:not(:disabled),
+[role='button']:not([aria-disabled='true']),
+summary {
+  cursor: pointer;
 }
 
 .empty-page {
-  background: radial-gradient(circle at 50% 36%, var(--accent-soft), transparent 45%), var(--surface-0);
+  background: var(--surface-0);
   color: var(--ink);
 }
 
@@ -143,8 +155,7 @@ button {
   border: 1px solid var(--line-strong);
   border-radius: 20px;
   background: var(--surface-2);
-  color: var(--accent);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
+  color: rgb(var(--accent-ink));
 }
 
 .empty-page button {
@@ -156,13 +167,13 @@ button {
 }
 
 .empty-page button:first-child {
-  background: #7b68ee !important;
+  background: rgb(var(--accent-ink)) !important;
   color: #ffffff !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 0 16px rgba(123, 104, 238, 0.35);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .empty-page button:first-child:hover {
-  background: #6c5ce7 !important;
+  background: rgb(var(--accent-hover)) !important;
   transform: translateY(-1px);
 }
 
@@ -177,7 +188,6 @@ button {
   border-radius: 9px;
   color: var(--ink);
   background: var(--surface-2);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .icons-sidebar-button {
@@ -191,7 +201,7 @@ button {
 
 .icons-sidebar-button:focus-visible,
 .titlebar-panel-button:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid rgb(var(--accent-ink));
   outline-offset: 2px;
 }
 
@@ -203,9 +213,8 @@ button {
 
 .icons-sidebar-button.is-active {
   background: var(--accent-soft) !important;
-  color: #7b68ee !important;
+  color: rgb(var(--accent-ink)) !important;
   border-color: var(--line-strong) !important;
-  box-shadow: 0 1px 4px rgba(123, 104, 238, 0.2) !important;
 }
 
 .icons-sidebar-button.is-active::before {
@@ -216,8 +225,7 @@ button {
   bottom: 7px;
   width: 3px !important;
   border-radius: 0 3px 3px 0;
-  background-color: #7b68ee;
-  box-shadow: 0 0 8px rgba(123, 104, 238, 0.6);
+  background-color: rgb(var(--accent-ink));
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -235,23 +243,17 @@ button {
   width: 40px !important;
   min-width: 40px !important;
   max-width: 40px !important;
-  background: color-mix(in srgb, var(--surface-0) 80%, transparent) !important;
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: var(--surface-0) !important;
   border-right: 1px solid var(--line);
   box-sizing: border-box;
 }
 
 .file-sidebar-surface {
-  background: color-mix(in srgb, var(--surface-1) 85%, transparent) !important;
-  backdrop-filter: blur(16px) saturate(150%);
-  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  background: var(--surface-1) !important;
 }
 
 .file-sidebar-header {
-  background: color-mix(in srgb, var(--surface-0) 75%, transparent) !important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: var(--surface-0) !important;
   border-bottom: 1px solid var(--line);
 }
 
@@ -260,23 +262,15 @@ button {
 }
 
 .titlebar {
+  /* 背景取不透明的 --surface-0，保持扁平、不做模糊。 */
   background: var(--surface-0) !important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--line) !important;
   box-shadow: 0 1px 0 var(--line);
 }
 
 .titlebar-panel-button.is-active {
-  color: #7b68ee !important;
-  background: rgba(123, 104, 238, 0.15) !important;
-}
-
-.titlebar-title {
-  letter-spacing: 0.18em;
-  font-size: 0.72rem;
-  color: var(--ink-muted);
-  font-weight: 600;
+  color: rgb(var(--accent-ink)) !important;
+  background: rgb(var(--accent-ink) / 0.15) !important;
 }
 
 .editor-search-popover {
@@ -305,13 +299,13 @@ button {
 }
 
 .settings-tab.is-active {
-  color: var(--accent);
+  color: rgb(var(--accent-ink));
   background: var(--accent-soft);
-  box-shadow: inset 3px 0 0 #7b68ee;
+  box-shadow: inset 3px 0 0 rgb(var(--accent-ink));
 }
 
 .settings-tab.is-active svg {
-  color: var(--accent);
+  color: rgb(var(--accent-ink));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -322,6 +316,29 @@ button {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+}
+
+/* 减少动效第二层：上面那段只把时长压到 0.01ms，元素仍会「瞬间跳到终态」。
+   这里停掉纯装饰性的循环动画：脉冲/弹跳占位，以及 tailwindcss-animate 生成的
+   弹层进出场（.animate-in / .animate-out）直接不跑动画，元素停在自然状态；
+   再把带缩放/位移的悬停与按压过渡改为静止（WCAG 2.3.3）。
+   加载转圈（.animate-spin）不在其列：它是「仍在处理」的功能性反馈。 */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse,
+  .animate-bounce,
+  .animate-in,
+  .animate-out {
+    animation: none !important;
+  }
+
+  /* 这些缩放工具类散落在各个组件（含本人不负责的 .tsx）里，
+     用属性子串一次覆盖 hover:scale-* / active:scale-*，避免逐个枚举。 */
+  [class*='hover:scale']:hover,
+  [class*='active:scale']:active,
+  .icons-sidebar-button:hover,
+  .empty-page button:first-child:hover {
+    transform: none !important;
   }
 }
 
@@ -336,6 +353,10 @@ textarea,
     box-shadow 75ms ease;
 }
 
+/* 表单控件的底色/描边统一走产品令牌。这里必须 !important：
+   各设置面板的输入框会带 Tailwind 的 border-border / bg-background，
+   而那套是 shadcn 的 HSL 槽位，深浅切换在部分弹层里没跟上，会出现深色弹层里白底输入框。
+   用 !important 把这一层压到最低，保证任何弹层里输入框都和所在主题同色。 */
 input,
 textarea,
 [data-radix-select-trigger] {
@@ -354,7 +375,7 @@ textarea:hover,
 input:focus,
 textarea:focus,
 [data-radix-select-trigger]:focus {
-  border-color: #7b68ee !important;
+  border-color: rgb(var(--accent-ink)) !important;
   outline: none !important;
 }
 
@@ -389,41 +410,6 @@ textarea:focus,
   background: transparent;
 }
 
-.icon {
-  margin-right: 16px;
-}
-
-.text {
-  align-self: center;
-}
-
-/* Css for table on bubble-menu */
-.table-size-selector {
-  background: #1e1e1e;
-  border: 1px solid rgb(55 65 81);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 10px;
-  z-index: 1050;
-}
-
-.table-size-selector .row {
-  display: flex;
-}
-
-.table-size-selector .cell {
-  width: 20px;
-  height: 20px;
-  border: 1px solid #ccc;
-  background-color: #323232;
-  transition: background-color 0.3s;
-  margin: 1px;
-}
-
-.table-size-selector .cell.hovered,
-.table-size-selector .cell:hover {
-  background-color: #ddd;
-}
-
 /**
  * TAKEN FROM: https://tiptap.dev/docs/editor/extensions/nodes/table
  */
@@ -443,7 +429,7 @@ textarea:focus,
 
 .tiptap td,
 .tiptap th {
-  border: 1px solid #ccc;
+  border: 1px solid hsl(var(--border));
   box-sizing: border-box;
   min-width: 1em;
   padding: 6px 8px;
@@ -457,9 +443,7 @@ textarea:focus,
 }
 
 .tiptap th {
-  /* background-color: rgba(61, 37, 20, .05); */
-  background-color: rgba(162, 157, 153, 0.5);
-  /* 50% transparent white */
+  background-color: var(--surface-2);
   font-weight: bold;
   text-align: left;
 }
@@ -477,7 +461,7 @@ textarea:focus,
 }
 
 .tiptap .column-resize-handle {
-  background-color: var(--purple);
+  background-color: rgb(var(--accent-ink));
   bottom: -2px;
   pointer-events: none;
   position: absolute;
@@ -494,26 +478,6 @@ textarea:focus,
 .tiptap.resize-cursor {
   cursor: ew-resize;
   cursor: col-resize;
-}
-
-.my-day-picker .rdp {
-  @apply text-xs;
-  /* Adjust font size */
-}
-
-.my-day-picker .rdp-months {
-  @apply p-2;
-  /* Adjust padding */
-}
-
-.my-day-picker .rdp-caption {
-  @apply text-sm;
-  /* Adjust caption font size */
-}
-
-.my-day-picker .rdp-day {
-  @apply w-6 h-6 leading-6;
-  /* Adjust day cell size */
 }
 
 @layer base {
@@ -588,8 +552,6 @@ textarea:focus,
   }
 }
 
-.settings-nav > div,
-.settings-nav > button,
 [data-settings-nav='true'] > div,
 [data-settings-nav='true'] > button {
   transition:
@@ -598,13 +560,6 @@ textarea:focus,
 }
 
 @media (max-width: 640px) {
-  .settings-shell,
-  [data-settings-shell='true'] {
-    min-height: 0 !important;
-    flex-direction: column !important;
-  }
-
-  .settings-nav,
   [data-settings-nav='true'] {
     width: 100% !important;
     min-width: 0 !important;
@@ -618,8 +573,6 @@ textarea:focus,
     gap: 0.25rem !important;
   }
 
-  .settings-nav > div,
-  .settings-nav > button,
   [data-settings-nav='true'] > div,
   [data-settings-nav='true'] > button {
     flex: 0 0 auto !important;
@@ -628,7 +581,6 @@ textarea:focus,
     border-radius: 0.4rem !important;
   }
 
-  .settings-panel,
   [data-settings-panel='true'] {
     width: 100% !important;
     max-width: none !important;
@@ -636,19 +588,11 @@ textarea:focus,
     overflow-x: hidden !important;
   }
 }
+
 @media (max-width: 640px) {
   .titlebar {
     padding-left: 0.35rem !important;
     padding-right: 0.35rem !important;
-  }
-
-  .titlebar-title {
-    font-size: 0.58rem;
-    letter-spacing: 0.12em;
-  }
-
-  .titlebar-feedback {
-    display: none;
   }
 
   .titlebar-actions {
@@ -659,9 +603,7 @@ textarea:focus,
     padding-left: 0.75rem !important;
     padding-right: 0.75rem !important;
   }
-}
 
-@media (max-width: 640px) {
   .main-editor-panel.is-background-panel {
     display: none !important;
   }
@@ -686,7 +628,7 @@ textarea:focus,
     width: calc(100vw - 40px) !important;
     min-width: calc(100vw - 40px) !important;
     flex: none !important;
-    box-shadow: 12px 0 32px rgba(0, 0, 0, 0.28);
+    box-shadow: 1px 0 0 var(--line);
   }
   .sidebar-panel-hidden {
     display: none !important;
@@ -715,7 +657,7 @@ button[role='switch'] {
 
 .wikiobs-switch-root[data-state='checked'],
 button[role='switch'][data-state='checked'] {
-  background-color: #7b68ee !important;
+  background-color: rgb(var(--accent-ink)) !important;
 }
 
 .wikiobs-switch-root[data-state='unchecked'],
@@ -756,12 +698,62 @@ button[role='switch'][data-state='unchecked'] > span {
 }
 
 button[role='switch']:focus-visible {
-  outline: 2px solid #7b68ee !important;
+  outline: 2px solid rgb(var(--accent-ink)) !important;
   outline-offset: 2px !important;
 }
 
 button[role='switch']:disabled {
   opacity: 0.4 !important;
   cursor: not-allowed !important;
+}
+
+/* ==========================================================================
+   react-toastify：扁平化 + 主题跟随
+   类名与 node_modules/react-toastify/dist/ReactToastify.css 对齐。
+   App.tsx 里 ToastContainer 写死了 theme="dark"，浅色主题下必须由这里接管，
+   否则会出现「白底白字」。vendor 的深色底、状态色底、渐变进度条和投影
+   一律让位给产品令牌（--surface-* / --line / --ink*），与其它控件同一套扁平观感。
+   这里用 !important，是因为两份样式表的打包先后顺序不稳定。
+   ========================================================================== */
+.Toastify__toast-container {
+  /* 圆角对齐现有控件（按钮/面板 8px）。进度条包裹层也读这个变量，
+     在这里改一次就不会出现「卡片圆角变了、进度条还是 6px」的错位。 */
+  --toastify-toast-bd-radius: 8px;
+}
+
+.Toastify__toast,
+.Toastify__toast-theme--dark,
+.Toastify__toast-theme--light,
+.Toastify__toast-theme--colored {
+  background: var(--surface-1) !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--line) !important;
+  box-shadow: none !important;
+}
+
+/* 进度条：填充走品牌色，轨道走中性底色，均为纯色，不沿用 vendor 的渐变与状态色。 */
+.Toastify__progress-bar {
+  background: rgb(var(--accent-ink)) !important;
+  opacity: 1 !important;
+}
+
+.Toastify__progress-bar--bg {
+  background: var(--surface-3) !important;
+  opacity: 1 !important;
+}
+
+.Toastify__close-button {
+  color: var(--ink-muted) !important;
+  opacity: 1 !important;
+}
+
+.Toastify__close-button:hover {
+  color: var(--ink) !important;
+}
+
+/* vendor 给关闭按钮写了 outline: none，这里补回可见焦点环。 */
+.Toastify__close-button:focus-visible {
+  outline: 2px solid rgb(var(--accent-ink));
+  outline-offset: 2px;
 }
 

@@ -102,7 +102,7 @@ const InEditorBacklinkSuggestionsDisplay: React.FC<SuggestionsDisplayProps> = ({
   return (
     <div
       ref={suggestionsRef}
-      className={`absolute z-50 min-w-[240px] ${maxWidth} overflow-hidden rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-2xl backdrop-blur-xl animate-in fade-in-0`}
+      className={`absolute z-50 min-w-[240px] ${maxWidth} overflow-hidden rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-sm animate-in fade-in-0`}
       style={{
         left: `${layout.left}px`,
         top: `${layout.top}px`,
@@ -120,18 +120,18 @@ const InEditorBacklinkSuggestionsDisplay: React.FC<SuggestionsDisplayProps> = ({
               key={suggestion}
               className={`flex cursor-pointer items-center justify-between gap-2 rounded-md px-2.5 py-1.5 text-xs transition-colors duration-75 ${
                 isSelected
-                  ? 'bg-accent border-l-2 border-[#7b68ee] font-medium text-accent-foreground shadow-sm'
+                  ? 'bg-accent border-l-2 border-brand font-medium text-accent-foreground shadow-sm'
                   : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
               }`}
               onMouseEnter={() => setSelectedIndex(index)}
               onClick={() => handleSelect(suggestion, index)}
             >
               <div className="flex min-w-0 items-center gap-2">
-                <FileText className={`size-3.5 shrink-0 ${isSelected ? 'text-[#7b68ee]' : 'text-muted-foreground'}`} />
+                <FileText className={`size-3.5 shrink-0 ${isSelected ? 'text-brand' : 'text-muted-foreground'}`} />
                 <span className="truncate">{suggestion}</span>
               </div>
               {isSelected && (
-                <span className="flex shrink-0 items-center gap-1 text-[10px] text-[#a29bfe]">
+                <span className="flex shrink-0 items-center gap-1 text-[10px] text-brand">
                   <span>插入</span>
                   <CornerDownLeft size={10} />
                 </span>

@@ -99,7 +99,7 @@ const NewDirectoryComponent: React.FC<NewDirectoryComponentProps> = ({ isOpen, o
   return (
     <ReorModal isOpen={isOpen} onClose={onClose} className="max-w-[420px] p-5">
       <div className="flex items-start gap-3 pb-3 border-b border-border">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-[#7b68ee]/30 bg-[#7b68ee]/15 text-[#7b68ee] dark:text-[#9d8ff5] shadow-sm shadow-[#7b68ee]/20">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-brand/30 bg-brand/15 text-brand">
           <FolderPlus size={18} strokeWidth={2} />
         </div>
         <div className="min-w-0 flex-1 pr-6">
@@ -118,7 +118,7 @@ const NewDirectoryComponent: React.FC<NewDirectoryComponentProps> = ({ isOpen, o
             placeholder="例如：Projects/Notes"
             disabled={isCreating}
             autoFocus
-            className="h-8 bg-background border-border text-foreground text-xs focus:border-[#7b68ee] font-mono"
+            className="h-8 bg-background border-border text-foreground text-xs focus:border-brand font-mono"
           />
           {errorMessage && <p className="text-[11px] text-red-400 pt-0.5">{errorMessage}</p>}
         </div>
@@ -132,7 +132,7 @@ const NewDirectoryComponent: React.FC<NewDirectoryComponentProps> = ({ isOpen, o
             size="sm"
             onClick={createNewDirectory}
             disabled={isCreating || !directoryRelativePath.trim() || Boolean(errorMessage)}
-            className="text-xs shadow-md shadow-[#7b68ee]/25"
+            className="text-xs"
           >
             {t('file.createDirectory')}
           </Button>

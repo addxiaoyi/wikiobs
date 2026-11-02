@@ -36,7 +36,7 @@
   margin: 0 !important;
   background-color: transparent !important;
   border: none !important;
-  color: #a78bfa !important;
+  color: rgb(var(--accent-ink)) !important;
   font-weight: 450;
   text-decoration: underline !important;
   text-decoration-color: rgba(167, 139, 250, 0.45) !important;
@@ -50,8 +50,8 @@
 [data-backlink='true']:hover {
   background-color: transparent !important;
   border: none !important;
-  color: #c4b5fd !important;
-  text-decoration-color: #a78bfa !important;
+  color: rgb(var(--accent-ink)) !important;
+  text-decoration-color: rgb(var(--accent-ink) / 0.55) !important;
   box-shadow: none !important;
   transform: none !important;
 }
@@ -66,9 +66,9 @@
 .ProseMirror a:not([data-backlink='true']),
 .link:not([data-backlink='true']),
 .hm-link:not([data-backlink='true']) {
-  color: #7b68ee !important;
+  color: rgb(var(--accent-ink)) !important;
   text-decoration: underline !important;
-  text-decoration-color: rgba(123, 104, 238, 0.4) !important;
+  text-decoration-color: rgb(var(--accent-ink) / 0.4) !important;
   text-underline-offset: 4px !important;
   text-decoration-thickness: 1px !important;
   transition: all 75ms ease;
@@ -78,8 +78,8 @@
 .ProseMirror a:not([data-backlink='true']):hover,
 .link:not([data-backlink='true']):hover,
 .hm-link:not([data-backlink='true']):hover {
-  text-decoration-color: #7b68ee !important;
-  color: #6c58dc !important;
+  text-decoration-color: rgb(var(--accent-ink)) !important;
+  color: rgb(var(--accent-hover)) !important;
   text-decoration-thickness: 1.5px !important;
 }
 
@@ -230,7 +230,7 @@ ol > [data-node-type='block-outer']::marker {
 
 :is([data-theme='light'], .light) :where(.x-post-container),
 :where(.x-post-container) {
-  --tweet-skeleton-gradient: linear-gradient(270deg, #fafafa, #eaeaea, #eaeaea, #fafafa);
+  --tweet-skeleton-gradient: #eaeaea;
   --tweet-border: 1px solid rgb(207, 217, 222);
   --tweet-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --tweet-font-color: rgb(15, 20, 25);
@@ -252,7 +252,7 @@ ol > [data-node-type='block-outer']::marker {
 }
 
 :is([data-theme='dark'], .dark) :where(.x-post-container) {
-  --tweet-skeleton-gradient: linear-gradient(270deg, #15202b, rgb(30, 39, 50), rgb(30, 39, 50), rgb(21, 32, 43));
+  --tweet-skeleton-gradient: rgb(30 39 50);
   --tweet-border: 1px solid rgb(66, 83, 100);
   --tweet-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --tweet-font-color: rgb(247, 249, 249);
@@ -275,7 +275,7 @@ ol > [data-node-type='block-outer']::marker {
 
 @media (prefers-color-scheme: dark) {
   :where(.x-post-container) {
-    --tweet-skeleton-gradient: linear-gradient(270deg, #15202b, rgb(30, 39, 50), rgb(30, 39, 50), rgb(21, 32, 43));
+    --tweet-skeleton-gradient: rgb(30 39 50);
     --tweet-border: 1px solid rgb(66, 83, 100);
     --tweet-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     --tweet-font-color: rgb(247, 249, 249);
@@ -506,14 +506,12 @@ ol > [data-node-type='block-outer']::marker {
   background-color: rgb(255,165,0, 0.3);
 }
 
-/* Slash Menu Translucent Acrylic Panel */
+/* Slash Menu Panel */
 .mantine-Menu-dropdown {
-  background: rgba(14, 16, 21, 0.95) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
+  background: rgb(14 16 21) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-radius: 8px !important;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
   padding: 4px !important;
   min-width: 240px !important;
 }
@@ -537,6 +535,6 @@ ol > [data-node-type='block-outer']::marker {
 
 .mantine-Menu-item[data-hovered='true'],
 .mantine-Menu-item:hover {
-  background: rgba(123, 104, 238, 0.18) !important;
+  background: rgb(var(--accent-ink) / 0.18) !important;
   color: #ffffff !important;
 }

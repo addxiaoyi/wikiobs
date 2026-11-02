@@ -347,7 +347,7 @@ export const LocalGraphPanel: React.FC = () => {
 
             {/* Informative Empty State for 0-Link Orphan Notes */}
             {isOrphan && (
-              <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 rounded-full border border-border/80 bg-background/90 px-3 py-1 text-[11px] text-muted-foreground shadow-md backdrop-blur-md">
+              <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 rounded-full border border-border/80 bg-background px-3 py-1 text-[11px] text-muted-foreground shadow-md">
                 <Info size={12} className="text-muted-foreground" />
                 <span>当前笔记暂无双向链接</span>
               </div>

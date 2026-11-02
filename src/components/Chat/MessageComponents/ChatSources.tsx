@@ -102,7 +102,7 @@ const ChatSources: React.FC<ChatSourcesProps> = ({ contextItems }) => {
                 <TooltipContent
                   side="top"
                   align="start"
-                  className="max-w-sm rounded-lg border border-border bg-popover/95 p-2.5 text-xs shadow-xl backdrop-blur-md"
+                  className="max-w-sm rounded-lg border border-border bg-popover p-2.5 text-xs shadow-sm"
                 >
                   <div className="mb-1 flex items-center gap-1.5 font-semibold text-foreground">
                     <FileText size={12} className="shrink-0 text-muted-foreground" />

@@ -60,7 +60,7 @@ const ToolSelector: React.FC<ToolSelectorProps> = ({ allTools, selectedTools, on
         />
       </Button>
       {isOpen && (
-        <div className="absolute mt-1 w-full rounded-md border bg-popover shadow-lg">
+        <div className="absolute mt-1 w-full rounded-md border bg-popover shadow-sm">
           <div className="py-1">
             {allTools.map((tool) => {
               const isSelected = selectedTools.some((selectedTool) => selectedTool.name === tool.name)

@@ -1,6 +1,6 @@
-import { alpha, createTheme } from '@mui/material/styles'
+import { createTheme } from '@mui/material/styles'
 
-const ACCENT = '#7b68ee'
+const ACCENT = 'rgb(var(--accent-ink))'
 const SURFACE = '#111319'
 
 const restoreDialogFocus = (dialog: HTMLElement): void => {
@@ -118,12 +118,13 @@ export const appMuiTheme = createTheme({
           transition: 'all 75ms ease',
         },
         containedPrimary: {
-          backgroundColor: '#7b68ee',
+          backgroundColor: 'rgb(var(--accent-ink))',
           color: '#ffffff',
           fontWeight: 600,
           '&:hover': {
-            backgroundColor: '#6c5ce7',
-            boxShadow: '0 0 16px rgba(123, 104, 238, 0.35)',
+            // 按下态比常态深一档，与 --accent-hover 同值。
+            backgroundColor: 'rgb(var(--accent-hover))',
+            boxShadow: '0 0 16px rgb(var(--accent-ink) / 0.35)',
           },
         },
         outlined: {
@@ -143,7 +144,7 @@ export const appMuiTheme = createTheme({
           borderRadius: 4,
           padding: 6,
           '&.Mui-checked': {
-            color: '#7b68ee',
+            color: 'rgb(var(--accent-ink))',
           },
         },
       },
@@ -161,7 +162,7 @@ export const appMuiTheme = createTheme({
             transform: 'translateX(16px)',
             color: '#fff',
             '& + .MuiSwitch-track': {
-              backgroundColor: '#7b68ee',
+              backgroundColor: 'rgb(var(--accent-ink))',
               opacity: 1,
             },
           },
@@ -211,10 +212,10 @@ export const appMuiTheme = createTheme({
         root: {
           height: 4,
           borderRadius: 999,
-          backgroundColor: 'rgba(123, 104, 238, 0.2)',
+          backgroundColor: 'rgb(var(--accent-ink) / 0.2)',
         },
         bar: {
-          backgroundColor: '#7b68ee',
+          backgroundColor: 'rgb(var(--accent-ink))',
         },
       },
     },

@@ -113,9 +113,9 @@ const FileItemRows: React.FC<ListChildComponentProps> = ({ index, style, data })
 
   const itemClasses = `relative flex items-center cursor-pointer px-2 py-1 h-full mt-0 mb-0 font-sans text-xs leading-relaxed rounded-md transition-colors duration-100 ${
     isSelected
-      ? 'font-medium bg-[var(--accent-soft)] text-foreground'
+      ? 'font-medium bg-brand-soft text-foreground'
       : 'text-muted-foreground/85 hover:text-foreground hover:bg-[var(--surface-2)]'
-  } ${isDragOver ? 'bg-[var(--accent-soft)] ring-1 ring-[#7b68ee]/50' : ''}`
+  } ${isDragOver ? 'bg-brand-soft ring-1 ring-brand/50' : ''}`
 
   const renderContextMenuItems = () => (
     <>
@@ -181,7 +181,7 @@ const FileItemRows: React.FC<ListChildComponentProps> = ({ index, style, data })
           />
         ))}
       {isSelected && !isDirectory && (
-        <span className="absolute left-0.5 top-1 bottom-1 w-[2.5px] rounded-r bg-[#7b68ee] shadow-[0_0_6px_rgba(123,104,238,0.7)] pointer-events-none" />
+        <span className="absolute left-0.5 top-1 bottom-1 w-[2.5px] rounded-r bg-brand pointer-events-none" />
       )}
       <ContextMenu>
         <ContextMenuTrigger>

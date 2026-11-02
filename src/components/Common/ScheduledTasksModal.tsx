@@ -297,7 +297,7 @@ const ScheduledTasksModal: React.FC<ScheduledTasksModalProps> = ({ isOpen, onClo
     <ReorModal isOpen={isOpen} onClose={onClose} embedded={embedded} className="max-w-[620px] p-5">
       {/* Header */}
       <div className="flex items-start gap-3 pb-4 border-b border-border">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-[#7b68ee]/30 bg-[#7b68ee]/15 text-[#7b68ee] dark:text-[#9d8ff5] shadow-sm shadow-[#7b68ee]/20">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-brand/30 bg-brand/15 text-brand">
           <CalendarClock size={18} strokeWidth={2} />
         </div>
         <div className="min-w-0 flex-1 pr-6">
@@ -328,7 +328,7 @@ const ScheduledTasksModal: React.FC<ScheduledTasksModalProps> = ({ isOpen, onClo
         {/* Loading */}
         {loading && (
           <div className="py-8 flex flex-col items-center justify-center gap-2 text-muted-foreground">
-            <Loader2 size={20} className="animate-spin text-[#7b68ee]" />
+            <Loader2 size={20} className="animate-spin text-brand" />
             <span className="text-xs">{t('scheduled.loading')}</span>
           </div>
         )}

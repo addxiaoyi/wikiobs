@@ -45,7 +45,7 @@ const SearchToolRenderer: React.FC<ToolRendererProps> = ({ existingToolResult })
       ) : (
         <div className="rounded-lg border border-border/60 bg-muted/30 p-2.5 font-mono text-xs text-muted-foreground">
           <div className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold text-foreground/80">
-            <Terminal size={12} className="text-[#7b68ee]" />
+            <Terminal size={12} className="text-brand" />
             <span>执行结果</span>
           </div>
           <pre className="overflow-x-auto text-[11px] leading-relaxed">
@@ -73,17 +73,17 @@ const DefaultToolRenderer: React.FC<ToolRendererProps> = ({ toolCallPart, existi
     <Collapsible
       open={isOpen}
       onOpenChange={setIsOpen}
-      className="my-1.5 w-full rounded-lg border border-border/70 bg-card/60 shadow-sm backdrop-blur-sm transition-all"
+      className="my-1.5 w-full rounded-lg border border-border/70 bg-card shadow-sm transition-all"
     >
       <div className="flex items-center justify-between px-3 py-1.5">
         <div className="flex items-center gap-2">
           {isCompleted ? (
             <CheckCircle2 size={13} className="text-emerald-500 shrink-0" />
           ) : (
-            <Wrench size={13} className="text-[#7b68ee] shrink-0" />
+            <Wrench size={13} className="text-brand shrink-0" />
           )}
           <span className="font-mono text-xs font-medium text-foreground">
-            工具调用: <span className="text-[#7b68ee]">{toolCallPart.toolName}</span>
+            工具调用: <span className="text-brand">{toolCallPart.toolName}</span>
           </span>
           <span className="rounded bg-secondary/80 px-1.5 py-0.2 font-mono text-[10px] text-muted-foreground">
             {isCompleted ? '已完成' : '待执行'}
@@ -102,7 +102,7 @@ const DefaultToolRenderer: React.FC<ToolRendererProps> = ({ toolCallPart, existi
           <div className="space-y-1">
             {Object.entries(toolCallPart.args as Record<string, unknown>).map(([key, value]) => (
               <div key={key} className="rounded bg-background/50 p-1.5 text-xs">
-                <span className="font-mono font-medium text-[#7b68ee]">{key}:</span>{' '}
+                <span className="font-mono font-medium text-brand">{key}:</span>{' '}
                 <span className="text-foreground/90">{renderValue(value)}</span>
               </div>
             ))}
@@ -122,7 +122,7 @@ const DefaultToolRenderer: React.FC<ToolRendererProps> = ({ toolCallPart, existi
               <Button
                 onClick={() => executeToolCall(toolCallPart)}
                 size="sm"
-                className="h-7 w-full bg-[#7b68ee] text-xs text-white hover:bg-[#6c5ce7]"
+                className="h-7 w-full bg-brand text-xs text-white hover:bg-brand-hover"
               >
                 执行工具
               </Button>

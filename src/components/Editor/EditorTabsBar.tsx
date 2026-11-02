@@ -19,33 +19,33 @@ import { useTranslation } from '@/lib/i18n'
 
 const getTabIcon = (filePath: string, isActive: boolean) => {
   if (filePath === 'graph://global') {
-    return <Network size={12} className="text-[#7b68ee] shrink-0" />
+    return <Network size={12} className="text-brand shrink-0" />
   }
   if (filePath === 'wikiobs://settings') {
-    return <Settings size={12} className={isActive ? 'text-[#7b68ee]' : 'text-muted-foreground'} />
+    return <Settings size={12} className={isActive ? 'text-brand' : 'text-muted-foreground'} />
   }
   if (filePath === 'wikiobs://plugins') {
-    return <Puzzle size={12} className={isActive ? 'text-[#7b68ee]' : 'text-muted-foreground'} />
+    return <Puzzle size={12} className={isActive ? 'text-brand' : 'text-muted-foreground'} />
   }
   if (filePath === 'wikiobs://tasks') {
-    return <Clock size={12} className={isActive ? 'text-[#7b68ee]' : 'text-muted-foreground'} />
+    return <Clock size={12} className={isActive ? 'text-brand' : 'text-muted-foreground'} />
   }
   if (filePath === 'wikiobs://export') {
-    return <ArrowUpDown size={12} className={isActive ? 'text-[#7b68ee]' : 'text-muted-foreground'} />
+    return <ArrowUpDown size={12} className={isActive ? 'text-brand' : 'text-muted-foreground'} />
   }
   if (filePath === 'wikiobs://obsidian') {
-    return <Compass size={12} className={isActive ? 'text-[#7b68ee]' : 'text-muted-foreground'} />
+    return <Compass size={12} className={isActive ? 'text-brand' : 'text-muted-foreground'} />
   }
   if (filePath === 'wikiobs://ai-org') {
-    return <Sparkles size={12} className={isActive ? 'text-[#7b68ee]' : 'text-muted-foreground'} />
+    return <Sparkles size={12} className={isActive ? 'text-brand' : 'text-muted-foreground'} />
   }
   if (filePath === 'wikiobs://wiki-importer') {
-    return <Globe size={12} className={isActive ? 'text-[#7b68ee]' : 'text-muted-foreground'} />
+    return <Globe size={12} className={isActive ? 'text-brand' : 'text-muted-foreground'} />
   }
   if (filePath === 'wikiobs://vaults') {
-    return <FolderGit2 size={12} className={isActive ? 'text-[#7b68ee]' : 'text-muted-foreground'} />
+    return <FolderGit2 size={12} className={isActive ? 'text-brand' : 'text-muted-foreground'} />
   }
-  return <FileText size={12} className={isActive ? 'text-[#7b68ee]' : 'text-muted-foreground'} />
+  return <FileText size={12} className={isActive ? 'text-brand' : 'text-muted-foreground'} />
 }
 
 export const EditorTabsBar: React.FC = () => {
@@ -99,7 +99,7 @@ export const EditorTabsBar: React.FC = () => {
               title={`${tab.title}\n${tab.filePath}`}
               className={`editor-tab group relative flex h-full max-w-[200px] min-w-[110px] items-center justify-between gap-1.5 px-3 text-xs border-r border-[var(--line)] transition-all duration-100 cursor-pointer select-none ${
                 isActive
-                  ? 'bg-[var(--surface-1)] text-foreground font-medium border-t-2 border-t-[#7b68ee] -mb-[1px] border-b border-b-[var(--surface-1)] z-10'
+                  ? 'bg-[var(--surface-1)] text-foreground font-medium border-t-2 border-t-brand -mb-[1px] border-b border-b-[var(--surface-1)] z-10'
                   : 'bg-[var(--surface-0)] text-muted-foreground/80 hover:text-foreground hover:bg-[var(--surface-2)] border-t-2 border-t-transparent'
               }`}
             >
@@ -111,7 +111,7 @@ export const EditorTabsBar: React.FC = () => {
               <div className="flex items-center shrink-0">
                 {isDirty && (
                   <span
-                    className="mr-1 size-1.5 rounded-full bg-[#7b68ee] shadow-[0_0_6px_rgba(123,104,238,0.7)]"
+                    className="mr-1 size-1.5 rounded-full bg-brand"
                     title={t('editor.saveDirty') || '未保存'}
                   />
                 )}
@@ -121,7 +121,7 @@ export const EditorTabsBar: React.FC = () => {
                     e.stopPropagation()
                     closeTab(tab.id)
                   }}
-                  className={`flex size-4.5 items-center justify-center rounded-sm text-muted-foreground transition-all hover:bg-[var(--accent-soft)] hover:text-[#7b68ee] active:scale-90 ${
+                  className={`flex size-4.5 items-center justify-center rounded-sm text-muted-foreground transition-all hover:bg-brand-soft hover:text-brand-hover active:scale-90 ${
                     isActive ? 'opacity-70 group-hover:opacity-100' : 'opacity-0 group-hover:opacity-100'
                   }`}
                   aria-label={t('button.close') || '关闭标签页'}
@@ -138,7 +138,7 @@ export const EditorTabsBar: React.FC = () => {
       <button
         type="button"
         onClick={() => createUntitledNote()}
-        className="mx-1.5 mb-1.5 flex size-5.5 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-[var(--accent-soft)] hover:text-[#7b68ee] active:scale-90"
+        className="mx-1.5 mb-1.5 flex size-5.5 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-brand-soft hover:text-brand-hover active:scale-90"
         title={t('files.newNote') || '新建标签页 (双击标签栏空白处也可新建)'}
         aria-label={t('files.newNote') || '新建标签页'}
       >

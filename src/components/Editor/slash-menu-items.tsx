@@ -8,7 +8,7 @@ const slashMenuItems = [
     name: '标题 (Heading)',
     aliases: ['h', 'h1', 'h2', 'h3', 'heading', 'title', 'bt', 'biaoti'],
     group: '文本块 (Text)',
-    icon: <Heading size={16} strokeWidth={1.8} className="text-[#a78bfa]" />,
+    icon: <Heading size={16} strokeWidth={1.8} className="text-brand" />,
     hint: '插入各级内容标题',
     execute: (editor: BlockNoteEditor<Record<string, BlockSpec<string, PropSchema>>>) => {
       insertOrUpdateBlock(editor, {

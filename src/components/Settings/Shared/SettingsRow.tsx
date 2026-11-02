@@ -20,7 +20,7 @@ const SettingsSection: React.FC<SettingsSectionProps> = ({ title, children, foot
       <div className="flex items-center justify-between pb-3 border-b border-border">
         <h2 className="text-base font-semibold text-foreground tracking-tight">{title}</h2>
       </div>
-      <div className="w-full rounded-xl border border-border bg-card p-4 divide-y divide-border shadow-sm backdrop-blur-sm">
+      <div className="w-full rounded-xl border border-border bg-card p-4 divide-y divide-border">
         {children}
       </div>
       {error && (

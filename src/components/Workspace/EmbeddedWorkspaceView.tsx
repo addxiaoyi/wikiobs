@@ -21,7 +21,7 @@ export const EmbeddedWorkspaceView: React.FC<EmbeddedWorkspaceViewProps> = ({ ur
       <Suspense
         fallback={
           <div className="flex size-full items-center justify-center gap-2 text-xs text-muted-foreground">
-            <Loader2 size={16} className="animate-spin text-[#7b68ee]" />
+            <Loader2 size={16} className="animate-spin text-brand" />
             <span>加载视图中...</span>
           </div>
         }

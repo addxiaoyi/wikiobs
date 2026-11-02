@@ -48,7 +48,7 @@ const AnalyticsSettings: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* 100% Offline Privacy Hero Banner */}
-      <div className="relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5 shadow-sm backdrop-blur-xl">
+      <div className="relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5">
         <div className="flex items-start gap-3.5">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
             <ShieldCheck size={20} />
@@ -73,7 +73,7 @@ const AnalyticsSettings: React.FC = () => {
           description="本地所有双链关系与向量索引的根工作空间目录"
           control={
             <div className="flex items-center gap-1.5 max-w-xs truncate rounded-md border border-border/70 bg-secondary/50 px-2.5 py-1 font-mono text-xs text-foreground">
-              <Folder size={12} className="text-[#7b68ee] shrink-0" />
+              <Folder size={12} className="text-brand shrink-0" />
               <span className="truncate" title={vaultDir}>{vaultDir}</span>
             </div>
           }
@@ -84,7 +84,7 @@ const AnalyticsSettings: React.FC = () => {
           description="负责文档分块向量化与相似度检索的本地模型"
           control={
             <div className="flex items-center gap-1.5 rounded-md border border-border/70 bg-secondary/50 px-2.5 py-1 font-mono text-xs text-foreground">
-              <Database size={12} className="text-[#7b68ee] shrink-0" />
+              <Database size={12} className="text-brand shrink-0" />
               <span>{embeddingModel}</span>
             </div>
           }
@@ -95,7 +95,7 @@ const AnalyticsSettings: React.FC = () => {
           description="知识助理对话与语义整理的本地 LLM 模型"
           control={
             <div className="flex items-center gap-1.5 rounded-md border border-border/70 bg-secondary/50 px-2.5 py-1 font-mono text-xs text-foreground">
-              <Sparkles size={12} className="text-[#7b68ee] shrink-0" />
+              <Sparkles size={12} className="text-brand shrink-0" />
               <span>{defaultLLM}</span>
             </div>
           }
@@ -111,9 +111,9 @@ const AnalyticsSettings: React.FC = () => {
               size="sm"
               disabled={isReindexing}
               onClick={handleReindex}
-              className="flex items-center gap-1.5 border-border/70 text-xs hover:border-[#7b68ee]/50 hover:bg-[#7b68ee]/10 hover:text-foreground"
+              className="flex items-center gap-1.5 border-border/70 text-xs hover:border-brand-hover/50 hover:bg-brand-hover/10 hover:text-foreground"
             >
-              <RefreshCw size={12} className={isReindexing ? 'animate-spin text-[#7b68ee]' : 'text-muted-foreground'} />
+              <RefreshCw size={12} className={isReindexing ? 'animate-spin text-brand' : 'text-muted-foreground'} />
               <span>{isReindexing ? '正在重建索引...' : '重建向量索引'}</span>
             </Button>
           }

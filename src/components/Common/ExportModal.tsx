@@ -320,7 +320,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, embedded }) 
     <ReorModal isOpen={isOpen} onClose={handleClose} embedded={embedded} className="max-w-[620px] p-5">
       {/* Modal Header */}
       <div className="flex items-start gap-3 pb-4 border-b border-border">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-[#7b68ee]/30 bg-[#7b68ee]/15 text-[#7b68ee] dark:text-[#9d8ff5] shadow-sm shadow-[#7b68ee]/20">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-brand/30 bg-brand/15 text-brand">
           <Download size={18} strokeWidth={2} />
         </div>
         <div className="min-w-0 flex-1 pr-6">
@@ -371,7 +371,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, embedded }) 
                   className={cn(
                     'group relative flex flex-col items-center justify-center rounded-xl p-2.5 text-center transition-all cursor-pointer border',
                     isSelected
-                      ? 'border-[#7b68ee] bg-[#7b68ee]/15 text-[#7b68ee] dark:text-[#a29bfe] ring-1 ring-[#7b68ee]/40 shadow-sm shadow-[#7b68ee]/20'
+                      ? 'border-brand bg-brand/15 text-brand ring-1 ring-brand/40'
                       : 'border-border bg-card text-muted-foreground hover:border-border/80 hover:bg-accent/50 hover:text-foreground',
                   )}
                 >
@@ -379,7 +379,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, embedded }) 
                     className={cn(
                       'flex size-8 items-center justify-center rounded-lg transition-colors mb-1.5',
                       isSelected
-                        ? 'bg-[#7b68ee] text-white'
+                        ? 'bg-brand text-white'
                         : 'bg-muted text-muted-foreground group-hover:text-foreground',
                     )}
                   >
@@ -463,7 +463,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, embedded }) 
                       className={cn(
                         'px-2 py-0.5 rounded text-[11px] transition-colors',
                         isActive
-                          ? 'bg-[#7b68ee]/20 text-[#7b68ee] dark:text-[#9d8ff5] font-medium border border-[#7b68ee]/30'
+                          ? 'bg-brand/20 text-brand font-medium border border-brand/30'
                           : 'bg-muted/40 text-muted-foreground hover:text-foreground border border-transparent',
                       )}
                     >
@@ -581,7 +581,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, embedded }) 
                       }}
                       className={cn(
                         'export-preview-item flex items-center gap-2.5 rounded-md px-2 py-1.5 text-xs transition-colors cursor-pointer select-none',
-                        isChecked ? 'bg-[#7b68ee]/15 text-[#7b68ee] dark:text-[#a29bfe] font-medium' : 'text-foreground hover:bg-accent',
+                        isChecked ? 'bg-brand/15 text-brand font-medium' : 'text-foreground hover:bg-accent',
                       )}
                     >
                       <Checkbox
@@ -619,7 +619,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, embedded }) 
           <div className="space-y-1.5 rounded-xl border border-purple-500/20 bg-purple-500/10 p-3">
             <div className="flex items-center justify-between text-xs text-purple-200">
               <span className="flex items-center gap-1.5">
-                <Loader2 size={13} className="animate-spin text-[#7b68ee]" />
+                <Loader2 size={13} className="animate-spin text-brand" />
                 {t('export.exporting')}
               </span>
             </div>
@@ -702,7 +702,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, embedded }) 
             size="sm"
             onClick={handleExport}
             disabled={exporting || (preview !== null && selectedFiles.size === 0)}
-            className="text-xs shadow-md shadow-[#7b68ee]/25 gap-1.5"
+            className="text-xs gap-1.5"
           >
             {exporting ? (
               <>

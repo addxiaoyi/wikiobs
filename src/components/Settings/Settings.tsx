@@ -85,18 +85,18 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
   if (embedded) {
     return (
-      <div className="size-full flex flex-col bg-background text-foreground overflow-hidden">
-        <div className="h-full flex w-full overflow-hidden">
+      <div className="flex size-full flex-col overflow-hidden bg-background text-foreground">
+        <div className="flex size-full overflow-hidden">
           {/* Left Navigation Sidebar */}
           <div
             data-settings-nav="true"
             role="tablist"
             aria-label={t('settings.title')}
-            className="w-56 shrink-0 flex flex-col gap-1 border-r border-border bg-secondary/30 p-4 text-foreground"
+            className="flex w-56 shrink-0 flex-col gap-1 border-r border-border bg-secondary/30 p-4 text-foreground"
           >
-            <div className="flex items-center justify-between px-2 py-2 mb-3 border-b border-border">
+            <div className="mb-3 flex items-center justify-between border-b border-border p-2">
               <div className="flex items-center gap-2">
-                <div className="flex size-7 items-center justify-center rounded-lg bg-[#7b68ee]/20 text-[#7b68ee] dark:text-[#9d8ff5] border border-[#7b68ee]/30">
+                <div className="flex size-7 items-center justify-center rounded-lg border border-brand/30 bg-brand/20 text-brand">
                   <Settings2 size={15} />
                 </div>
                 <span className="text-sm font-semibold tracking-tight text-foreground">{t('settings.title')}</span>
@@ -104,7 +104,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               <button
                 type="button"
                 onClick={handleSave}
-                className="flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground cursor-pointer"
+                className="flex size-6 cursor-pointer items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground"
                 title={t('button.close')}
               >
                 <X size={14} />
@@ -125,7 +125,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                   className={cn(
                     'settings-tab group flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-medium transition-all text-left w-full cursor-pointer',
                     isActive
-                      ? 'is-active bg-[#7b68ee]/15 text-[#7b68ee] dark:text-[#a29bfe] shadow-sm border border-[#7b68ee]/30 font-semibold'
+                      ? 'is-active bg-brand/15 text-brand shadow-sm border border-brand/30 font-semibold'
                       : 'text-muted-foreground hover:text-foreground hover:bg-accent/60 border border-transparent',
                   )}
                   onClick={() => setActiveTab(id)}
@@ -135,7 +135,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     size={16}
                     className={cn(
                       'transition-colors shrink-0',
-                      isActive ? 'text-[#7b68ee] dark:text-[#9d8ff5]' : 'text-muted-foreground group-hover:text-foreground',
+                      isActive ? 'text-brand' : 'text-muted-foreground group-hover:text-foreground',
                     )}
                     aria-hidden="true"
                   />
@@ -143,10 +143,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 </button>
               )
             })}
-            <div className="mt-auto pt-3 border-t border-border/40 text-[10px] text-muted-foreground/70 px-2 flex flex-col gap-0.5 select-none">
-              <span className="font-medium text-foreground/85 tracking-wide">WIKIOBS</span>
+            <div className="mt-auto flex select-none flex-col gap-0.5 border-t border-border/40 px-2 pt-3 text-[10px] text-muted-foreground/70">
+              <span className="font-medium tracking-wide text-foreground/85">WIKIOBS</span>
               <span>Helstera 旗下产品</span>
-              <span className="text-[9px] text-muted-foreground/50">v0.2.31</span>
+              <span className="text-[9px] text-muted-foreground/50">v0.3.0</span>
             </div>
           </div>
 
@@ -156,9 +156,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             id={`settings-panel-${activeTab}`}
             role="tabpanel"
             aria-labelledby={`settings-tab-${activeTab}`}
-            className="flex-1 min-w-0 h-full overflow-y-auto bg-background p-8 custom-scrollbar"
+            className="custom-scrollbar h-full min-w-0 flex-1 overflow-y-auto bg-background p-8"
           >
-            <div className="max-w-3xl mx-auto">
+            <div className="mx-auto max-w-3xl">
               {activeTab === SettingsTab.GeneralSettingsTab && <EditorSettings />}
               {activeTab === SettingsTab.LLMSettingsTab && <LLMSettingsContent />}
               {activeTab === SettingsTab.EmbeddingModelTab && (
@@ -180,7 +180,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         if (!open) handleSave()
       }}
     >
-      <DialogContent aria-describedby={undefined} className="p-0 border border-border bg-popover text-popover-foreground shadow-[0_24px_64px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.06),0_0_40px_rgba(123,104,238,0.08)] backdrop-blur-2xl rounded-2xl overflow-hidden max-w-[840px]">
+      <DialogContent
+        aria-describedby={undefined}
+        className="max-w-[840px] overflow-hidden rounded-2xl border border-border bg-popover p-0 text-popover-foreground shadow-sm"
+      >
         <DialogTitle className="sr-only">{t('settings.title')}</DialogTitle>
         <DialogClose asChild>
           <button
@@ -193,16 +196,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             <X size={15} strokeWidth={2} />
           </button>
         </DialogClose>
-        <div className="h-[min(82vh,740px)] max-h-[calc(100vh-32px)] flex w-full overflow-hidden">
+        <div className="flex h-[min(82vh,740px)] max-h-[calc(100vh-32px)] w-full overflow-hidden">
           {/* Left Navigation Sidebar */}
           <div
             data-settings-nav="true"
             role="tablist"
             aria-label={t('settings.title')}
-            className="w-48 shrink-0 flex flex-col gap-1 border-r border-border bg-secondary/50 p-3 text-foreground"
+            className="flex w-48 shrink-0 flex-col gap-1 border-r border-border bg-secondary/50 p-3 text-foreground"
           >
-            <div className="flex items-center gap-2 px-2 py-2 mb-2 border-b border-border">
-              <div className="flex size-7 items-center justify-center rounded-lg bg-[#7b68ee]/20 text-[#7b68ee] dark:text-[#9d8ff5] border border-[#7b68ee]/30">
+            <div className="mb-2 flex items-center gap-2 border-b border-border p-2">
+              <div className="flex size-7 items-center justify-center rounded-lg border border-brand/30 bg-brand/20 text-brand">
                 <Settings2 size={15} />
               </div>
               <span className="text-xs font-semibold tracking-tight text-foreground">{t('settings.title')}</span>
@@ -222,7 +225,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                   className={cn(
                     'settings-tab group flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all text-left w-full cursor-pointer',
                     isActive
-                      ? 'is-active bg-[#7b68ee]/15 text-[#7b68ee] dark:text-[#a29bfe] shadow-sm border border-[#7b68ee]/30 font-semibold'
+                      ? 'is-active bg-brand/15 text-brand shadow-sm border border-brand/30 font-semibold'
                       : 'text-muted-foreground hover:text-foreground hover:bg-accent/60 border border-transparent',
                   )}
                   onClick={() => setActiveTab(id)}
@@ -232,7 +235,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     size={15}
                     className={cn(
                       'transition-colors shrink-0',
-                      isActive ? 'text-[#7b68ee] dark:text-[#9d8ff5]' : 'text-muted-foreground group-hover:text-foreground',
+                      isActive ? 'text-brand' : 'text-muted-foreground group-hover:text-foreground',
                     )}
                     aria-hidden="true"
                   />
@@ -240,10 +243,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 </button>
               )
             })}
-            <div className="mt-auto pt-3 border-t border-border/40 text-[10px] text-muted-foreground/70 px-2 flex flex-col gap-0.5 select-none">
-              <span className="font-medium text-foreground/85 tracking-wide">WIKIOBS</span>
+            <div className="mt-auto flex select-none flex-col gap-0.5 border-t border-border/40 px-2 pt-3 text-[10px] text-muted-foreground/70">
+              <span className="font-medium tracking-wide text-foreground/85">WIKIOBS</span>
               <span>Helstera 旗下产品</span>
-              <span className="text-[9px] text-muted-foreground/50">v0.2.31</span>
+              <span className="text-[9px] text-muted-foreground/50">v0.3.0</span>
             </div>
           </div>
 
@@ -253,7 +256,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             id={`settings-panel-${activeTab}`}
             role="tabpanel"
             aria-labelledby={`settings-tab-${activeTab}`}
-            className="flex-1 min-w-0 h-full overflow-y-auto bg-background/50 custom-scrollbar"
+            className="custom-scrollbar h-full min-w-0 flex-1 overflow-y-auto bg-background/50"
           >
             {activeTab === SettingsTab.GeneralSettingsTab && <EditorSettings />}
             {activeTab === SettingsTab.LLMSettingsTab && <LLMSettingsContent />}

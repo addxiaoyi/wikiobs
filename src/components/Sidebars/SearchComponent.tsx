@@ -177,12 +177,12 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
             placeholder={
               searchParams.searchMode === 'hybrid' ? t('search.placeholderHybrid') : t('search.placeholderVector')
             }
-            className="h-8 w-full rounded-md border border-border bg-background pl-8 pr-7 text-xs text-foreground placeholder:text-muted-foreground transition-colors focus:border-[#7b68ee] focus:outline-none focus:ring-1 focus:ring-[#7b68ee]"
+            className="h-8 w-full rounded-md border border-border bg-background pl-8 pr-7 text-xs text-foreground placeholder:text-muted-foreground transition-colors focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
           />
           <button
             type="button"
             className={`absolute right-5 top-5 flex items-center transition-colors ${
-              showSearchOptions ? 'text-[#7b68ee]' : 'text-muted-foreground hover:text-foreground'
+              showSearchOptions ? 'text-brand' : 'text-muted-foreground hover:text-foreground'
             }`}
             onClick={() => setShowSearchOptions((open) => !open)}
             aria-label={t('search.options')}
@@ -199,7 +199,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
             id="search-options"
             role="region"
             aria-label={t('search.options')}
-            className="mx-3 mt-2 rounded-md border border-border bg-card p-3 text-xs shadow-lg animate-slide-down"
+            className="mx-3 mt-2 rounded-md border border-border bg-card p-3 text-xs shadow-sm animate-slide-down"
           >
             <div className="flex items-center justify-between">
               <span className="font-medium text-foreground">{t('search.hybrid')}</span>
@@ -216,7 +216,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
               <div className="mt-3 border-t border-border pt-3">
                 <div className="mb-2 flex items-center justify-between text-[11px]">
                   <span className="font-medium text-foreground">{t('search.balance')}</span>
-                  <span className="text-[#a29bfe] font-mono">
+                  <span className="text-brand font-mono">
                     {Math.round(searchParams.vectorWeight * 100)}% 语义 / {Math.round((1 - searchParams.vectorWeight) * 100)}% 关键词
                   </span>
                 </div>
@@ -234,15 +234,15 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
                     aria-label={t('search.balance')}
                   >
                     <Slider.Track backgroundColor="rgba(255, 255, 255, 0.15)">
-                      <Slider.TrackActive backgroundColor="#7b68ee" />
+                      <Slider.TrackActive backgroundColor="rgb(var(--accent-ink))" />
                     </Slider.Track>
                     <Slider.Thumb
                       index={0}
                       circular
                       size={16}
-                      backgroundColor="#7b68ee"
-                      hoverStyle={{ backgroundColor: '#6c5ce7' }}
-                      focusStyle={{ backgroundColor: '#6c5ce7' }}
+                      backgroundColor="rgb(var(--accent-ink))"
+                      hoverStyle={{ backgroundColor: 'rgb(var(--accent-ink))' }}
+                      focusStyle={{ backgroundColor: 'rgb(var(--accent-ink))' }}
                     />
                   </Slider>
                 </div>

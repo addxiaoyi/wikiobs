@@ -209,7 +209,7 @@ const ObsidianCompatModal: React.FC<ObsidianCompatModalProps> = ({ isOpen, onClo
     <ReorModal isOpen={isOpen} onClose={handleClose} embedded={embedded} className="max-w-[560px] p-5">
       {/* Header */}
       <div className="flex items-start gap-3 pb-4 border-b border-border">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-[#7b68ee]/30 bg-[#7b68ee]/15 text-[#7b68ee] dark:text-[#9d8ff5] shadow-sm shadow-[#7b68ee]/20">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-brand/30 bg-brand/15 text-brand">
           <FolderArchive size={18} strokeWidth={2} />
         </div>
         <div className="min-w-0 flex-1 pr-6">
@@ -230,7 +230,7 @@ const ObsidianCompatModal: React.FC<ObsidianCompatModalProps> = ({ isOpen, onClo
             className={cn(
               'flex-1 flex items-center justify-center gap-1.5 rounded-md py-1.5 text-xs font-medium transition-all',
               mode === 'export'
-                ? 'bg-[#7b68ee] text-white shadow-sm'
+                ? 'bg-brand text-white shadow-sm'
                 : 'text-muted-foreground hover:text-foreground',
             )}
           >
@@ -246,7 +246,7 @@ const ObsidianCompatModal: React.FC<ObsidianCompatModalProps> = ({ isOpen, onClo
             className={cn(
               'flex-1 flex items-center justify-center gap-1.5 rounded-md py-1.5 text-xs font-medium transition-all',
               mode === 'import'
-                ? 'bg-[#7b68ee] text-white shadow-sm'
+                ? 'bg-brand text-white shadow-sm'
                 : 'text-muted-foreground hover:text-foreground',
             )}
           >
@@ -280,7 +280,7 @@ const ObsidianCompatModal: React.FC<ObsidianCompatModalProps> = ({ isOpen, onClo
           <div className="space-y-1.5 rounded-lg border border-purple-500/20 bg-purple-500/10 p-3">
             <div className="flex items-center justify-between text-xs text-purple-700 dark:text-purple-200">
               <span className="flex items-center gap-1.5 truncate">
-                <Loader2 size={13} className="animate-spin text-[#7b68ee] shrink-0" />
+                <Loader2 size={13} className="animate-spin text-brand shrink-0" />
                 <span>
                   {t('obsidianCompat.processing', { current: progress.current, total: progress.total })}
                   {progress.fileName && ` · ${progress.fileName}`}
@@ -336,7 +336,7 @@ const ObsidianCompatModal: React.FC<ObsidianCompatModalProps> = ({ isOpen, onClo
           size="sm"
           onClick={mode === 'export' ? handleExport : handleImport}
           disabled={isProcessing || (mode === 'export' ? !outputDir : !sourceDir)}
-          className="text-xs gap-1.5 shadow-md shadow-[#7b68ee]/25"
+          className="text-xs gap-1.5"
         >
           {isProcessing ? (
             <>

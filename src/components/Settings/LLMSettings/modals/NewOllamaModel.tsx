@@ -105,7 +105,7 @@ const NewOllamaModelModal: React.FC<NewOllamaModelModalProps> = ({ isOpen, onClo
     <ReorModal isOpen={isOpen} onClose={handleClose} className="max-w-[460px] p-5">
       {/* Header */}
       <div className="flex items-start gap-3 pb-3 border-b border-border">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-[#7b68ee]/30 bg-[#7b68ee]/15 text-[#7b68ee] shadow-sm shadow-[#7b68ee]/20">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-brand/30 bg-brand/15 text-brand">
           <Download size={18} strokeWidth={2} />
         </div>
         <div className="min-w-0 flex-1 pr-6">
@@ -178,7 +178,7 @@ const NewOllamaModelModal: React.FC<NewOllamaModelModalProps> = ({ isOpen, onClo
             size="sm"
             onClick={downloadSelectedModel}
             disabled={isDownloading || !modelNameBeingInputted.trim()}
-            className="text-xs shadow-md shadow-[#7b68ee]/25 gap-1.5"
+            className="text-xs gap-1.5"
           >
             {isDownloading ? (
               <>

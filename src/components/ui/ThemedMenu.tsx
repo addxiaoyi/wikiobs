@@ -17,10 +17,9 @@ const ThemedMenu: React.FC<ThemedMenuProps & MenuProps> = ({ children, ...restPr
       {...restProps}
       styles={{
         dropdown: {
-          backgroundColor: '#0e1015',
-          borderColor: 'rgba(255, 255, 255, 0.1)',
-          backdropFilter: 'blur(16px)',
-          boxShadow: '0 20px 48px -10px rgba(0,0,0,0.7)',
+          backgroundColor: 'var(--surface-1)',
+          borderColor: 'var(--line)',
+          boxShadow: 'none',
           borderRadius: '8px',
           padding: '4px',
         },
@@ -40,13 +39,13 @@ export const ThemedMenuItem: React.FC<ThemedMenuItemProps> = <C extends React.El
       {...props}
       style={{
         backgroundColor: 'transparent',
-        color: '#f8fafc',
+        color: 'var(--ink)',
         borderRadius: '6px',
         fontSize: '12px',
         ...style,
       }}
       onMouseEnter={(e: React.MouseEvent<HTMLElement>) => {
-        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)'
+        e.currentTarget.style.backgroundColor = 'var(--surface-2)'
       }}
       onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
         e.currentTarget.style.backgroundColor = 'transparent'

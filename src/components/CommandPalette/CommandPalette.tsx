@@ -22,6 +22,7 @@ import {
   ChevronsDownUp,
   ChevronsUpDown,
 } from 'lucide-react'
+import type { PluginCommandEntry } from '@shared/plugin-types'
 import { useModalOpeners } from '@/contexts/ModalContext'
 import { useFileContext } from '@/contexts/FileContext'
 import { useContentContext } from '@/contexts/ContentContext'
@@ -29,7 +30,6 @@ import { useChatContext } from '@/contexts/ChatContext'
 import { useThemeManager } from '@/contexts/ThemeContext'
 import { useTranslation } from '@/lib/i18n'
 import { removeFileExtension } from '@/lib/file'
-import ShinyText from '@/components/ui/ShinyText'
 
 interface PaletteItem {
   id: string
@@ -248,7 +248,7 @@ const CommandPalette: React.FC = () => {
       {
         id: 'action-reactbits-showcase',
         title: 'React Bits 组件展厅',
-        subtitle: '预览与交互测试 ShinyText 与 Stepper 组件',
+        subtitle: '预览与交互测试 Stepper 组件',
         icon: <Sparkles size={15} strokeWidth={1.8} />,
         section: 'actions',
         onSelect: () => {
@@ -280,7 +280,8 @@ const CommandPalette: React.FC = () => {
       },
       {
         id: 'action-theme',
-        title: theme === 'dark' ? t('theme.switchToLight') || '切换至浅色模式' : t('theme.switchToDark') || '切换至深色模式',
+        title:
+          theme === 'dark' ? t('theme.switchToLight') || '切换至浅色模式' : t('theme.switchToDark') || '切换至深色模式',
         subtitle: '切换应用界面高对比单色主题',
         icon: theme === 'dark' ? <Sun size={15} strokeWidth={1.8} /> : <Moon size={15} strokeWidth={1.8} />,
         section: 'actions',
@@ -327,6 +328,44 @@ const CommandPalette: React.FC = () => {
   )
 
   // Filtered items based on query
+  const [pluginCommands, setPluginCommands] = useState<PluginCommandEntry[]>([])
+
+  useEffect(() => {
+    if (!isCommandPaletteOpen) return undefined
+    let cancelled = false
+    window.plugin
+      .getContributions()
+      .then((registry) => {
+        if (!cancelled) setPluginCommands(registry?.commands ?? [])
+      })
+      .catch(() => undefined)
+    return () => {
+      cancelled = true
+    }
+  }, [isCommandPaletteOpen])
+
+  const pluginActions: PaletteItem[] = useMemo(
+    () =>
+      pluginCommands.map((command) => ({
+        id: `plugin-command-${command.pluginId}-${command.id}`,
+        title: command.label,
+        subtitle: `${command.pluginName}${command.description ? ` · ${command.description}` : ''}`,
+        icon: <Puzzle size={15} strokeWidth={1.8} />,
+        section: 'actions' as const,
+        onSelect: () => {
+          close()
+          window.plugin.runCommand({ pluginId: command.pluginId, commandId: command.id }).then(
+            (result) => {
+              if (result.success) return
+              console.warn(`Plugin command failed: ${command.pluginId}.${command.id}`, result.error)
+            },
+            () => undefined,
+          )
+        },
+      })),
+    [pluginCommands, close],
+  )
+
   const items: PaletteItem[] = useMemo(() => {
     const q = query.trim().toLowerCase()
 
@@ -351,7 +390,7 @@ const CommandPalette: React.FC = () => {
         .filter((item): item is PaletteItem => item !== null)
         .slice(0, 5)
 
-      return [...recentNotes, ...allActions]
+      return [...pluginActions, ...recentNotes, ...allActions]
     }
 
     // Matching notes
@@ -401,8 +440,8 @@ const CommandPalette: React.FC = () => {
           ]
         : []
 
-    return [...dynamicCreate, ...matchedNotes, ...matchedActions]
-  }, [query, vaultFilesFlattened, navigationHistory, allActions, close, openContent, createUntitledNote])
+    return [...dynamicCreate, ...matchedNotes, ...pluginActions, ...matchedActions]
+  }, [query, vaultFilesFlattened, navigationHistory, allActions, pluginActions, close, openContent, createUntitledNote])
 
   // Reset selected index when items change
   useEffect(() => {
@@ -449,7 +488,7 @@ const CommandPalette: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-start justify-center bg-black/60 pt-[14vh] backdrop-blur-md animate-in fade-in-0 duration-100"
+      className="fixed inset-0 z-[9999] flex items-start justify-center bg-black/60 pt-[14vh] animate-in fade-in-0 duration-100"
       onClick={close}
       onKeyDown={handleKeyDown}
       role="dialog"
@@ -457,7 +496,7 @@ const CommandPalette: React.FC = () => {
       aria-label="Command Palette"
     >
       <div
-        className="w-full max-w-xl overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--surface-1)] shadow-2xl backdrop-blur-2xl ring-1 ring-[var(--line)] text-foreground"
+        className="w-full max-w-xl overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--surface-1)] shadow-sm text-foreground"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input Bar */}
@@ -469,7 +508,7 @@ const CommandPalette: React.FC = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="搜索笔记文件、路径或执行指令..."
-            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-[var(--ink-muted)] focus:outline-none"
+            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-[var(--ink-muted)] focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             aria-label="搜索指令"
           />
           {query ? (
@@ -490,9 +529,7 @@ const CommandPalette: React.FC = () => {
         {/* Results List */}
         <div ref={listRef} className="max-h-[380px] overflow-y-auto p-1.5 pr-2">
           {items.length === 0 ? (
-            <div className="py-10 text-center text-xs text-[var(--ink-muted)]">
-              未找到匹配的笔记或指令
-            </div>
+            <div className="py-10 text-center text-xs text-[var(--ink-muted)]">未找到匹配的笔记或指令</div>
           ) : (
             <>
               {recentItems.length > 0 && (
@@ -511,12 +548,12 @@ const CommandPalette: React.FC = () => {
                         onMouseEnter={() => setSelectedIndex(idx)}
                         className={`flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-xs transition-colors duration-75 ${
                           isSelected
-                            ? 'bg-[var(--accent-soft)] font-medium text-foreground border-l-2 border-[#7b68ee] pl-2.5 shadow-xs'
+                            ? 'bg-brand-soft font-medium text-foreground border-l-2 border-brand pl-2.5 shadow-xs'
                             : 'border-l-2 border-transparent text-[var(--ink-muted)] hover:bg-[var(--surface-2)] hover:text-foreground'
                         }`}
                       >
                         <div className="flex min-w-0 items-center gap-2.5">
-                          <span className={isSelected ? 'text-[#7b68ee]' : 'text-[var(--ink-muted)]'}>{item.icon}</span>
+                          <span className={isSelected ? 'text-brand' : 'text-[var(--ink-muted)]'}>{item.icon}</span>
                           <span className="truncate">{highlightMatches(item.title, query)}</span>
                           {item.subtitle && (
                             <span className="truncate text-[11px] text-[var(--ink-muted)]">{item.subtitle}</span>
@@ -550,12 +587,12 @@ const CommandPalette: React.FC = () => {
                         onMouseEnter={() => setSelectedIndex(idx)}
                         className={`flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-xs transition-colors duration-75 ${
                           isSelected
-                            ? 'bg-[var(--accent-soft)] font-medium text-foreground border-l-2 border-[#7b68ee] pl-2.5 shadow-xs'
+                            ? 'bg-brand-soft font-medium text-foreground border-l-2 border-brand pl-2.5 shadow-xs'
                             : 'border-l-2 border-transparent text-[var(--ink-muted)] hover:bg-[var(--surface-2)] hover:text-foreground'
                         }`}
                       >
                         <div className="flex min-w-0 items-center gap-2.5">
-                          <span className={isSelected ? 'text-[#7b68ee]' : 'text-[var(--ink-muted)]'}>{item.icon}</span>
+                          <span className={isSelected ? 'text-brand' : 'text-[var(--ink-muted)]'}>{item.icon}</span>
                           <span className="truncate">{highlightMatches(item.title, query)}</span>
                           {item.subtitle && (
                             <span className="truncate text-[11px] text-[var(--ink-muted)]">{item.subtitle}</span>
@@ -589,12 +626,12 @@ const CommandPalette: React.FC = () => {
                         onMouseEnter={() => setSelectedIndex(idx)}
                         className={`flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-xs transition-colors duration-75 ${
                           isSelected
-                            ? 'bg-[var(--accent-soft)] font-medium text-foreground border-l-2 border-[#7b68ee] pl-2.5 shadow-xs'
+                            ? 'bg-brand-soft font-medium text-foreground border-l-2 border-brand pl-2.5 shadow-xs'
                             : 'border-l-2 border-transparent text-[var(--ink-muted)] hover:bg-[var(--surface-2)] hover:text-foreground'
                         }`}
                       >
                         <div className="flex min-w-0 items-center gap-2.5">
-                          <span className={isSelected ? 'text-[#7b68ee]' : 'text-[var(--ink-muted)]'}>{item.icon}</span>
+                          <span className={isSelected ? 'text-brand' : 'text-[var(--ink-muted)]'}>{item.icon}</span>
                           <span className="truncate">{highlightMatches(item.title, query)}</span>
                           {item.subtitle && (
                             <span className="truncate text-[11px] text-[var(--ink-muted)]">{item.subtitle}</span>
@@ -621,16 +658,7 @@ const CommandPalette: React.FC = () => {
         <div className="flex h-9 items-center justify-between border-t border-[var(--line)] bg-[var(--surface-0)] px-3.5 text-[11px] text-[var(--ink-muted)]">
           <div className="flex items-center gap-1.5">
             <Command size={12} className="text-[var(--ink-muted)]" />
-            <span className="font-medium text-[var(--ink-muted)]">
-              <ShinyText
-                text="WIKIOBS by Helstera · 指令面板"
-                color="currentColor"
-                shineColor="#a29bfe"
-                speed={3.5}
-                shineWidth={35}
-                softness={0.8}
-              />
-            </span>
+            <span className="font-medium text-[var(--ink-muted)]">WIKIOBS by Helstera · 指令面板</span>
           </div>
           <div className="flex items-center gap-3">
             <span>

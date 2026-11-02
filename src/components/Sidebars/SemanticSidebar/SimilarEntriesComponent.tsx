@@ -65,7 +65,7 @@ const SimilarEntriesComponent: React.FC<SimilarEntriesComponentProps> = ({
           {/* Header */}
           <div className="file-sidebar-header flex h-10 items-center justify-between px-3 border-b border-border">
             <div className="flex items-center gap-1.5 text-foreground">
-              <Share2 size={13} className="text-[#7b68ee]" />
+              <Share2 size={13} className="text-brand" />
               <span className="text-[11px] font-semibold uppercase tracking-wider">{titleText}</span>
             </div>
             {updateSimilarEntries && setSimilarEntries && (

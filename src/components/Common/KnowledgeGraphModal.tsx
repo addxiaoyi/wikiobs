@@ -133,7 +133,7 @@ const KnowledgeGraphModal: React.FC<KnowledgeGraphModalProps> = ({ isOpen, onClo
     >
       {/* Header */}
       <div className="flex items-start gap-3 pb-3 border-b border-border shrink-0">
-        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-[#7b68ee]/30 bg-[#7b68ee]/15 text-[#7b68ee] dark:text-[#9d8ff5] shadow-sm shadow-[#7b68ee]/20">
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-brand/30 bg-brand/15 text-brand">
           <Share2 size={16} strokeWidth={2} />
         </div>
         <div className="min-w-0 flex-1 pr-6">
@@ -147,8 +147,8 @@ const KnowledgeGraphModal: React.FC<KnowledgeGraphModalProps> = ({ isOpen, onClo
       {/* Body */}
       <div className="flex-1 min-h-0 relative flex flex-col pt-2 overflow-hidden">
         {loading && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-background/80 backdrop-blur-sm text-muted-foreground">
-            <Loader2 size={24} className="animate-spin text-[#7b68ee]" />
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-background text-muted-foreground">
+            <Loader2 size={24} className="animate-spin text-brand" />
             <span className="text-xs">{t('scheduled.loading')}</span>
           </div>
         )}
@@ -192,7 +192,7 @@ const KnowledgeGraphModal: React.FC<KnowledgeGraphModalProps> = ({ isOpen, onClo
           size="sm"
           onClick={handleOpenInTab}
           title="在工作区标签页中打开"
-          className="text-xs gap-1.5 border-[#7b68ee]/40 text-[#7b68ee] hover:bg-[#7b68ee]/10 hover:text-[#7b68ee]"
+          className="text-xs gap-1.5 border-brand/40 text-brand hover:bg-brand-hover/10 hover:text-brand-hover"
         >
           <Network size={13} />
           <span>在工作区标签页中打开</span>

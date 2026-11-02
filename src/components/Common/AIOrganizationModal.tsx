@@ -322,7 +322,7 @@ const AIOrganizationModal: React.FC<AIOrganizationModalProps> = ({ isOpen, onClo
     <ReorModal isOpen={isOpen} onClose={handleClose} embedded={embedded} className="max-w-[580px] p-5">
       {/* Header */}
       <div className="flex items-start gap-3 pb-4 border-b border-border">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-[#7b68ee]/30 bg-[#7b68ee]/15 text-[#7b68ee] dark:text-[#9d8ff5] shadow-sm shadow-[#7b68ee]/20">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-brand/30 bg-brand/15 text-brand">
           <Brain size={18} strokeWidth={2} />
         </div>
         <div className="min-w-0 flex-1 pr-6">
@@ -407,7 +407,7 @@ const AIOrganizationModal: React.FC<AIOrganizationModalProps> = ({ isOpen, onClo
                   }}
                   className={cn(
                     'flex items-center gap-2.5 rounded px-2 py-1 text-xs transition-colors cursor-pointer select-none',
-                    checked ? 'bg-[#7b68ee]/15 text-[#7b68ee] dark:text-[#a29bfe] font-medium' : 'text-foreground hover:bg-accent',
+                    checked ? 'bg-brand/15 text-brand font-medium' : 'text-foreground hover:bg-accent',
                   )}
                 >
                   <Checkbox
@@ -436,7 +436,7 @@ const AIOrganizationModal: React.FC<AIOrganizationModalProps> = ({ isOpen, onClo
           <div className="space-y-1.5 rounded-lg border border-purple-500/20 bg-purple-500/10 p-3">
             <div className="flex items-center justify-between text-xs text-purple-200">
               <span className="flex items-center gap-1.5 truncate max-w-[70%]">
-                <Loader2 size={13} className="animate-spin text-[#7b68ee] shrink-0" />
+                <Loader2 size={13} className="animate-spin text-brand shrink-0" />
                 <span className="truncate">{progress.status || t('aiOrganization.analyzing')}</span>
               </span>
               <span className="font-mono text-[11px]">{progressPercent}%</span>
@@ -493,7 +493,7 @@ const AIOrganizationModal: React.FC<AIOrganizationModalProps> = ({ isOpen, onClo
                       className="ai-org-suggestion-item flex items-center justify-between gap-2 rounded bg-muted/40 border border-border p-2 text-xs"
                     >
                       <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <Folder size={14} className="text-[#7b68ee] shrink-0" />
+                        <Folder size={14} className="text-brand shrink-0" />
                         <div className="min-w-0 flex-1">
                           <div className="font-medium text-foreground truncate">{suggestion.suggestedCategory}</div>
                           <div className="text-[10px] text-muted-foreground font-mono truncate">{suggestion.path}</div>
@@ -534,7 +534,7 @@ const AIOrganizationModal: React.FC<AIOrganizationModalProps> = ({ isOpen, onClo
             size="sm"
             onClick={handleApply}
             disabled={isApplying}
-            className="text-xs gap-1.5 shadow-md shadow-[#7b68ee]/25"
+            className="text-xs gap-1.5"
           >
             {isApplying && <Loader2 size={13} className="animate-spin" />}
             <span>{isApplying ? t('aiOrganization.applying') : t('aiOrganization.applyChanges')}</span>
@@ -546,7 +546,7 @@ const AIOrganizationModal: React.FC<AIOrganizationModalProps> = ({ isOpen, onClo
               size="sm"
               onClick={handleRun}
               disabled={isRunning || selectedCount === 0}
-              className="text-xs gap-1.5 shadow-md shadow-[#7b68ee]/25"
+              className="text-xs gap-1.5"
             >
               {isRunning ? (
                 <>

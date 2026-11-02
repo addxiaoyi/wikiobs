@@ -89,7 +89,7 @@ const NavigationButtons: React.FC = () => {
         <div
           ref={ref}
           tabIndex={0}
-          className="absolute z-50 min-w-[190px] overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--surface-1)]/95 p-1.5 text-foreground shadow-2xl backdrop-blur-xl animate-in fade-in-0 zoom-in-95"
+          className="absolute z-50 min-w-[190px] overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--surface-1)] p-1.5 text-foreground shadow-sm animate-in fade-in-0 zoom-in-95"
           style={{ left: offsetLeft, top: offsetTop + offsetHeight + 4 }}
         >
           <div className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--ink-muted)]">
@@ -100,10 +100,10 @@ const NavigationButtons: React.FC = () => {
               <button
                 key={pathOrChatID}
                 type="button"
-                className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs text-foreground transition-all duration-100 hover:bg-[var(--accent-soft)] hover:text-[#7b68ee]"
+                className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs text-foreground transition-all duration-100 hover:bg-brand-soft hover:text-brand-hover"
                 onClick={() => goSelected(pathOrChatID)}
               >
-                <FileText size={12} className="text-[#7b68ee] shrink-0" />
+                <FileText size={12} className="text-brand shrink-0" />
                 <span className="truncate">
                   {removeFileExtension(pathOrChatID.replace(/\\/g, '/').split('/').pop() || '')}
                 </span>

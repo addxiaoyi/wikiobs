@@ -81,7 +81,7 @@
 
   blockquote {
     padding: 0.35rem 0.85rem;
-    border-left: 2px solid rgba(167, 139, 250, 0.5);
+    border-left: 2px solid rgb(var(--accent-ink) / 0.5);
     background: transparent;
     border-radius: 0;
     font-style: normal;

@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+import { brandColors } from './src/styles/brand-colors.js'
+
 export default {
   darkMode: ['class'],
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
@@ -53,6 +55,8 @@ export default {
           DEFAULT: 'hsl(var(--destructive))',
           foreground: 'hsl(var(--destructive-foreground))',
         },
+        // 产品品牌色，与上方 accent（shadcn 中性悬停槽位）无关。函数式色值让 brand/xx 透明度可用。
+        ...brandColors,
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',

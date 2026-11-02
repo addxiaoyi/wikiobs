@@ -81,7 +81,7 @@ const VaultSwitcher: React.FC<VaultSwitcherProps> = ({ onOpenManagement }) => {
       <DropdownMenuContent
         align="start"
         side="right"
-        className="w-64 border-border bg-popover/98 text-popover-foreground p-1.5 shadow-2xl backdrop-blur-2xl"
+        className="w-64 border-border bg-popover text-popover-foreground p-1.5 shadow-sm"
       >
         <DropdownMenuLabel className="px-2 py-1.5">
           <div className="text-[11px] font-medium text-muted-foreground">{t('vault.title')}</div>
@@ -112,14 +112,16 @@ const VaultSwitcher: React.FC<VaultSwitcherProps> = ({ onOpenManagement }) => {
                   onClick={() => handleSwitch(vault)}
                   className={cn(
                     'flex items-center justify-between gap-2 rounded px-2 py-1.5 text-xs transition-colors cursor-pointer',
-                    isSelected ? 'bg-[#7b68ee]/20 text-[#7b68ee] dark:text-[#a29bfe] font-medium' : 'text-foreground hover:bg-accent hover:text-foreground',
+                    isSelected
+                      ? 'bg-brand/20 text-brand font-medium'
+                      : 'text-foreground hover:bg-accent hover:text-foreground',
                   )}
                 >
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <span
                       className={cn(
                         'flex size-5 shrink-0 items-center justify-center rounded text-[10px] font-bold',
-                        isSelected ? 'bg-[#7b68ee] text-white' : 'bg-muted text-muted-foreground',
+                        isSelected ? 'bg-brand text-white' : 'bg-muted text-muted-foreground',
                       )}
                     >
                       {vault.name.charAt(0).toUpperCase()}
@@ -131,7 +133,7 @@ const VaultSwitcher: React.FC<VaultSwitcherProps> = ({ onOpenManagement }) => {
                       )}
                     </div>
                   </div>
-                  {isSelected && <Check size={14} className="text-[#7b68ee] shrink-0" />}
+                  {isSelected && <Check size={14} className="text-brand shrink-0" />}
                 </DropdownMenuItem>
               )
             })}

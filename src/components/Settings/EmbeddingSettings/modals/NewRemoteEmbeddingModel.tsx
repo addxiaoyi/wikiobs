@@ -78,7 +78,7 @@ const NewRemoteEmbeddingModelModal: React.FC<NewRemoteEmbeddingModelModalProps> 
     <ReorModal isOpen={isOpen} onClose={handleClose} className="max-w-[440px] p-5">
       {/* Header */}
       <div className="flex items-start gap-3 pb-3 border-b border-border">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-[#7b68ee]/30 bg-[#7b68ee]/15 text-[#7b68ee] shadow-sm shadow-[#7b68ee]/20">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-brand/30 bg-brand/15 text-brand">
           <Database size={18} strokeWidth={2} />
         </div>
         <div className="min-w-0 flex-1 pr-6">
@@ -103,7 +103,10 @@ const NewRemoteEmbeddingModelModal: React.FC<NewRemoteEmbeddingModelModalProps> 
           />
           <div className="text-[11px] text-muted-foreground leading-relaxed space-y-1 pt-1">
             <p className="flex items-center gap-1.5">
-              <ExternalLink href="https://huggingface.co/models?pipeline_tag=feature-extraction&sort=downloads&search=xenova" className="text-[#7b68ee] hover:underline inline-flex items-center gap-1">
+              <ExternalLink
+                href="https://huggingface.co/models?pipeline_tag=feature-extraction&sort=downloads&search=xenova"
+                className="text-brand hover:underline inline-flex items-center gap-1"
+              >
                 <span>Hugging Face</span>
                 <ExternalLinkIcon size={10} />
               </ExternalLink>{' '}
@@ -122,7 +125,7 @@ const NewRemoteEmbeddingModelModal: React.FC<NewRemoteEmbeddingModelModalProps> 
             size="sm"
             onClick={saveModelConfigToElectronStore}
             disabled={isSaving || !huggingfaceRepo.trim()}
-            className="text-xs shadow-md shadow-[#7b68ee]/25 gap-1.5"
+            className="text-xs gap-1.5"
           >
             {isSaving ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
             <span>{t('embedding.attach')}</span>

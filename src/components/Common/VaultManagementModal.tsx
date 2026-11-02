@@ -253,7 +253,7 @@ const VaultManagementModal: React.FC<VaultManagementModalProps> = ({ isOpen, onC
     <ReorModal isOpen={isOpen} onClose={onClose} embedded={embedded} className="max-w-[620px] p-5">
       {/* Header */}
       <div className="flex items-start gap-3 pb-4 border-b border-border">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-[#7b68ee]/30 bg-[#7b68ee]/15 text-[#7b68ee] dark:text-[#9d8ff5] shadow-sm shadow-[#7b68ee]/20">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-brand/30 bg-brand/15 text-brand">
           <FolderArchive size={18} strokeWidth={2} />
         </div>
         <div className="min-w-0 flex-1 pr-6">
@@ -284,7 +284,7 @@ const VaultManagementModal: React.FC<VaultManagementModalProps> = ({ isOpen, onC
         {/* Loading */}
         {loading && (
           <div className="py-8 flex flex-col items-center justify-center gap-2 text-muted-foreground">
-            <Loader2 size={20} className="animate-spin text-[#7b68ee]" />
+            <Loader2 size={20} className="animate-spin text-brand" />
             <span className="text-xs">{t('scheduled.loading')}</span>
           </div>
         )}
@@ -501,7 +501,7 @@ const VaultManagementModal: React.FC<VaultManagementModalProps> = ({ isOpen, onC
                     className={cn(
                       'vault-row-item rounded-lg border p-3 text-xs transition-colors',
                       isCurrent
-                        ? 'border-[#7b68ee]/40 bg-[#7b68ee]/10'
+                        ? 'border-brand/40 bg-brand/10'
                         : 'border-border bg-card hover:border-border/80',
                     )}
                   >
@@ -510,7 +510,7 @@ const VaultManagementModal: React.FC<VaultManagementModalProps> = ({ isOpen, onC
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-foreground truncate">{vault.name}</span>
                           {isCurrent && (
-                            <span className="rounded bg-[#7b68ee]/25 border border-[#7b68ee]/40 px-1.5 py-0.2 text-[10px] text-[#7b68ee] dark:text-[#b6a9ff] font-medium">
+                            <span className="rounded bg-brand/25 border border-brand/40 px-1.5 py-0.2 text-[10px] text-brand font-medium">
                               {t('vault.current')}
                             </span>
                           )}

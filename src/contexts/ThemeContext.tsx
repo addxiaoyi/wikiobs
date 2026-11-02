@@ -185,12 +185,12 @@ export const ThemeProvider: FC<PropsWithChildren> = ({ children }) => {
   if (!manager) {
     return (
       <div
-        className="flex min-h-screen items-center justify-center bg-[#0e1015] text-sm text-muted-foreground select-none font-sans"
+        className="flex min-h-screen items-center justify-center bg-[var(--surface-0)] text-sm text-muted-foreground select-none font-sans"
         role="status"
         aria-live="polite"
       >
         <div className="flex flex-col items-center gap-3">
-          <WikiObsLogo size={32} className="animate-pulse drop-shadow-[0_0_12px_rgba(123,104,238,0.5)]" />
+          <WikiObsLogo size={32} className="animate-pulse" />
           <span className="text-xs font-medium text-muted-foreground tracking-wider">正在初始化工作区主题…</span>
         </div>
       </div>

@@ -58,8 +58,8 @@ const EmptyPage: React.FC = () => {
     <div ref={containerRef} className="empty-page flex size-full min-w-0 flex-col items-center justify-center px-6">
       <div className="flex max-w-[360px] flex-col items-center text-center">
         <div className="empty-icon-shell mb-5" data-animation="empty-icon">
-          <div className="flex size-16 items-center justify-center rounded-2xl border border-[#7b68ee]/30 bg-[#7b68ee]/10 text-[#7b68ee] shadow-2xl backdrop-blur-md">
-            <FileText size={32} strokeWidth={1.6} className="drop-shadow-[0_0_12px_rgba(123,104,238,0.4)]" />
+          <div className="flex size-16 items-center justify-center rounded-2xl border border-brand/30 bg-brand/10 text-brand">
+            <FileText size={32} strokeWidth={1.6} />
           </div>
         </div>
         <h2 className="mb-0 text-base font-semibold tracking-tight text-foreground" data-animation="empty-text">
@@ -73,14 +73,14 @@ const EmptyPage: React.FC = () => {
         </p>
         <div className="flex flex-row gap-2.5 pt-5" data-animation="empty-buttons">
           <button
-            className="cursor-pointer rounded-lg border border-[#7b68ee]/30 bg-[#7b68ee] px-4 py-2 text-xs font-medium text-white shadow-lg shadow-[#7b68ee]/25 transition-all duration-75 hover:bg-[#6c5ce7] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#7b68ee]"
+            className="cursor-pointer rounded-lg border border-brand/30 bg-brand px-4 py-2 text-xs font-medium text-white transition-all duration-75 hover:bg-brand-hover active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand"
             onClick={() => createUntitledNote()}
             type="button"
           >
             {t('empty.createFile')}
           </button>
           <button
-            className="cursor-pointer rounded-lg border border-border bg-secondary/50 px-4 py-2 text-xs font-medium text-foreground backdrop-blur-sm transition-all duration-75 hover:bg-secondary active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="cursor-pointer rounded-lg border border-border bg-secondary/50 px-4 py-2 text-xs font-medium text-foreground transition-all duration-75 hover:bg-secondary active:scale-[0.98] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             onClick={() => setIsNewDirectoryModalOpen(true)}
             type="button"
           >
@@ -90,7 +90,7 @@ const EmptyPage: React.FC = () => {
 
         <div
           data-animation="empty-shortcuts"
-          className="mt-8 flex w-full flex-col gap-2 rounded-xl border border-border bg-card/60 px-4 py-3 text-left backdrop-blur-sm"
+          className="mt-8 flex w-full flex-col gap-2 rounded-xl border border-border bg-card px-4 py-3 text-left"
         >
           <div className="flex items-center justify-between text-[11px] text-muted-foreground">
             <span>指令面板</span>

@@ -138,7 +138,7 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
           Copy
         </button>
         <button
-          className="flex cursor-pointer items-center rounded-md bg-[#7b68ee] px-2.5 py-1 text-xs font-semibold text-white transition-colors hover:bg-[#6c5ce7]"
+          className="flex cursor-pointer items-center rounded-md bg-brand px-2.5 py-1 text-xs font-semibold text-white transition-colors hover:bg-brand-hover"
           onClick={replaceHighlightedText}
           type="button"
         >

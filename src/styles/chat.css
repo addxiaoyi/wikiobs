@@ -5,49 +5,6 @@
   word-wrap: break-word;
 }
 
-.chat-container {
-  line-height: 1.6;
-}
-
-/* User's message box */
-.user-chat-message {
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  color: var(--ink);
-  border-radius: 10px;
-  margin: 10px 0;
-  padding: 8px 12px;
-  font-size: 0.92rem;
-  line-height: 1.4rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(8px);
-}
-
-/* AI's message box */
-.assistant-chat-message {
-  color: var(--ink);
-  margin: 10px 0;
-  padding: 4px 6px;
-  font-size: 0.92rem;
-  line-height: 1.5rem;
-}
-
-@keyframes dropdown-fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(10px);
-  }
-}
-
-.animate-dropdown-fadeIn {
-  opacity: 0;
-  animation: dropdown-fadeIn 0.5s ease-out forwards;
-}
-
 .chat-error-state {
   display: flex;
   width: 100%;
@@ -56,18 +13,18 @@
   justify-content: space-between;
   gap: 0.75rem;
   margin-top: 0.75rem;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  border: 1px solid hsl(var(--destructive) / 0.3);
   border-radius: 0.5rem;
-  background: rgba(239, 68, 68, 0.08);
-  color: #dc2626;
+  background: hsl(var(--destructive) / 0.1);
+  color: hsl(var(--destructive));
   padding: 0.65rem 0.75rem;
   font-size: 0.75rem;
 }
 
 .dark .chat-error-state {
-  background: rgba(127, 29, 29, 0.2);
-  color: #fecaca;
-  border-color: rgba(248, 113, 113, 0.35);
+  background: hsl(var(--destructive) / 0.16);
+  color: hsl(var(--destructive-foreground));
+  border-color: hsl(var(--destructive) / 0.4);
 }
 
 .chat-error-state span {
@@ -77,22 +34,22 @@
 
 .chat-error-state button {
   flex: 0 0 auto;
-  border: 1px solid rgba(239, 68, 68, 0.35);
+  border: 1px solid hsl(var(--destructive) / 0.35);
   border-radius: 0.375rem;
   background: transparent;
-  color: #dc2626;
+  color: hsl(var(--destructive));
   padding: 0.3rem 0.55rem;
   cursor: pointer;
 }
 
 .dark .chat-error-state button {
-  border-color: rgba(248, 113, 113, 0.45);
-  color: #fecaca;
+  border-color: hsl(var(--destructive) / 0.45);
+  color: hsl(var(--destructive-foreground));
 }
 
 .chat-error-state button:hover,
 .chat-error-state button:focus-visible {
-  background: rgba(248, 113, 113, 0.16);
+  background: hsl(var(--destructive) / 0.16);
 }
 
 @media (max-width: 640px) {

@@ -14,7 +14,6 @@ import NewRemoteEmbeddingModelModal from './EmbeddingSettings/modals/NewRemoteEm
 import useLLMConfigs from '@/lib/hooks/use-llm-configs'
 import LLMSettingsContent from './LLMSettings/LLMSettingsContent'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
-import ShinyText from '@/components/ui/ShinyText'
 
 interface InitialSetupSinglePageProps {
   readyForIndexing: () => void
@@ -150,16 +149,11 @@ export const InitialSetupSinglePage: React.FC<InitialSetupSinglePageProps> = ({
       ref={containerRef}
       className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-y-auto bg-background text-foreground px-4 py-10 select-none font-sans"
     >
-      {/* Background glow */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/3 w-[700px] h-[450px] rounded-full bg-[#7b68ee]/10 blur-[130px]" />
-      </div>
-
       <div className="relative z-10 w-full max-w-lg mx-auto flex flex-col items-center">
         {/* Brand Header */}
         <div className="onboarding-hero flex flex-col items-center text-center mb-6">
           <div className="relative mb-3 flex items-center justify-center">
-            <WikiObsLogo size={42} className="drop-shadow-[0_0_16px_rgba(123,104,238,0.5)]" />
+            <WikiObsLogo size={42} />
           </div>
 
           <div className="flex items-center gap-2 mb-2">
@@ -170,14 +164,7 @@ export const InitialSetupSinglePage: React.FC<InitialSetupSinglePageProps> = ({
           </div>
 
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-            <ShinyText
-              text="欢迎使用 WIKIOBS"
-              color="currentColor"
-              shineColor="#7b68ee"
-              speed={2.8}
-              shineWidth={45}
-              softness={0.75}
-            />
+            <span>欢迎使用 WIKIOBS</span>
           </h1>
           <p className="mt-1.5 text-xs text-muted-foreground max-w-sm leading-relaxed">
             本地 Markdown 知识库工作区 · 数据完全保存在本地设备
@@ -187,10 +174,10 @@ export const InitialSetupSinglePage: React.FC<InitialSetupSinglePageProps> = ({
         {/* Setup Cards */}
         <div className="w-full space-y-3 mb-6">
           {/* Card 1: Vault Directory */}
-          <div className="onboarding-card rounded-xl border border-border/70 bg-card/70 backdrop-blur-md p-4 transition-colors hover:border-border">
+          <div className="onboarding-card rounded-xl border border-border/70 bg-card p-4 transition-colors hover:border-border">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-start gap-3 min-w-0">
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#7b68ee]/15 text-[#7b68ee] border border-[#7b68ee]/30">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand/15 text-brand border border-brand/30">
                   <Folder size={17} strokeWidth={2} />
                 </div>
                 <div className="min-w-0">
@@ -212,7 +199,7 @@ export const InitialSetupSinglePage: React.FC<InitialSetupSinglePageProps> = ({
                   </p>
                   {vaultDirectory && (
                     <div className="mt-2 flex items-center gap-1.5 rounded border border-border/60 bg-muted/40 px-2 py-0.5 text-[11px] font-mono text-muted-foreground truncate max-w-full">
-                      <FolderCheck size={11} className="shrink-0 text-[#7b68ee]" />
+                      <FolderCheck size={11} className="shrink-0 text-brand" />
                       <span className="truncate" title={vaultDirectory}>
                         {truncateName(vaultDirectory, 36)}
                       </span>
@@ -236,8 +223,8 @@ export const InitialSetupSinglePage: React.FC<InitialSetupSinglePageProps> = ({
                   onClick={handleSelectDirectory}
                   className={`h-8 px-3 text-xs font-medium cursor-pointer transition-all ${
                     !vaultDirectory
-                      ? 'bg-[#7b68ee] text-white hover:bg-[#6c58dc]'
-                      : 'hover:border-[#7b68ee]/40'
+                      ? 'bg-brand text-white hover:bg-brand-hover'
+                      : 'hover:border-brand-hover/40'
                   }`}
                 >
                   <FolderPlus size={13} className="mr-1.5" />
@@ -248,10 +235,10 @@ export const InitialSetupSinglePage: React.FC<InitialSetupSinglePageProps> = ({
           </div>
 
           {/* Card 2: Embedding Model */}
-          <div className="onboarding-card rounded-xl border border-border/70 bg-card/70 backdrop-blur-md p-4 transition-colors hover:border-border">
+          <div className="onboarding-card rounded-xl border border-border/70 bg-card p-4 transition-colors hover:border-border">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-start gap-3 min-w-0">
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#7b68ee]/15 text-[#7b68ee] border border-[#7b68ee]/30">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand/15 text-brand border border-brand/30">
                   <Sparkles size={17} strokeWidth={2} />
                 </div>
                 <div className="min-w-0">
@@ -287,10 +274,10 @@ export const InitialSetupSinglePage: React.FC<InitialSetupSinglePageProps> = ({
           </div>
 
           {/* Card 3: LLM Model (Optional) */}
-          <div className="onboarding-card rounded-xl border border-border/70 bg-card/70 backdrop-blur-md p-4 transition-colors hover:border-border">
+          <div className="onboarding-card rounded-xl border border-border/70 bg-card p-4 transition-colors hover:border-border">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-start gap-3 min-w-0">
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#7b68ee]/15 text-[#7b68ee] border border-[#7b68ee]/30">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand/15 text-brand border border-brand/30">
                   <Bot size={17} strokeWidth={2} />
                 </div>
                 <div className="min-w-0">
@@ -334,7 +321,7 @@ export const InitialSetupSinglePage: React.FC<InitialSetupSinglePageProps> = ({
             onClick={handleStart}
             className={`h-10 w-full rounded-lg text-xs font-medium tracking-wide transition-all ${
               canProceed
-                ? 'bg-[#7b68ee] hover:bg-[#6c58dc] text-white shadow-sm cursor-pointer'
+                ? 'bg-brand hover:bg-brand-hover text-white shadow-sm cursor-pointer'
                 : 'bg-muted text-muted-foreground cursor-not-allowed opacity-60'
             }`}
           >
@@ -373,7 +360,7 @@ export const InitialSetupSinglePage: React.FC<InitialSetupSinglePageProps> = ({
       >
         <DialogContent
           aria-describedby={undefined}
-          className="p-6 border border-border bg-popover text-popover-foreground shadow-xl backdrop-blur-xl rounded-xl max-w-xl max-h-[85vh] overflow-y-auto custom-scrollbar"
+          className="p-6 border border-border bg-popover text-popover-foreground shadow-sm rounded-xl max-w-xl max-h-[85vh] overflow-y-auto custom-scrollbar"
         >
           <DialogTitle className="text-sm font-semibold mb-2">配置 AI 对话模型</DialogTitle>
           <LLMSettingsContent />

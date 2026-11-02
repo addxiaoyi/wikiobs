@@ -48,7 +48,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
   return (
     <div className="flex w-full">
-      <div className="z-50 flex w-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm backdrop-blur-md transition-all duration-75 focus-within:border-foreground/30 focus-within:ring-1 focus-within:ring-foreground/10">
+      <div className="z-50 flex w-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-75 focus-within:border-foreground/30 focus-within:ring-1 focus-within:ring-foreground/10">
         <textarea
           value={userTextFieldInput}
           onCompositionStart={() => {
@@ -69,7 +69,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
           onChange={(e) => setUserTextFieldInput(e.target.value)}
           autoFocus
           rows={3}
-          className="w-full resize-none border-0 bg-transparent p-3.5 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:ring-0 leading-relaxed font-sans"
+          className="w-full resize-none border-0 bg-transparent p-3.5 text-xs text-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-1 focus-visible:ring-ring leading-relaxed font-sans"
         />
         <div className="mx-auto h-px w-[96%] bg-border/60" />
         <div className="flex min-h-[40px] items-center justify-between gap-2 px-3 py-1.5">

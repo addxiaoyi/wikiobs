@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import {
   Files,
@@ -18,6 +18,7 @@ import {
   Settings,
   BookOpen,
 } from 'lucide-react'
+import type { PluginUiContributionEntry } from '@shared/plugin-types'
 import gsap from 'gsap'
 import { useTranslation } from '@/lib/i18n'
 import { useModalOpeners } from '../../contexts/ModalContext'
@@ -53,6 +54,7 @@ const IconsSidebar: React.FC<IconsSidebarProps> = ({ getShortcutDescription }) =
   const { state: theme, actions: themeActions } = useThemeManager()
   const { createUntitledNote, setShowEditor } = useContentContext()
   const { openOrCreateFile, currentlyOpenFilePath } = useFileContext()
+  const [pluginItems, setPluginItems] = useState<PluginUiContributionEntry[]>([])
 
   const openTab = (uri: string) => {
     setShowEditor(true)
@@ -90,6 +92,20 @@ const IconsSidebar: React.FC<IconsSidebarProps> = ({ getShortcutDescription }) =
     }
   }, [])
 
+  useEffect(() => {
+    if (!window.plugin?.getContributions) return undefined
+    let cancelled = false
+    window.plugin
+      .getContributions()
+      .then((registry) => {
+        if (!cancelled) setPluginItems((registry?.ui ?? []).filter((item) => item.location === 'sidebar'))
+      })
+      .catch(() => undefined)
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   return (
     <nav
       ref={iconsRef}
@@ -104,7 +120,10 @@ const IconsSidebar: React.FC<IconsSidebarProps> = ({ getShortcutDescription }) =
         aria-label="WIKIOBS · 展开/收起侧边栏"
         onClick={() => setSidebarShowing(sidebarShowing ? null : 'files')}
       >
-        <WikiObsLogo size={20} className="drop-shadow-[0_0_8px_rgba(123,104,238,0.5)] transition-transform group-hover:drop-shadow-[0_0_12px_rgba(168,85,247,0.7)]" />
+        <WikiObsLogo
+          size={20}
+          className="transition-transform"
+        />
       </button>
       <div className="icons-sidebar-group flex-1 min-h-0 w-full flex flex-col items-center gap-1 overflow-y-auto overflow-x-hidden no-scrollbar">
         <button
@@ -254,6 +273,20 @@ const IconsSidebar: React.FC<IconsSidebarProps> = ({ getShortcutDescription }) =
         >
           <Puzzle size={16} strokeWidth={1.8} />
         </button>
+        {pluginItems.map((item) => (
+          <button
+            key={`${item.pluginId}:${item.id}`}
+            type="button"
+            className="icons-sidebar-button flex size-8 items-center justify-center rounded-md transition-colors"
+            title={`${item.pluginName} · ${item.label}`}
+            aria-label={`${item.pluginName} · ${item.label}`}
+            onClick={() => {
+              window.plugin.runCommand({ pluginId: item.pluginId, commandId: item.id }).catch(() => undefined)
+            }}
+          >
+            <Puzzle size={16} strokeWidth={1.8} />
+          </button>
+        ))}
       </div>
       <div className="icons-sidebar-group-bottom flex w-full flex-col items-center gap-1">
         <div className="mb-1 h-px w-4 bg-border" />
@@ -262,8 +295,16 @@ const IconsSidebar: React.FC<IconsSidebarProps> = ({ getShortcutDescription }) =
           type="button"
           data-testid="sidebar-btn-theme-toggle"
           className="icons-sidebar-button flex size-8 items-center justify-center rounded-md transition-colors"
-          title={theme === 'dark' ? t('theme.switchToLight') || '切换至明亮主题' : t('theme.switchToDark') || '切换至暗色主题'}
-          aria-label={theme === 'dark' ? t('theme.switchToLight') || '切换至明亮主题' : t('theme.switchToDark') || '切换至暗色主题'}
+          title={
+            theme === 'dark'
+              ? t('theme.switchToLight') || '切换至明亮主题'
+              : t('theme.switchToDark') || '切换至暗色主题'
+          }
+          aria-label={
+            theme === 'dark'
+              ? t('theme.switchToLight') || '切换至明亮主题'
+              : t('theme.switchToDark') || '切换至暗色主题'
+          }
           onClick={() => themeActions.toggle()}
         >
           {theme === 'dark' ? <Sun size={16} strokeWidth={1.8} /> : <Moon size={16} strokeWidth={1.8} />}

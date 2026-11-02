@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import ShinyText from '@/components/ui/ShinyText';
 import Stepper, { Step } from '@/components/ui/Stepper';
 import { Sparkles, Layers, CheckCircle2, ShieldCheck, Database, Cpu } from 'lucide-react';
 
@@ -11,144 +10,87 @@ export const ReactBitsShowcase: React.FC = () => {
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
 
   return (
-    <div className={`p-8 rounded-2xl border transition-colors ${
-      stepperTheme === 'dark' 
-        ? 'bg-[#0e1015] border-white/10 text-white' 
-        : 'bg-[#ffffff] border-zinc-200 text-zinc-900 shadow-xl'
-    }`}>
+    <div className="p-8 rounded-2xl border border-[var(--line)] bg-[var(--surface-1)] text-foreground transition-colors">
       {/* Header */}
-      <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6 border-current/10">
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--line)] pb-6">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <Sparkles className="size-5 text-[#a29bfe]" />
-            <h2 className="text-xl font-bold tracking-tight">
-              <ShinyText
-                text="React Bits Integration Showcase"
-                color={stepperTheme === 'dark' ? '#d4d4d8' : '#27272a'}
-                shineColor={stepperTheme === 'dark' ? '#ffffff' : '#7b68ee'}
-                speed={2.2}
-                shineWidth={45}
-                softness={0.7}
-                trigger="loop"
-              />
-            </h2>
+            <Sparkles className="size-5 text-brand" />
+            <h2 className="text-xl font-bold tracking-tight">React Bits Integration Showcase</h2>
           </div>
           <p className="text-xs text-muted-foreground opacity-75">
-            Verified integration of ShinyText and Stepper components from React Bits.
+            来自 React Bits 的扁平排版样例与 Stepper 组件集成演示。
           </p>
         </div>
 
         {/* Theme toggle */}
         <div className="flex items-center gap-2 text-xs">
-          <span className="opacity-70">Theme:</span>
+          <span className="opacity-70">主题：</span>
           <button
             type="button"
             onClick={() => setStepperTheme(t => (t === 'dark' ? 'light' : 'dark'))}
-            className={`px-3 py-1.5 rounded-lg border font-medium transition-all ${
-              stepperTheme === 'dark'
-                ? 'bg-white/10 border-white/20 text-white hover:bg-white/15'
-                : 'bg-zinc-100 border-zinc-300 text-zinc-800 hover:bg-zinc-200'
-            }`}
+            className="px-3 py-1.5 rounded-lg border border-[var(--line-strong)] bg-[var(--surface-2)] font-medium text-foreground transition-all hover:bg-[var(--surface-3)]"
           >
-            {stepperTheme === 'dark' ? '🌙 Dark Mode' : '☀️ Light Mode'}
+            {stepperTheme === 'dark' ? '深色模式' : '浅色模式'}
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Component 1: ShinyText Demos */}
+        {/* Component 1: Flat typography samples */}
         <div className="space-y-6">
-          <div className="flex items-center gap-2 border-b border-current/10 pb-3">
-            <Layers className="size-4 text-purple-400" />
-            <h3 className="text-sm font-semibold tracking-wide">
-              1. &lt;ShinyText /&gt; Variants
-            </h3>
+          <div className="flex items-center gap-2 border-b border-[var(--line)] pb-3">
+            <Layers className="size-4 text-brand" />
+            <h3 className="text-sm font-semibold tracking-wide">1. 排版示例</h3>
           </div>
 
           <div className="space-y-4">
-            {/* Demo 1: Continuous Loop */}
-            <div className={`p-4 rounded-xl border ${stepperTheme === 'dark' ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-              <div className="text-[11px] uppercase tracking-wider opacity-60 mb-2 font-mono">Loop (Speed 2s, 120deg)</div>
-              <div className="text-lg font-semibold">
-                <ShinyText
-                  text="Helstera WIKIOBS 知识库引擎"
-                  color={stepperTheme === 'dark' ? '#a1a1aa' : '#52525b'}
-                  shineColor={stepperTheme === 'dark' ? '#ffffff' : '#000000'}
-                  speed={2}
-                  shineWidth={40}
-                  trigger="loop"
-                />
-              </div>
+            <div className="p-4 rounded-xl border border-[var(--line)] bg-[var(--surface-2)]">
+              <div className="text-[11px] uppercase tracking-wider opacity-60 mb-2 font-mono">正文 · 次级文字</div>
+              <div className="text-lg font-semibold text-muted-foreground">Helstera WIKIOBS 知识库引擎</div>
             </div>
 
-            {/* Demo 2: Hover Sweep & Glow */}
-            <div className={`p-4 rounded-xl border ${stepperTheme === 'dark' ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-              <div className="text-[11px] uppercase tracking-wider opacity-60 mb-2 font-mono">Hover Trigger + Follow Pointer + Glow</div>
-              <div className="text-lg font-semibold cursor-pointer select-none">
-                <ShinyText
-                  text="光标悬停掠过测试 (Hover Me)"
-                  color={stepperTheme === 'dark' ? '#a1a1aa' : '#52525b'}
-                  shineColor="#7b68ee"
-                  glow={0.8}
-                  speed={1.5}
-                  trigger="hover"
-                  followPointer={true}
-                />
-              </div>
+            <div className="p-4 rounded-xl border border-[var(--line)] bg-[var(--surface-2)]">
+              <div className="text-[11px] uppercase tracking-wider opacity-60 mb-2 font-mono">强调 · 品牌色</div>
+              <div className="text-lg font-semibold text-brand">品牌强调色 · 主色令牌</div>
             </div>
 
-            {/* Demo 3: Snappy Easing with Multi-bands */}
-            <div className={`p-4 rounded-xl border ${stepperTheme === 'dark' ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'}`}>
-              <div className="text-[11px] uppercase tracking-wider opacity-60 mb-2 font-mono">Snappy Multi-Bands (Chrome Shimmer)</div>
-              <div className="text-base font-semibold">
-                <ShinyText
-                  text="双光带高光脉冲 · 双向往返 Yoyo"
-                  color={stepperTheme === 'dark' ? '#94a3b8' : '#475569'}
-                  shineColor={stepperTheme === 'dark' ? '#38bdf8' : '#0284c7'}
-                  speed={2.5}
-                  bands={2}
-                  yoyo={true}
-                  easing="snappy"
-                  trigger="loop"
-                />
-              </div>
+            <div className="p-4 rounded-xl border border-[var(--line)] bg-[var(--surface-2)]">
+              <div className="text-[11px] uppercase tracking-wider opacity-60 mb-2 font-mono">辅助 · 前景弱化</div>
+              <div className="text-base font-semibold text-foreground/80">本地向量索引 · 秒级语义检索</div>
             </div>
           </div>
         </div>
 
         {/* Component 2: Stepper Demos */}
         <div className="space-y-6">
-          <div className="flex items-center justify-between border-b border-current/10 pb-3">
+          <div className="flex items-center justify-between border-b border-[var(--line)] pb-3">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="size-4 text-emerald-400" />
               <h3 className="text-sm font-semibold tracking-wide">
-                2. &lt;Stepper /&gt; Interactive Flow
+                2. &lt;Stepper /&gt; 交互流程
               </h3>
             </div>
 
             {/* Stepper controls */}
             <div className="flex items-center gap-2 text-xs">
               <select
-                aria-label="Stepper indicator style"
+                aria-label="Stepper 指示器样式"
                 value={stepperIndicator}
                 onChange={e => setStepperIndicator(e.target.value as any)}
-                className={`rounded px-2 py-1 text-xs border ${
-                  stepperTheme === 'dark' ? 'bg-[#181a20] border-white/20 text-white' : 'bg-white border-zinc-300 text-zinc-900'
-                }`}
+                className="rounded px-2 py-1 text-xs border border-[var(--line)] bg-[var(--surface-2)] text-foreground"
               >
-                <option value="numbers">Numbers</option>
-                <option value="dots">Dots</option>
-                <option value="bars">Bars</option>
+                <option value="numbers">数字</option>
+                <option value="dots">圆点</option>
+                <option value="bars">条形</option>
               </select>
 
               <button
                 type="button"
                 onClick={() => setStepperOrientation(o => (o === 'horizontal' ? 'vertical' : 'horizontal'))}
-                className={`px-2.5 py-1 rounded text-xs border font-medium ${
-                  stepperTheme === 'dark' ? 'bg-white/10 border-white/20 text-white' : 'bg-zinc-100 border-zinc-300 text-zinc-800'
-                }`}
+                className="px-2.5 py-1 rounded text-xs border border-[var(--line)] bg-[var(--surface-2)] font-medium text-foreground"
               >
-                {stepperOrientation === 'horizontal' ? 'Horizontal' : 'Vertical'}
+                {stepperOrientation === 'horizontal' ? '横向' : '纵向'}
               </button>
             </div>
           </div>
@@ -185,7 +127,7 @@ export const ReactBitsShowcase: React.FC = () => {
                       setCurrentStep(1);
                       setIsCompleted(false);
                     }}
-                    className="mt-2 text-xs text-purple-400 hover:underline"
+                    className="mt-2 text-xs text-brand hover:underline"
                   >
                     重置并重新演示
                   </button>

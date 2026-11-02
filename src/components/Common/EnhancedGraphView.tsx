@@ -574,7 +574,7 @@ const EnhancedGraphView: React.FC<EnhancedGraphViewProps> = ({
       {/* 悬浮控制栏 */}
       <div
         ref={controlBarRef}
-        className="absolute top-2.5 inset-x-2.5 z-10 flex flex-wrap items-center gap-2.5 rounded-xl border border-border bg-card/90 backdrop-blur-xl px-3 py-2 text-xs shadow-xl text-card-foreground"
+        className="absolute top-2.5 inset-x-2.5 z-10 flex flex-wrap items-center gap-2.5 rounded-xl border border-border bg-card px-3 py-2 text-xs shadow-sm text-card-foreground"
       >
         {/* 缩放控制 */}
         <div className="flex items-center gap-2 shrink-0">
@@ -754,7 +754,7 @@ const EnhancedGraphView: React.FC<EnhancedGraphViewProps> = ({
       {/* 图例 */}
       <div
         ref={legendRef}
-        className="absolute bottom-3 left-3 z-10 rounded-xl border border-border bg-card/92 backdrop-blur-md p-2.5 text-xs text-card-foreground shadow-xl max-w-sm"
+        className="absolute bottom-3 left-3 z-10 rounded-xl border border-border bg-card p-2.5 text-xs text-card-foreground shadow-sm max-w-sm"
       >
         <div className="font-semibold text-foreground mb-1.5">{t('graph.clusters')}:</div>
         <div className="flex flex-wrap gap-1">
@@ -790,7 +790,7 @@ const EnhancedGraphView: React.FC<EnhancedGraphViewProps> = ({
       {selectedNode && (
         <div
           ref={detailPanelRef}
-          className="absolute top-16 right-3 z-10 w-56 rounded-xl border border-border bg-card/95 backdrop-blur-md p-3 text-card-foreground shadow-xl space-y-2"
+          className="absolute top-16 right-3 z-10 w-56 rounded-xl border border-border bg-card p-3 text-card-foreground shadow-sm space-y-2"
         >
           <div>
             <div className="text-xs font-semibold text-foreground truncate">{selectedNode.label}</div>
@@ -843,7 +843,7 @@ const EnhancedGraphView: React.FC<EnhancedGraphViewProps> = ({
       {/* 右键菜单 */}
       {contextMenu && (
         <div
-          className="fixed z-50 min-w-36 rounded-lg border border-border bg-popover p-1 text-xs text-popover-foreground shadow-2xl backdrop-blur-md"
+          className="fixed z-50 min-w-36 rounded-lg border border-border bg-popover p-1 text-xs text-popover-foreground shadow-sm"
           style={{ top: contextMenu.y, left: contextMenu.x }}
           onClick={(e) => e.stopPropagation()}
         >

@@ -74,24 +74,22 @@ const IndexingProgress: React.FC<IndexingProgressProps> = ({ indexingProgress, s
           {indexingProgress === 0 ? t('indexing.initializing') : t('indexing.title')}
         </h2>
         <div className="mb-2 h-2.5 w-full overflow-hidden rounded-full bg-secondary">
-          <div ref={progressBarRef} className="h-full rounded-full bg-[#7b68ee] transition-all duration-150" style={{ width: '0%' }} />
+          <div
+            ref={progressBarRef}
+            className="h-full rounded-full bg-brand transition-all duration-150"
+            style={{ width: '0%' }}
+          />
         </div>
         <div className="flex min-w-0 items-center gap-2">
-          {indexingProgress === 0 && <Loader2 size={16} className="shrink-0 animate-spin text-[#7b68ee]" />}
+          {indexingProgress === 0 && <Loader2 size={16} className="shrink-0 animate-spin text-brand" />}
           <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
             <span className="text-sm text-foreground">
               {indexingProgress > 0 ? `${Math.round(indexingProgress * 100)}%` : t('indexing.preparing')}
             </span>
-            <span className="shrink-0 tabular-nums text-xs text-muted-foreground">
-              {eta || `${elapsedSeconds}s`}
-            </span>
+            <span className="shrink-0 tabular-nums text-xs text-muted-foreground">{eta || `${elapsedSeconds}s`}</span>
           </div>
         </div>
-        {status && status !== 'Complete' && (
-          <span className="truncate text-xs text-muted-foreground">
-            {status}
-          </span>
-        )}
+        {status && status !== 'Complete' && <span className="truncate text-xs text-muted-foreground">{status}</span>}
       </div>
     </ReorModal>
   )

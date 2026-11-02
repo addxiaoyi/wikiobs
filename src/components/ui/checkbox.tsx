@@ -15,7 +15,7 @@ const Checkbox: React.FC<CheckboxProps> = ({ className, label, id, ...props }) =
       <CheckboxPrimitive.Root
         id={id}
         className={cn(
-          'flex size-4 appearance-none items-center justify-center rounded border border-border bg-background transition-colors hover:border-[#7b68ee]/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#7b68ee] data-[state=checked]:border-[#7b68ee] data-[state=checked]:bg-[#7b68ee] data-[state=checked]:text-white',
+          'flex size-4 appearance-none items-center justify-center rounded border border-border bg-background transition-colors hover:border-brand-hover/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand data-[state=checked]:border-brand data-[state=checked]:bg-brand data-[state=checked]:text-white',
           className,
         )}
         {...props}

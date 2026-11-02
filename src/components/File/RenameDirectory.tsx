@@ -87,7 +87,7 @@ const RenameDirModal: React.FC = () => {
   return (
     <ReorModal isOpen={Boolean(fileDirToBeRenamed)} onClose={onClose} className="max-w-[420px] p-5">
       <div className="flex items-start gap-3 pb-3 border-b border-border">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-[#7b68ee]/30 bg-[#7b68ee]/15 text-[#7b68ee] dark:text-[#9d8ff5] shadow-sm shadow-[#7b68ee]/20">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-brand/30 bg-brand/15 text-brand">
           <FolderEdit size={18} strokeWidth={2} />
         </div>
         <div className="min-w-0 flex-1 pr-6">
@@ -106,7 +106,7 @@ const RenameDirModal: React.FC = () => {
             placeholder={t('file.renameDirTitle')}
             disabled={isUpdatingDirName}
             autoFocus
-            className="h-8 bg-background border-border text-foreground text-xs focus:border-[#7b68ee]"
+            className="h-8 bg-background border-border text-foreground text-xs focus:border-brand"
           />
           {errorMessage && <p className="text-[11px] text-red-400 pt-0.5">{errorMessage}</p>}
         </div>
@@ -120,7 +120,7 @@ const RenameDirModal: React.FC = () => {
             size="sm"
             onClick={sendDirRename}
             disabled={isUpdatingDirName || !dirName.trim() || Boolean(errorMessage)}
-            className="text-xs shadow-md shadow-[#7b68ee]/25 gap-1.5"
+            className="text-xs gap-1.5"
           >
             {isUpdatingDirName && <Loader2 size={12} className="animate-spin" />}
             <span>{t('file.renameBtn')}</span>

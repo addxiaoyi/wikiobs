@@ -440,7 +440,7 @@ const FileSidebar: React.FC<FileExplorerProps> = ({ lheight }) => {
             onChange={(e) => setFilterText(e.target.value)}
             placeholder="输入文件名过滤..."
             autoFocus
-            className="h-full min-w-0 flex-1 bg-transparent text-xs text-foreground placeholder:text-muted-foreground outline-none"
+            className="h-full min-w-0 flex-1 bg-transparent text-xs text-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-1 focus-visible:ring-ring"
           />
           {filterText && (
             <button
@@ -467,7 +467,7 @@ const FileSidebar: React.FC<FileExplorerProps> = ({ lheight }) => {
         aria-label={isRootDragOver ? t('files.moveToVault') : undefined}
       >
         {isRootDragOver && (
-          <div className="pointer-events-none absolute inset-x-2 top-1 z-10 rounded border border-border bg-popover/95 px-2 py-1 text-center text-[11px] text-foreground shadow-lg backdrop-blur-sm">
+          <div className="pointer-events-none absolute inset-x-2 top-1 z-10 rounded border border-border bg-popover px-2 py-1 text-center text-[11px] text-foreground shadow-sm">
             {t('files.moveToVault')}
           </div>
         )}
@@ -498,7 +498,7 @@ const FileSidebar: React.FC<FileExplorerProps> = ({ lheight }) => {
                   ? '新建文件夹名称 (Enter确认, Esc取消)'
                   : '新建笔记名称 (Enter确认, Esc取消)'
               }
-              className="flex-1 min-w-0 bg-transparent text-xs text-foreground placeholder:text-muted-foreground/60 outline-none py-0.5"
+              className="flex-1 min-w-0 bg-transparent text-xs text-foreground placeholder:text-muted-foreground/60 outline-none focus-visible:ring-1 focus-visible:ring-ring py-0.5"
             />
           </div>
         )}

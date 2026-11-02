@@ -22,9 +22,6 @@
   --stepper-bleed: 20px;
   padding: var(--stepper-pad);
   background: var(--stepper-frame);
-  box-shadow: var(--stepper-frame-shadow);
-  -webkit-backdrop-filter: blur(20px) saturate(1.6);
-  backdrop-filter: blur(20px) saturate(1.6);
 }
 
 .stepper__rim {
@@ -60,8 +57,7 @@
   background: var(--stepper-tile);
   box-shadow:
     inset 0 0 0 1px var(--stepper-tile-edge),
-    inset 0 1px 0 var(--stepper-tile-highlight),
-    var(--stepper-tile-shadow);
+    inset 0 1px 0 var(--stepper-tile-highlight);
   opacity: 0;
   pointer-events: none;
 }
@@ -342,8 +338,7 @@
   background: var(--stepper-tile);
   box-shadow:
     inset 0 0 0 1px var(--stepper-tile-edge),
-    inset 0 1px 0 var(--stepper-tile-highlight),
-    var(--stepper-tile-shadow);
+    inset 0 1px 0 var(--stepper-tile-highlight);
   color: var(--stepper-ink);
 }
 
@@ -359,7 +354,6 @@
   margin-left: auto;
   padding-right: 11px;
   background: var(--stepper-solid);
-  box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.5);
   color: var(--stepper-solid-ink);
 }
 

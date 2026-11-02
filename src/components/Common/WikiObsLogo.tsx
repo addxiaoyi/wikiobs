@@ -14,7 +14,7 @@ export interface WikiObsLogoProps {
 export const WikiObsLogo: React.FC<WikiObsLogoProps> = ({
   size = 24,
   className = '',
-  glow = true,
+  glow = false,
 }) => {
   return (
     <svg
@@ -26,11 +26,13 @@ export const WikiObsLogo: React.FC<WikiObsLogoProps> = ({
       style={{ display: 'block', flexShrink: 0 }}
       aria-label="WIKIOBS Logo"
     >
+      {/* 品牌标里的渐变色按“插画”处理，保留本文件内固定的紫色谱系：
+          SVG 渐变 stop 在部分 WebView 下不解析 CSS 变量，若令牌没命中会直接丢色（黑块）。 */}
       <defs>
         {glow && (
           <radialGradient id="wikiObsAura" cx="50%" cy="48%" r="48%">
             <stop offset="0%" stopColor="#9333ea" stopOpacity="0.45" />
-            <stop offset="45%" stopColor="#7b68ee" stopOpacity="0.22" />
+            <stop offset="45%" stopColor="#b4a6ff" stopOpacity="0.22" />
             <stop offset="75%" stopColor="#6366f1" stopOpacity="0.08" />
             <stop offset="100%" stopColor="#000000" stopOpacity="0" />
           </radialGradient>
@@ -45,17 +47,17 @@ export const WikiObsLogo: React.FC<WikiObsLogoProps> = ({
         <linearGradient id="wikiObsFacetTR" x1="100%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stopColor="#ddd6fe" />
           <stop offset="40%" stopColor="#a855f7" />
-          <stop offset="100%" stopColor="#7c3aed" />
+          <stop offset="100%" stopColor="#7b68ee" />
         </linearGradient>
 
         <linearGradient id="wikiObsFacetCenter" x1="50%" y1="0%" x2="50%" y2="100%">
-          <stop offset="0%" stopColor="#c4b5fd" />
+          <stop offset="0%" stopColor="#ddd6fe" />
           <stop offset="60%" stopColor="#8b5cf6" />
           <stop offset="100%" stopColor="#6d28d9" />
         </linearGradient>
 
         <linearGradient id="wikiObsFacetMidL" x1="0%" y1="50%" x2="100%" y2="50%">
-          <stop offset="0%" stopColor="#7c3aed" />
+          <stop offset="0%" stopColor="#7b68ee" />
           <stop offset="50%" stopColor="#6366f1" />
           <stop offset="100%" stopColor="#4f46e5" />
         </linearGradient>
@@ -68,7 +70,7 @@ export const WikiObsLogo: React.FC<WikiObsLogoProps> = ({
 
         <linearGradient id="wikiObsFacetCore" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#a78bfa" />
-          <stop offset="50%" stopColor="#7b68ee" />
+          <stop offset="50%" stopColor="#a29bfe" />
           <stop offset="100%" stopColor="#4338ca" />
         </linearGradient>
 
@@ -108,7 +110,7 @@ export const WikiObsLogo: React.FC<WikiObsLogoProps> = ({
       <polygon
         points="256,38 418,146 448,284 362,428 256,482 150,428 64,284 94,146"
         fill="#0e0a1a"
-        stroke="#7b68ee"
+        stroke="#a29bfe"
         strokeOpacity="0.3"
         strokeWidth="1.5"
       />

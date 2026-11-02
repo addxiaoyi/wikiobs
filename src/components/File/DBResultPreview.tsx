@@ -51,7 +51,7 @@ export const DBResultPreview: React.FC<DBResultPreviewProps> = ({ dbResult: entr
       backgroundColor="$background"
       hoverStyle={{
         backgroundColor: '$backgroundHover',
-        borderColor: '#7b68ee',
+        borderColor: 'rgb(var(--accent-ink))',
       }}
       borderRadius="$2"
       borderWidth={1}
@@ -68,11 +68,11 @@ export const DBResultPreview: React.FC<DBResultPreviewProps> = ({ dbResult: entr
       <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
         {fileName && (
           <div className="flex items-center gap-1 font-medium text-foreground">
-            <FileText size={11} className="text-[#7b68ee]" />
+            <FileText size={11} className="text-brand" />
             <span>{fileName}</span>
           </div>
         )}
-        <span className="rounded bg-[#7b68ee]/20 text-[#7b68ee] font-mono px-1.5 py-0.5 text-[10px] font-medium">
+        <span className="rounded bg-brand/20 text-brand font-mono px-1.5 py-0.5 text-[10px] font-medium">
           {cosineDistanceToPercentage(entry._distance)}%
         </span>
         {modified && <span>· {modified}</span>}
@@ -114,7 +114,7 @@ export const DBSearchPreview: React.FC<DBSearchPreviewProps> = ({ dbResult: entr
         padding="$3"
         hoverStyle={{
           backgroundColor: '$backgroundHover',
-          borderColor: '#7b68ee',
+          borderColor: 'rgb(var(--accent-ink))',
         }}
         onPress={activate}
       >
@@ -124,12 +124,12 @@ export const DBSearchPreview: React.FC<DBSearchPreviewProps> = ({ dbResult: entr
           </Text>
           {fileName && (
             <div className="flex items-center gap-1.5 mt-1 font-medium text-foreground text-xs">
-              <FileText size={12} className="text-[#7b68ee]" />
+              <FileText size={12} className="text-brand" />
               <span className="truncate">{fileName}</span>
             </div>
           )}
           <div className="mt-1 flex min-w-0 flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-            <span className="rounded bg-[#7b68ee]/20 text-[#7b68ee] font-mono px-1.5 py-0.5 text-[10px] font-medium">
+            <span className="rounded bg-brand/20 text-brand font-mono px-1.5 py-0.5 text-[10px] font-medium">
               {cosineDistanceToPercentage(entry._distance)}%
             </span>
             {modified && (

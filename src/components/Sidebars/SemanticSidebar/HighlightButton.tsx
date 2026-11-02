@@ -31,7 +31,7 @@ const HighlightButton: React.FC<HighlightButtonProps> = ({ highlightData, onClic
     <button
       onClick={handleClick}
       style={{ top: `${top}px`, left: `${left}px` }}
-      className="absolute flex size-7 cursor-pointer items-center justify-center rounded-full border border-border bg-popover text-foreground shadow-xl backdrop-blur-md transition-all duration-100 hover:border-[#7b68ee] hover:bg-[#7b68ee] hover:text-white hover:scale-110 active:scale-95"
+      className="absolute flex size-7 cursor-pointer items-center justify-center rounded-full border border-border bg-popover text-foreground shadow-sm transition-all duration-100 hover:border-brand-hover hover:bg-brand-hover hover:text-white hover:scale-110 active:scale-95"
       aria-label="关联图谱或笔记"
       type="button"
     >

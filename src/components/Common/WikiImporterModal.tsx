@@ -286,7 +286,7 @@ const WikiImporterModal: React.FC<WikiImporterModalProps> = ({ isOpen, onClose, 
     <ReorModal isOpen={isOpen} onClose={handleClose} embedded={embedded} className="max-w-[560px] p-5">
       {/* Header */}
       <div className="flex items-start gap-3 pb-4 border-b border-border">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-[#7b68ee]/30 bg-[#7b68ee]/15 text-[#7b68ee] dark:text-[#9d8ff5] shadow-sm shadow-[#7b68ee]/20">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-brand/30 bg-brand/15 text-brand">
           <Globe size={18} strokeWidth={2} />
         </div>
         <div className="min-w-0 flex-1 pr-6">
@@ -378,7 +378,7 @@ const WikiImporterModal: React.FC<WikiImporterModalProps> = ({ isOpen, onClose, 
           <div ref={progressRef} className="space-y-1.5 rounded-lg border border-purple-500/20 bg-purple-500/10 p-3">
             <div className="flex items-center justify-between text-xs text-purple-200">
               <span className="flex items-center gap-1.5 truncate max-w-[70%]">
-                <Loader2 size={13} className="animate-spin text-[#7b68ee] shrink-0" />
+                <Loader2 size={13} className="animate-spin text-brand shrink-0" />
                 <span className="truncate">{progress.currentUrl}</span>
               </span>
               <span className="font-mono text-[11px]">
@@ -453,10 +453,10 @@ const WikiImporterModal: React.FC<WikiImporterModalProps> = ({ isOpen, onClose, 
                         className="flex w-full items-center justify-between rounded-md bg-muted/40 hover:bg-muted px-2.5 py-1.5 text-left text-xs transition-colors group"
                       >
                         <span className="flex items-center gap-1.5 truncate text-foreground">
-                          <FileText size={13} className="text-[#7b68ee] shrink-0" />
+                          <FileText size={13} className="text-brand shrink-0" />
                           <span className="truncate">{baseName}</span>
                         </span>
-                        <span className="text-[11px] text-[#7b68ee] dark:text-[#9d8ff5] opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 shrink-0 ml-2">
+                        <span className="text-[11px] text-brand opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 shrink-0 ml-2">
                           <span>{t('wikiImporter.openFile')}</span>
                           <ArrowRight size={11} />
                         </span>
@@ -487,7 +487,7 @@ const WikiImporterModal: React.FC<WikiImporterModalProps> = ({ isOpen, onClose, 
             size="sm"
             onClick={handleImport}
             disabled={isImporting || !source.trim()}
-            className="text-xs shadow-md shadow-[#7b68ee]/25 gap-1.5"
+            className="text-xs gap-1.5"
           >
             {isImporting ? (
               <>

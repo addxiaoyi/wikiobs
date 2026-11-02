@@ -49,12 +49,12 @@ const TitleBar: React.FC<TitleBarProps> = ({ activePanel, togglePanel }) => {
   return (
     <header
       style={{ zIndex: 10001 }}
-      className="titlebar electron-drag relative z-[10001] flex h-9 items-center justify-between border-b border-[var(--line)] bg-[var(--surface-0)]/90 backdrop-blur-xl px-3 select-none"
+      className="titlebar electron-drag relative z-[10001] flex h-9 items-center justify-between border-b border-[var(--line)] bg-[var(--surface-0)] px-3 select-none"
     >
       {/* Left: Brand logo & Navigation buttons */}
       <div className="flex items-center gap-2" style={platform === 'darwin' ? { marginLeft: '65px' } : undefined}>
         <div className="electron-no-drag flex items-center gap-2 select-none pr-1" title="WIKIOBS · Helstera 旗下产品">
-          <WikiObsLogo size={16} className="drop-shadow-[0_0_6px_rgba(123,104,238,0.4)]" />
+          <WikiObsLogo size={16} />
           <div className="flex items-baseline gap-1.5">
             <span className="font-semibold text-[11px] tracking-wider text-foreground/90 font-mono">WIKIOBS</span>
             <span className="text-[9px] font-medium text-muted-foreground/75 tracking-wider font-sans">by Helstera</span>
@@ -67,7 +67,7 @@ const TitleBar: React.FC<TitleBarProps> = ({ activePanel, togglePanel }) => {
       <button
         type="button"
         onClick={() => setIsCommandPaletteOpen(true)}
-        className="electron-no-drag absolute left-1/2 -translate-x-1/2 flex h-6.5 w-64 max-w-[42vw] items-center justify-between rounded-full border border-[var(--line)] bg-[var(--surface-1)] hover:border-[#7b68ee]/50 hover:bg-[var(--surface-2)] px-2.5 text-[11px] text-[var(--ink-muted)] hover:text-foreground shadow-xs transition-all active:scale-[0.98]"
+        className="electron-no-drag absolute left-1/2 -translate-x-1/2 flex h-6.5 w-64 max-w-[42vw] items-center justify-between rounded-full border border-[var(--line)] bg-[var(--surface-1)] hover:border-brand-hover/50 hover:bg-[var(--surface-2)] px-2.5 text-[11px] text-[var(--ink-muted)] hover:text-foreground shadow-xs transition-all active:scale-[0.98]"
         title={platform === 'darwin' ? 'Command Palette (⌘K / ⌘P)' : '命令面板 (Ctrl+K / Ctrl+P)'}
       >
         <span className="flex items-center gap-1.5 truncate">
@@ -105,7 +105,7 @@ const TitleBar: React.FC<TitleBarProps> = ({ activePanel, togglePanel }) => {
             <TooltipTrigger asChild>
               <button
                 type="button"
-                className={`${iconBtn} ${activePanel === 'chat' ? 'text-[#7b68ee] bg-[#7b68ee]/15 font-medium' : ''}`}
+                className={`${iconBtn} ${activePanel === 'chat' ? 'text-brand bg-brand/15 font-medium' : ''}`}
                 aria-label={activePanel !== 'chat' ? t('titlebar.openChatPanel') : t('titlebar.closeChatPanel')}
                 aria-pressed={activePanel === 'chat'}
                 onClick={() => togglePanel('chat')}
@@ -122,7 +122,7 @@ const TitleBar: React.FC<TitleBarProps> = ({ activePanel, togglePanel }) => {
             <TooltipTrigger asChild>
               <button
                 type="button"
-                className={`${iconBtn} ${activePanel === 'similarFiles' ? 'text-[#7b68ee] bg-[#7b68ee]/15 font-medium' : ''}`}
+                className={`${iconBtn} ${activePanel === 'similarFiles' ? 'text-brand bg-brand/15 font-medium' : ''}`}
                 aria-label={activePanel !== 'similarFiles' ? t('titlebar.showSimilar') : t('titlebar.hideSimilar')}
                 aria-pressed={activePanel === 'similarFiles'}
                 onClick={() => togglePanel('similarFiles')}
@@ -140,7 +140,7 @@ const TitleBar: React.FC<TitleBarProps> = ({ activePanel, togglePanel }) => {
               <button
                 type="button"
                 data-testid="titlebar-btn-localgraph"
-                className={`${iconBtn} ${activePanel === 'localGraph' ? 'text-[#7b68ee] bg-[#7b68ee]/15 font-medium' : ''}`}
+                className={`${iconBtn} ${activePanel === 'localGraph' ? 'text-brand bg-brand/15 font-medium' : ''}`}
                 aria-label={activePanel !== 'localGraph' ? '局部关系图' : '关闭局部关系图'}
                 title="局部关系图"
                 aria-pressed={activePanel === 'localGraph'}

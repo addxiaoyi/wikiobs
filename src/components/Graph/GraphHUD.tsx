@@ -1,7 +1,7 @@
 /**
  * GraphHUD.tsx
  * Obsidian-grade collapsible HUD control panel for Force-Directed Knowledge Graph.
- * Defaults to a compact 28x28px frosted acrylic trigger button in the top-right corner.
+ * Defaults to a compact 28x28px flat trigger button in the top-right corner.
  * Clicking expands into a sleek monochrome floating card with real-time text search,
  * display/filter toggles, and live D3 physics parameter sliders.
  */
@@ -66,7 +66,7 @@ export const GraphHUD: React.FC<GraphHUDProps> = ({
   const isDark = activeTheme === 'dark'
   const isSearchActive = displayConfig.searchQuery.trim().length > 0
 
-  // Collapsed: 28x28px frosted trigger button in the top right
+  // Collapsed: 28x28px trigger button in the top right
   if (isCollapsed) {
     return (
       <div className={cn('absolute top-3.5 right-3.5 z-20 select-none', className)}>
@@ -75,10 +75,10 @@ export const GraphHUD: React.FC<GraphHUDProps> = ({
           onClick={() => setIsCollapsed(false)}
           title="打开图谱设置"
           className={cn(
-            'relative flex size-7 items-center justify-center rounded-lg transition-all duration-150 cursor-pointer shadow-md backdrop-blur-md',
+            'relative flex size-7 items-center justify-center rounded-lg transition-all duration-150 cursor-pointer',
             isDark
-              ? 'bg-[#10121a]/80 hover:bg-[#181a24] text-slate-300 hover:text-white border border-white/10 hover:border-white/25 shadow-black/40'
-              : 'bg-white/80 hover:bg-white text-slate-700 hover:text-slate-950 border border-slate-200/90 hover:border-slate-300 shadow-slate-900/5',
+              ? 'bg-[#10121a]/80 hover:bg-[#181a24] text-slate-300 hover:text-white border border-white/10 hover:border-white/25'
+              : 'bg-white/80 hover:bg-white text-slate-700 hover:text-slate-950 border border-slate-200/90 hover:border-slate-300',
           )}
         >
           <Sliders size={13} strokeWidth={1.8} />
@@ -100,10 +100,10 @@ export const GraphHUD: React.FC<GraphHUDProps> = ({
     <div
       className={cn(
         'absolute top-3.5 right-3.5 z-20 w-72 sm:w-80 select-none transition-all duration-150',
-        'backdrop-blur-xl border rounded-xl overflow-hidden shadow-2xl',
+        'border rounded-xl overflow-hidden',
         isDark
-          ? 'bg-[#10121a]/90 border-white/10 text-slate-200 shadow-black/60'
-          : 'bg-white/90 border-slate-200/90 text-slate-800 shadow-slate-900/10',
+          ? 'bg-[#10121a]/90 border-white/10 text-slate-200'
+          : 'bg-white/90 border-slate-200/90 text-slate-800',
         className,
       )}
     >

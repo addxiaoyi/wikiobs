@@ -33,8 +33,8 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           <div
             className={`flex size-10 shrink-0 items-center justify-center rounded-xl border ${
               isDestructive
-                ? 'border-red-500/30 bg-red-500/10 text-red-400 shadow-sm shadow-red-500/10'
-                : 'border-[#7b68ee]/30 bg-[#7b68ee]/10 text-[#7b68ee] shadow-sm shadow-[#7b68ee]/10'
+                ? 'border-red-500/30 bg-red-500/10 text-red-400'
+                : 'border-brand/30 bg-brand/10 text-brand'
             }`}
           >
             {isDestructive ? <Trash2 size={18} strokeWidth={2} /> : <HelpCircle size={18} strokeWidth={2} />}

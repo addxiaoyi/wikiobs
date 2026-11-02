@@ -54,9 +54,9 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex min-h-screen w-full flex-col items-center justify-center bg-[#0e1015] p-6 text-foreground select-none font-sans">
-          <div className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[#141722]/90 p-6 shadow-2xl backdrop-blur-2xl text-center">
-            <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl border border-red-500/30 bg-red-500/10 text-red-400 shadow-lg shadow-red-500/10">
+        <div className="flex min-h-screen w-full flex-col items-center justify-center bg-[var(--surface-0)] p-6 text-foreground select-none font-sans">
+          <div className="relative w-full max-w-lg rounded-2xl border border-[var(--line)] bg-[var(--surface-1)] p-6 shadow-sm text-center">
+            <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl border border-red-500/30 bg-red-500/10 text-red-400">
               <AlertCircle size={24} />
             </div>
 
@@ -90,7 +90,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 variant="accent"
                 size="sm"
                 onClick={this.handleReload}
-                className="text-xs shadow-md shadow-[#7b68ee]/25"
+                className="text-xs"
               >
                 <RotateCcw size={13} className="mr-1.5" />
                 重新载入工作区

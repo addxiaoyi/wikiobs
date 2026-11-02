@@ -143,12 +143,20 @@ export const GlobalGraphView: React.FC = () => {
       {/* Empty State Overlay */}
       {nodes.length === 0 && !isLoading && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none p-6 text-center select-none">
-          <div className="size-12 rounded-2xl border border-[var(--line)] bg-[var(--surface-1)] backdrop-blur-md flex items-center justify-center mb-3 shadow-lg">
-            <Share2 size={22} className="text-[#7b68ee]/80" />
+          <div className="size-12 rounded-2xl border border-[var(--line)] bg-[var(--surface-1)] flex items-center justify-center mb-3">
+            <Share2 size={22} className="text-brand" />
           </div>
           <h3 className="text-sm font-semibold text-foreground tracking-tight">知识网络尚未建立关联</h3>
           <p className="mt-1.5 max-w-sm text-xs text-[var(--ink-muted)] leading-relaxed">
-            在 Markdown 笔记中使用 <code className="rounded bg-[var(--surface-2)] border border-[var(--line)] px-1.5 py-0.5 text-[11px] font-mono text-[#7b68ee]">[[双向链接]]</code> 或 <code className="rounded bg-[var(--surface-2)] border border-[var(--line)] px-1.5 py-0.5 text-[11px] font-mono text-[#7b68ee]">#标签</code>，图谱将实时生成拓扑节点。
+            在 Markdown 笔记中使用{' '}
+            <code className="rounded bg-[var(--surface-2)] border border-[var(--line)] px-1.5 py-0.5 text-[11px] font-mono text-brand">
+              [[双向链接]]
+            </code>{' '}
+            或{' '}
+            <code className="rounded bg-[var(--surface-2)] border border-[var(--line)] px-1.5 py-0.5 text-[11px] font-mono text-brand">
+              #标签
+            </code>
+            ，图谱将实时生成拓扑节点。
           </p>
           <div className="mt-4 pointer-events-auto flex items-center gap-2">
             <Button
@@ -158,7 +166,7 @@ export const GlobalGraphView: React.FC = () => {
                 setShowEditor(true)
                 createUntitledNote()
               }}
-              className="gap-1.5 text-xs border-[#7b68ee]/40 text-[#7b68ee] hover:bg-[#7b68ee]/10 active:scale-95"
+              className="gap-1.5 text-xs border-brand/40 text-brand hover:bg-brand-hover/10 active:scale-95"
             >
               <PenLine size={12} />
               <span>新建首篇关联笔记</span>
@@ -168,7 +176,7 @@ export const GlobalGraphView: React.FC = () => {
       )}
 
       {isLoading && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center bg-background/50 backdrop-blur-xs">
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-background/50">
           <Loader2 className="size-6 animate-spin text-muted-foreground" />
         </div>
       )}
