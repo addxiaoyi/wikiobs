@@ -10,10 +10,14 @@ import {
   Trash2,
   Loader2,
   Store,
+  Wand2,
 } from 'lucide-react'
 import gsap from 'gsap'
 
+import { highestPermissionRisk } from '@shared/plugin-types'
 import Modal from './Modal'
+import { PluginScaffoldModal } from './PluginScaffoldModal'
+import PluginManagerPresetSection, { type PluginPresetListing } from './PluginManagerPresetSection'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
@@ -21,6 +25,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { useTranslation } from '@/lib/i18n'
 import { staggerFadeInUp } from '@/lib/gsap-animations'
 import { cn } from '@/lib/ui'
+import { PermissionList, PermissionRiskBadge } from '@/components/ui/permission-badges'
 
 interface Plugin {
   id: string
@@ -58,6 +63,9 @@ interface MarketplacePlugin {
   description: string
   author: string
   permissions: string[]
+  category: string
+  license?: string
+  hasUpdate: boolean
   installed: boolean
 }
 
@@ -77,6 +85,10 @@ const PluginManagerModal: React.FC<PluginManagerModalProps> = ({ isOpen, onClose
   const [selectedPlugin, setSelectedPlugin] = useState<Plugin | null>(null)
   const [marketplace, setMarketplace] = useState<MarketplacePlugin[]>([])
   const [showMarketplace, setShowMarketplace] = useState(false)
+  const [showScaffold, setShowScaffold] = useState(false)
+  const [presets, setPresets] = useState<PluginPresetListing[]>([])
+  const [creatingPreset, setCreatingPreset] = useState<string | null>(null)
+  const [showPresets, setShowPresets] = useState(false)
 
   const contentRef = useRef<HTMLDivElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
@@ -118,10 +130,34 @@ const PluginManagerModal: React.FC<PluginManagerModalProps> = ({ isOpen, onClose
     }
   }, [t])
 
+  const loadPresets = useCallback(async () => {
+    try {
+      setPresets((await window.plugin.presets.listMenu()) || [])
+    } catch (err) {
+      setError(`${t('error.generic')}: ${err}`)
+    }
+  }, [t])
+
+  const createPreset = async (preset: PluginPresetListing) => {
+    setCreatingPreset(preset.id)
+    setError(null)
+    try {
+      const result = await window.plugin.presets.create(preset.id)
+      if (!result.success) throw new Error(result.error || t('error.generic'))
+      showSuccess(t('plugin.presets.createdNamed', { name: preset.name }))
+      await Promise.all([loadPlugins(), loadPresets()])
+    } catch (err) {
+      setError(`${t('plugin.presets.failed')}: ${err instanceof Error ? err.message : String(err)}`)
+    } finally {
+      setCreatingPreset(null)
+    }
+  }
+
   useEffect(() => {
     if (isOpen) {
       loadPlugins()
       loadMarketplace()
+      loadPresets()
     } else {
       setSubView('list')
       setSelectedPlugin(null)
@@ -130,20 +166,23 @@ const PluginManagerModal: React.FC<PluginManagerModalProps> = ({ isOpen, onClose
       setError(null)
       setSuccessMsg(null)
       setShowMarketplace(false)
+      setShowScaffold(false)
+      setShowPresets(false)
     }
-  }, [isOpen, loadPlugins, loadMarketplace])
+  }, [isOpen, loadPlugins, loadMarketplace, loadPresets])
 
   const installMarketplacePlugin = async (entry: MarketplacePlugin) => {
+    const action = entry.hasUpdate ? 'Update' : 'Install'
     const permissions = entry.permissions.length > 0 ? entry.permissions.join(', ') : 'none'
     const trusted = window.confirm(
-      `${entry.name} v${entry.version} will run in the main process and requests: ${permissions}. Install it?`,
+      `${action} ${entry.name} v${entry.version}? It will run in the main process and requests: ${permissions}.`,
     )
     if (!trusted) return
 
     try {
       const result = await window.plugin.marketplace.install(entry.id)
       if (!result.success) throw new Error(result.error || t('error.generic'))
-      showSuccess(`${entry.name} ${t('plugin.installed')}`)
+      showSuccess(`${entry.name} ${entry.hasUpdate ? 'updated' : t('plugin.installed')}`)
       await Promise.all([loadPlugins(), loadMarketplace()])
     } catch (err) {
       setError(`${t('error.generic')}: ${err}`)
@@ -252,7 +291,7 @@ const PluginManagerModal: React.FC<PluginManagerModalProps> = ({ isOpen, onClose
     <Modal isOpen={isOpen} onClose={onClose} embedded={embedded} className="max-w-[620px] p-5">
       {/* Header */}
       <div className="flex items-start gap-3 border-b border-border pb-4">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-[#7b68ee]/30 bg-[#7b68ee]/15 text-[#7b68ee] shadow-sm shadow-[#7b68ee]/20 dark:text-[#9d8ff5]">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-brand/30 bg-brand/15 text-brand">
           <Blocks size={18} strokeWidth={2} />
         </div>
         <div className="min-w-0 flex-1 pr-6">
@@ -274,20 +313,34 @@ const PluginManagerModal: React.FC<PluginManagerModalProps> = ({ isOpen, onClose
               <div key={entry.id} className="rounded-md border border-border bg-background p-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-xs font-semibold text-foreground">{entry.name}</div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-semibold text-foreground">{entry.name}</span>
+                      {entry.category && (
+                        <span className="rounded border border-border bg-muted/40 px-1.5 py-0.5 text-[9px] uppercase tracking-wide text-muted-foreground">
+                          {entry.category}
+                        </span>
+                      )}
+                    </div>
                     <div className="mt-1 text-[11px] leading-relaxed text-muted-foreground">{entry.description}</div>
                     <div className="mt-1 font-mono text-[10px] text-muted-foreground">
                       v{entry.version} · {entry.author}
+                      {entry.license ? ` · ${entry.license}` : ''}
                     </div>
                   </div>
                   <Button
                     size="sm"
-                    variant={entry.installed ? 'secondary' : 'accent'}
-                    disabled={entry.installed}
+                    variant={(() => {
+                      if (entry.hasUpdate) return 'accent'
+                      return entry.installed ? 'secondary' : 'accent'
+                    })()}
+                    disabled={entry.installed && !entry.hasUpdate}
                     onClick={() => installMarketplacePlugin(entry)}
                     className="shrink-0 text-xs"
                   >
-                    {entry.installed ? 'Installed' : 'Install'}
+                    {(() => {
+                      if (entry.hasUpdate) return 'Update'
+                      return entry.installed ? 'Installed' : 'Install'
+                    })()}
                   </Button>
                 </div>
                 <div className="mt-2 flex flex-wrap gap-1">
@@ -325,7 +378,7 @@ const PluginManagerModal: React.FC<PluginManagerModalProps> = ({ isOpen, onClose
         {/* Loading */}
         {loading && (
           <div className="flex flex-col items-center justify-center gap-2 py-8 text-muted-foreground">
-            <Loader2 size={20} className="animate-spin text-[#7b68ee]" />
+            <Loader2 size={20} className="animate-spin text-brand" />
             <span className="text-xs">{t('scheduled.loading')}</span>
           </div>
         )}
@@ -392,6 +445,19 @@ const PluginManagerModal: React.FC<PluginManagerModalProps> = ({ isOpen, onClose
                 </div>
                 {manifestPreview.description && (
                   <p className="text-[11px] leading-relaxed text-foreground">{manifestPreview.description}</p>
+                )}
+                <div className="space-y-1 rounded border border-border bg-background/60 p-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-medium text-foreground">{t('plugin.permissions')}</span>
+                    <PermissionRiskBadge permissions={manifestPreview.permissions} />
+                  </div>
+                  <PermissionList permissions={manifestPreview.permissions} />
+                </div>
+                {highestPermissionRisk(manifestPreview.permissions ?? []) === 'high' && (
+                  <div className="flex items-start gap-1.5 rounded border border-red-500/20 bg-red-500/10 p-2 text-[11px] text-red-600 dark:text-red-300">
+                    <ShieldAlert size={14} className="mt-0.5 shrink-0" />
+                    <span>{t('plugin.risk.highDetail')}</span>
+                  </div>
                 )}
                 <div className="flex items-start gap-1.5 rounded border border-amber-500/20 bg-amber-500/10 p-2 text-[11px] text-amber-600 dark:text-amber-200">
                   <ShieldAlert size={14} className="mt-0.5 shrink-0 text-amber-500" />
@@ -489,19 +555,11 @@ const PluginManagerModal: React.FC<PluginManagerModalProps> = ({ isOpen, onClose
 
             {/* Permissions */}
             <div className="space-y-1.5 border-t border-border pt-2">
-              <span className="block font-medium text-foreground">{t('plugin.permissions')}</span>
-              <div className="flex flex-wrap gap-1">
-                {(selectedPlugin.permissions?.length ? selectedPlugin.permissions : [t('plugin.noPermissions')]).map(
-                  (perm) => (
-                    <span
-                      key={perm}
-                      className="rounded border border-border bg-muted/40 px-2 py-0.5 font-mono text-[10px] text-muted-foreground"
-                    >
-                      {perm}
-                    </span>
-                  ),
-                )}
+              <div className="flex items-center gap-2">
+                <span className="block font-medium text-foreground">{t('plugin.permissions')}</span>
+                <PermissionRiskBadge permissions={selectedPlugin.permissions} />
               </div>
+              <PermissionList permissions={selectedPlugin.permissions} />
             </div>
 
             <div className="flex items-center justify-between border-t border-border pt-3">
@@ -542,10 +600,19 @@ const PluginManagerModal: React.FC<PluginManagerModalProps> = ({ isOpen, onClose
         )}
 
         {/* Default View: Plugins List */}
+        <PluginManagerPresetSection
+          presets={presets}
+          creatingId={creatingPreset}
+          open={showPresets}
+          onToggle={() => setShowPresets(!showPresets)}
+          onCreate={createPreset}
+        />
         {!showMarketplace && !loading && subView === 'list' && (
           <div className="space-y-2.5">
             <div className="flex items-center justify-between px-1 text-xs">
-              <span className="font-medium text-muted-foreground">已安装插件 ({plugins.length})</span>
+              <span className="font-medium text-muted-foreground">
+                {t('plugin.installedCount', { count: plugins.length })}
+              </span>
               <div className="flex items-center gap-1.5">
                 <Button
                   variant="secondary"
@@ -569,6 +636,15 @@ const PluginManagerModal: React.FC<PluginManagerModalProps> = ({ isOpen, onClose
                 >
                   <Plus size={12} />
                   <span>{t('plugin.install')}</span>
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setShowScaffold(true)}
+                  className="h-7 gap-1 border-border px-2.5 text-xs"
+                >
+                  <Wand2 size={12} />
+                  <span>{t('plugin.create')}</span>
                 </Button>
               </div>
             </div>
@@ -607,6 +683,7 @@ const PluginManagerModal: React.FC<PluginManagerModalProps> = ({ isOpen, onClose
                           >
                             {plugin.enabled ? t('plugin.enabled') : t('plugin.disabled')}
                           </span>
+                          <PermissionRiskBadge permissions={plugin.permissions} />
                         </div>
                         {plugin.description && (
                           <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-muted-foreground">
@@ -655,6 +732,17 @@ const PluginManagerModal: React.FC<PluginManagerModalProps> = ({ isOpen, onClose
           {t('button.close')}
         </Button>
       </div>
+
+      <PluginScaffoldModal
+        isOpen={showScaffold}
+        embedded={embedded}
+        onClose={() => setShowScaffold(false)}
+        onCreated={() => {
+          setShowScaffold(false)
+          showSuccess(t('plugin.scaffold.created'))
+          loadPlugins()
+        }}
+      />
     </Modal>
   )
 }

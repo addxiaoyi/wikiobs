@@ -1,6 +1,6 @@
 {
   "name": "wikiobs",
-  "version": "0.2.31",
+  "version": "0.3.0",
   "productName": "WIKIOBS",
   "main": "dist-electron/main/index.js",
   "description": "WIKIOBS - local-first knowledge workspace",

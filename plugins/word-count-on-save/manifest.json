@@ -1,6 +1,6 @@
 {
   "name": "Word Count on Save",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "index.js",
   "description": "Adds word and character counts to note frontmatter when a note is saved.",
   "author": "WIKIOBS",

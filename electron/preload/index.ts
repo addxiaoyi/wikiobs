@@ -14,6 +14,19 @@ import { DBQueryResult } from 'electron/main/vector-database/schema'
 import { BackgroundTask } from 'electron/main/incremental-indexer'
 
 import { AgentConfig, ChatMetadata, Chat } from '@/lib/llm/types'
+import type {
+  KnownPermission,
+  PluginActiveNoteInfo,
+  PluginCommandContribution,
+  PluginCommandEntry,
+  PluginCommandRunRequest,
+  PluginCommandRunResult,
+  PluginNoteEditProposal,
+  PluginPresetCreateResponse,
+  PluginPresetListing,
+  PluginUiContribution,
+  PluginUiContributionEntry,
+} from '../../shared/plugin-types'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type IPCHandler<T extends (...args: any[]) => any> = (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>>
@@ -470,6 +483,14 @@ const exportModule = {
     >('export:preview'),
 }
 
+type PluginEventChannel = 'plugins:edit-note:proposed' | 'plugins:active-note:changed' | 'plugins:contributions:changed'
+
+const pluginEventChannels: ReadonlySet<PluginEventChannel> = new Set<PluginEventChannel>([
+  'plugins:edit-note:proposed',
+  'plugins:active-note:changed',
+  'plugins:contributions:changed',
+])
+
 const plugin = {
   getAll: createIPCHandler<() => Promise<Plugin[]>>('plugins:list'),
   get: createIPCHandler<(pluginId: string) => Promise<Plugin | undefined>>('plugins:loaded'),
@@ -499,7 +520,12 @@ const plugin = {
           description: string
           author: string
           permissions: string[]
+          source: 'bundled' | 'remote'
+          category: string
+          license?: string
+          homepage?: string
           installed: boolean
+          hasUpdate: boolean
         }>
       >
     >('plugins:marketplace:list'),
@@ -507,6 +533,58 @@ const plugin = {
       createIPCHandler<(pluginId: string) => Promise<{ success: boolean; error?: string; plugin?: Plugin }>>(
         'plugins:marketplace:install',
       ),
+  },
+  createFromTemplate: createIPCHandler<
+    (request: {
+      id: string
+      manifest: {
+        name: string
+        version: string
+        main: string
+        description: string
+        author: string
+        license: string
+        homepage: string
+        permissions: KnownPermission[]
+        contributions: {
+          commands: PluginCommandContribution[]
+          ui: PluginUiContribution[]
+        }
+      }
+    }) => Promise<{
+      success: boolean
+      error?: string
+      result?: { relativePath: string; files: string[]; apiSummary: string[] }
+    }>
+  >('plugins:create-from-template'),
+  getContributions: createIPCHandler<
+    () => Promise<{ ui: PluginUiContributionEntry[]; commands: PluginCommandEntry[] }>
+  >('plugins:contribution-registry'),
+  runCommand:
+    createIPCHandler<(request: PluginCommandRunRequest) => Promise<PluginCommandRunResult>>('plugins:commands:run'),
+  getActiveNote:
+    createIPCHandler<(note?: PluginActiveNoteInfo | null) => Promise<PluginActiveNoteInfo | null>>(
+      'plugins:active-note',
+    ),
+  proposeEdit:
+    createIPCHandler<(proposal: PluginNoteEditProposal) => Promise<{ accepted: boolean; error?: string }>>(
+      'plugins:edit-note',
+    ),
+  resolveEdit:
+    createIPCHandler<(decision: { proposalId: string; accepted: boolean }) => Promise<boolean>>(
+      'plugins:edit-note:resolve',
+    ),
+  presets: {
+    listMenu: createIPCHandler<() => Promise<PluginPresetListing[]>>('plugins:presets:list'),
+    create: createIPCHandler<(presetId: string) => Promise<PluginPresetCreateResponse>>('plugins:presets:create'),
+  },
+  onEvent: (channel: PluginEventChannel, callback: (...args: any[]) => void): (() => void) => {
+    if (!pluginEventChannels.has(channel)) throw new Error(`Unsupported plugin event channel: ${channel}`)
+    const subscription = (_event: Electron.IpcRendererEvent, ...args: any[]) => callback(...args)
+    ipcRenderer.on(channel, subscription)
+    return () => {
+      ipcRenderer.removeListener(channel, subscription)
+    }
   },
 }
 

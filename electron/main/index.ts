@@ -25,7 +25,7 @@ import registerKnowledgeGraphHandlers from './knowledge-graph-handlers'
 import { registerScheduledTasksHandlers, initScheduler, shutdownScheduler } from './scheduled-tasks'
 import { registerMultiVaultHandlers } from './multi-vault'
 import { registerExportHandlers } from './export'
-import { registerPluginSystemHandlers } from './plugin-system'
+import { registerPluginSystemHandlers, loadPlugins } from './plugin-system'
 
 if (process.env.NODE_ENV === 'production') {
   Sentry.init({
@@ -86,6 +86,9 @@ app.whenReady().then(() => {
 
   // Initialize scheduled tasks
   initScheduler().catch((error: unknown) => logger.error('Scheduler', 'Failed to initialize scheduled tasks', error))
+
+  // 激活用户已安装的插件；失败不应阻塞窗口启动。
+  loadPlugins().catch((error: unknown) => logger.error('PluginSystem', 'Failed to load plugins at startup', error))
 })
 
 app.on('window-all-closed', () => {
